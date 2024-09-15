@@ -5,13 +5,13 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
-import org.jetbrains.kotlin.gradle.targets.js.dsl.ExperimentalWasmDsl
 
 plugins {
     alias(libs.plugins.multiplatform)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.compose)
     alias(libs.plugins.android.library)
+    alias(libs.plugins.native.cocoapods)
     id("maven-publish")
     id("signing")
     alias(libs.plugins.maven.publish)
@@ -112,16 +112,45 @@ kotlin {
 //        binaries.executable()
 //    }
 
-    listOf(
-        iosX64(),
-        iosArm64(),
+//    listOf(
+//        iosX64(),
+//        iosArm64(),
+//        iosSimulatorArm64()
+//    ).forEach {
+//        it.binaries.framework {
+//            baseName = "lib"
+//            isStatic = true
+//        }
+//    }
+
+
+    iosArm64()
+    iosX64()
         iosSimulatorArm64()
-    ).forEach {
-        it.binaries.framework {
-            baseName = "lib"
-            isStatic = true
+    cocoapods {
+        version = "1.0"
+        summary = "Some description for a Kotlin/Native module"
+        homepage = "Link to a Kotlin/Native module homepage"
+
+        // Optional properties
+        // Configure the Pod name here instead of changing the Gradle project name
+        name = "KMMOpenId"
+
+        framework {
+            baseName = "KMMOpenId"
         }
+        noPodspec()
+        ios.deploymentTarget = "12.0"  // Update this to the required version
+
+        pod("AppAuth") {
+            version = "1.7.5"
+            extraOpts += listOf("-compiler-option", "-fmodules")
+
+        }
+
     }
+
+
 
     sourceSets {
         commonMain.dependencies {
@@ -141,7 +170,7 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.uiTooling)
             implementation(libs.androidx.activityCompose)
-            implementation ("net.openid:appauth:0.11.1")
+            implementation(libs.appauth)
         }
 
         jvmMain.dependencies {

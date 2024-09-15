@@ -1,4 +1,5 @@
 [versions]
+appauth = "0.11.1"
 kotlin = "2.0.20"
 compose = "1.7.0-beta02"
 agp = "8.6.0"
@@ -11,9 +12,11 @@ maven-publish = "0.29.0"
 androidx-activityCompose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 androidx-testManifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "androidx-uiTest" }
 androidx-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "androidx-uiTest" }
+appauth = { module = "net.openid:appauth", version.ref = "appauth" }
 
 [plugins]
 
+native-cocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
 multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 compose = { id = "org.jetbrains.compose", version.ref = "compose" }

@@ -11,6 +11,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import io.github.openid.AuthOpenId
+import io.github.openid.authOpenIdConfig
 import io.github.sample.theme.AppTheme
 import kotlinx.coroutines.launch
 
@@ -23,16 +24,20 @@ internal fun App() = AppTheme {
         mutableStateOf("")
     }
     LaunchedEffect(Unit){
-        val baseUrl:String = "https://sylidentitystaging.azurewebsites.net";
+        val baseUrl = "https://sylidentitystaging.azurewebsites.net"
 
-        auth.config(
-            "$baseUrl/.well-known/openid-configuration",
-            "$baseUrl/connect/token",
-            "$baseUrl/connect/authorize",
-            "au.u52ndsolution.syl",
-            "syl.interpreter.mobile",
-            "au.u52ndsolution.syl:/auth/signin-oidc",
-            "openid profile offline_access syl.interpreter.api.fullaccess"
+
+        authOpenIdConfig(
+            issuerUrl = baseUrl,
+            discoveryUrl = ".well-known/openid-configuration",
+            tokenEndPoint = "connect/token",
+            authEndPoint = "connect/authorize",
+            endSessionEndPoint = "au.u52ndsolution.syl",
+            clientId = "syl.interpreter.mobile",
+            redirectUrl = "au.u52ndsolution.syl:/auth/signin-oidc",
+            scope = "openid profile offline_access syl.interpreter.api.fullaccess"
+
+
         )
     }
    Column {
