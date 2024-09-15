@@ -10,6 +10,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.compose)
     alias(libs.plugins.android.application)
+    alias(libs.plugins.native.cocoapods)
 }
 
 kotlin {
@@ -39,17 +40,41 @@ kotlin {
 //        browser()
 //        binaries.executable()
 //    }
-
     listOf(
-        iosX64(),
         iosArm64(),
-        iosSimulatorArm64()
+        iosX64(),
+        iosSimulatorArm64(),
     ).forEach {
-        it.binaries.framework {
+        it.binaries {
+            framework {
+                baseName = "ComposeApp"
+                isStatic = true
+            }
+        }
+    }
+
+    cocoapods {
+        version = "1.0"
+        summary = "Some description for a Kotlin/Native module"
+        homepage = "Link to a Kotlin/Native module homepage"
+
+        // Optional properties
+        // Configure the Pod name here instead of changing the Gradle project name
+        name = "ComposeApp"
+
+        framework {
             baseName = "ComposeApp"
             isStatic = true
         }
+        noPodspec()
+        ios.deploymentTarget = "12.0"  // Update this to the required version
+
+        file("../iosApp/Podfile")
+
+
+
     }
+
 
     sourceSets {
         commonMain.dependencies {
@@ -73,9 +98,9 @@ kotlin {
             implementation(libs.androidx.activityCompose)
         }
 
-        jvmMain.dependencies {
-            implementation(compose.desktop.currentOs)
-        }
+//        jvmMain.dependencies {
+//            implementation(compose.desktop.currentOs)
+//        }
 
         iosMain.dependencies {
         }

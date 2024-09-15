@@ -126,7 +126,8 @@ kotlin {
 
     iosArm64()
     iosX64()
-        iosSimulatorArm64()
+    iosSimulatorArm64()
+
     cocoapods {
         version = "1.0"
         summary = "Some description for a Kotlin/Native module"
@@ -173,13 +174,13 @@ kotlin {
             implementation(libs.appauth)
         }
 
-        jvmMain.dependencies {
-            implementation(compose.desktop.currentOs)
-        }
-
-        jsMain.dependencies {
-            implementation(compose.html.core)
-        }
+//        jvmMain.dependencies {
+//            implementation(compose.desktop.currentOs)
+//        }
+//
+//        jsMain.dependencies {
+//            implementation(compose.html.core)
+//        }
 
         iosMain.dependencies {
         }
