@@ -90,7 +90,7 @@ android {
 
     defaultConfig {
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
 
         applicationId = "io.github.sample.androidApp"
         versionCode = 1
