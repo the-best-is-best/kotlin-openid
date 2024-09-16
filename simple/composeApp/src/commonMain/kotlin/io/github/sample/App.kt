@@ -41,16 +41,17 @@ internal fun App() = AppTheme {
     var idToken by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        val baseUrl = "https://demo.duendesoftware.com"
+        val issuerUrl = "https://demo.duendesoftware.com"
         authOpenIdConfig(
-            issuerUrl = baseUrl,
+            issuerUrl = issuerUrl,
             discoveryUrl = ".well-known/openid-configuration",
             tokenEndPoint = "connect/token",
             authEndPoint = "connect/authorize",
             endSessionEndPoint = "connect/endsession",
             clientId = "interactive.public",
             redirectUrl = "com.duendesoftware.demo:/oauthredirect'",
-            scope = "openid profile offline_access email api"
+            scope = "openid profile offline_access email api",
+            postLogoutRedirectURL = "com.duendesoftware.demo:/"
         )
     }
 

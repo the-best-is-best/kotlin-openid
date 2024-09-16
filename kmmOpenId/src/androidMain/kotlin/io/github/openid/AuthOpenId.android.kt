@@ -66,7 +66,7 @@ actual class AuthOpenId {
 
         val endSessionRequest = EndSessionRequest.Builder(serviceConfig)
             .setIdTokenHint(idToken)
-            .setPostLogoutRedirectUri(Uri.parse(OpenIdConfig.endSessionEndPoint)) // Ensure this is valid
+            .setPostLogoutRedirectUri(Uri.parse(OpenIdConfig.postLogoutRedirectURL)) // Ensure this is valid
             .build()
 
         val endSessionIntent = authService.getEndSessionRequestIntent(endSessionRequest)

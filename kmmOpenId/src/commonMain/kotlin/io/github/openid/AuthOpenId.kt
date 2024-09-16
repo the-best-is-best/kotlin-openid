@@ -10,6 +10,7 @@ fun authOpenIdConfig(
     clientId: String,
     redirectUrl: String,
     scope: String,
+    postLogoutRedirectURL: String
 
 ) {
     OpenIdConfig.authEndPoint = "$issuerUrl/$authEndPoint"
@@ -19,6 +20,7 @@ fun authOpenIdConfig(
     OpenIdConfig.discoveryUrl = "$issuerUrl/$discoveryUrl"
     OpenIdConfig.tokenEndPoint = "$issuerUrl/$tokenEndPoint"
     OpenIdConfig.endSessionEndPoint = "$issuerUrl/$endSessionEndPoint"
+    OpenIdConfig.postLogoutRedirectURL = postLogoutRedirectURL
 
 }
  expect class AuthOpenId() {

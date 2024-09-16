@@ -8,4 +8,5 @@ object OpenIdConfig {
     lateinit var clientId: String
     lateinit var redirectUrl: String
     lateinit var scope: String
+    lateinit var postLogoutRedirectURL: String
 }
