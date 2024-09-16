@@ -38,18 +38,19 @@ internal fun App() = AppTheme {
 
     var refreshToken by remember { mutableStateOf("") }
     var accessToken by remember { mutableStateOf("") }
+    var idToken by remember { mutableStateOf("") }
 
     LaunchedEffect(Unit) {
-        val baseUrl = "https://sylidentitystaging.azurewebsites.net"
+        val baseUrl = "https://demo.duendesoftware.com"
         authOpenIdConfig(
             issuerUrl = baseUrl,
             discoveryUrl = ".well-known/openid-configuration",
             tokenEndPoint = "connect/token",
             authEndPoint = "connect/authorize",
-            endSessionEndPoint = "au.u52ndsolution.syl",
-            clientId = "syl.interpreter.mobile",
-            redirectUrl = "au.u52ndsolution.syl:/auth/signin-oidc",
-            scope = "openid profile offline_access syl.interpreter.api.fullaccess"
+            endSessionEndPoint = "connect/endsession",
+            clientId = "interactive.public",
+            redirectUrl = "com.duendesoftware.demo:/oauthredirect'",
+            scope = "openid profile offline_access email api"
         )
     }
 
@@ -73,6 +74,7 @@ internal fun App() = AppTheme {
                                 println("Login success ${result.accessToken}")
                                 println("refresh token is ${result.refreshToken}")
                                 refreshToken = result.refreshToken
+                                idToken = result.idToken
                                 accessToken = result.accessToken
                             } else {
                                 println("Login failed: result is null")
@@ -102,6 +104,7 @@ internal fun App() = AppTheme {
                                     println("access token is ${result.accessToken}")
                                     refreshToken = result.refreshToken
                                     accessToken = result.accessToken
+                                    idToken = result.idToken
                                 } else {
                                     println("Refresh token failed: result is null")
                                 }
@@ -118,6 +121,23 @@ internal fun App() = AppTheme {
                 Text("access token $accessToken", style = TextStyle(fontSize = 10.sp))
                 Spacer(Modifier.height(10.dp))
                 Text("refresh token $refreshToken", style = TextStyle(fontSize = 10.sp))
+                Spacer(Modifier.height(10.dp))
+                Text("id token $idToken", style = TextStyle(fontSize = 10.sp))
+
+
+                Spacer(Modifier.height(50.dp))
+                Button(
+                    enabled = idToken.isNotEmpty(),
+                    onClick = {
+                        scope.launch {
+                            auth.logout(idToken)
+                            accessToken = ""
+                            idToken = ""
+                            refreshToken = ""
+                        }
+                    }) {
+                    Text("Logout")
+                }
             }
         }
     }

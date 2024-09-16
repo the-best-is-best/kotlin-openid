@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    >
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
         android:icon="@android:drawable/ic_menu_compass"
@@ -26,8 +24,12 @@
                 <action android:name="android.intent.action.VIEW"/>
                 <category android:name="android.intent.category.DEFAULT"/>
                 <category android:name="android.intent.category.BROWSABLE"/>
-                <data android:scheme="au.u52ndsolution.syl" android:host="redirect"/>
+
+                <data
+                    android:host="redirect"
+                    android:scheme="com.duendesoftware.demo" />
             </intent-filter>
+
         </activity>
 
     </application>

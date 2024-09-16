@@ -75,8 +75,9 @@ object AndroidOpenId {
      fun handleTokenResponse(tokenResponse: TokenResponse): AuthResult? {
         val accessToken = tokenResponse.accessToken
         val refreshToken = tokenResponse.refreshToken
-        return if (accessToken != null && refreshToken != null)
-            AuthResult(accessToken, refreshToken)
+         val idToken = tokenResponse.idToken
+         return if (accessToken != null && refreshToken != null && idToken != null)
+             AuthResult(accessToken, refreshToken, idToken)
         else null
     }
 

@@ -121,7 +121,7 @@ android {
         versionCode = 1
         versionName = "1.0.0"
         addManifestPlaceholders(
-            mapOf("appAuthRedirectScheme" to "au.u52ndsolution.syl")
+            mapOf("appAuthRedirectScheme" to "com.duendesoftware.demo")
         )
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
