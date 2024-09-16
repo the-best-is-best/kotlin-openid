@@ -18,7 +18,7 @@ import kotlin.coroutines.resumeWithException
 
 actual class AuthOpenId {
 
-    actual suspend fun auth(): AuthResult? {
+    actual suspend fun auth(): Boolean? {
         val serviceConfig = getAuthServicesConfig()
 
         val authRequest = AuthorizationRequest.Builder(
@@ -37,7 +37,7 @@ actual class AuthOpenId {
         }
     }
 
-    actual suspend fun refreshToken(refreshToken: String): AuthResult? {
+    actual suspend fun refreshToken(refreshToken: String): Boolean? {
         val serviceConfig = getAuthServicesConfig()
 
         val tokenRequest = TokenRequest.Builder(
@@ -51,7 +51,7 @@ actual class AuthOpenId {
             authService.performTokenRequest(tokenRequest) { tokenResponse, exception ->
                 if (tokenResponse != null) {
                     val authResult = handleTokenResponse(tokenResponse)
-                    cont.resume(authResult)
+                    cont.resume(true)
                 } else if (exception != null) {
                     cont.resumeWithException(exception)
                 } else {
@@ -61,7 +61,7 @@ actual class AuthOpenId {
         }
     }
 
-    actual suspend fun logout(idToken: String): AuthResult? {
+    actual suspend fun logout(idToken: String): Boolean? {
         val serviceConfig = getAuthServicesConfig()
 
         val endSessionRequest = EndSessionRequest.Builder(serviceConfig)
@@ -85,5 +85,9 @@ actual class AuthOpenId {
             Uri.parse(OpenIdConfig.endSessionEndPoint),
 
             )
+    }
+
+    actual fun getLastAuth(): AuthResult? {
+
     }
 }

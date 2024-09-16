@@ -34,9 +34,9 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun App() = AppTheme {
     val scope = rememberCoroutineScope()
-    val auth = AuthOpenId()
+    var auth by remember { mutableStateOf<AuthOpenId?>(null) }
 
-    var refreshToken by remember { mutableStateOf("") }
+    var refreshToken by remember { mutableStateOf("0450368BB663FA761544B84719623BC827FAA088784E2B65E80BEC64E28777EF-1") }
     var accessToken by remember { mutableStateOf("") }
     var idToken by remember { mutableStateOf("") }
 
@@ -53,6 +53,15 @@ internal fun App() = AppTheme {
             scope = "openid profile offline_access email api",
             postLogoutRedirectURL = "com.duendesoftware.demo:/"
         )
+        auth = AuthOpenId()
+        val lastAuth = auth!!.getLastAuth()
+        println("last auth token ${lastAuth?.accessToken}")
+        if (lastAuth != null) {
+            accessToken = lastAuth.accessToken
+            refreshToken = lastAuth.refreshToken
+            idToken = lastAuth.idToken
+        }
+
     }
 
     Surface(
@@ -69,8 +78,11 @@ internal fun App() = AppTheme {
                 Button(onClick = {
                     scope.launch {
                         try {
+
                             println("Attempting to login")
-                            val result = auth.auth()
+                            auth!!.auth()
+                            val result = auth!!.getLastAuth()
+
                             if (result != null) {
                                 println("Login success ${result.accessToken}")
                                 println("refresh token is ${result.refreshToken}")
@@ -93,7 +105,9 @@ internal fun App() = AppTheme {
                         scope.launch {
                             try {
                                 println("Attempting to refresh token")
-                                val result = auth.refreshToken(refreshToken)
+                                auth!!.refreshToken(refreshToken)
+                                val result = auth!!.getLastAuth()
+
                                 if (result != null) {
                                     if (result.refreshToken == refreshToken) {
                                         println("refresh token is the same")
@@ -131,7 +145,7 @@ internal fun App() = AppTheme {
                     enabled = idToken.isNotEmpty(),
                     onClick = {
                         scope.launch {
-                            auth.logout(idToken)
+                            auth!!.logout(idToken)
                             accessToken = ""
                             idToken = ""
                             refreshToken = ""

@@ -21,7 +21,7 @@ import kotlin.coroutines.resumeWithException
 object AndroidOpenId {
 
      lateinit var authLauncher: ActivityResultLauncher<Intent>
-    lateinit var continuation: CancellableContinuation<AuthResult?>
+    lateinit var continuation: CancellableContinuation<Boolean?>
      lateinit var authService: AuthorizationService
 
     // Initialize the static members with an activity
@@ -31,7 +31,7 @@ object AndroidOpenId {
         authLauncher = activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             CoroutineScope(Dispatchers.Main).launch {
                 val authResult = handleAuthResult(result)
-                continuation.resume(authResult)
+                continuation.resume(true)
             }
         }
     }

@@ -148,6 +148,11 @@ kotlin {
             extraOpts += listOf("-compiler-option", "-fmodules")
 
         }
+        pod("KeychainAccess") {
+            version = "4.2.2"
+            extraOpts += listOf("-compiler-option", "-fmodules")
+
+        }
 
     }
 

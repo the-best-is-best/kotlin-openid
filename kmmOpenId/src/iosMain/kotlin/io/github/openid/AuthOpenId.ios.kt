@@ -10,7 +10,11 @@ import cocoapods.AppAuth.OIDResponseTypeCode
 import cocoapods.AppAuth.OIDServiceConfiguration
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.suspendCancellableCoroutine
+import platform.Foundation.NSData
+import platform.Foundation.NSKeyedArchiver
+import platform.Foundation.NSKeyedUnarchiver
 import platform.Foundation.NSURL
+import platform.Foundation.NSUserDefaults
 import platform.UIKit.UIApplication
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -20,7 +24,15 @@ import kotlin.coroutines.resumeWithException
 actual class AuthOpenId {
     private var authState: OIDAuthState? = null
 
-    actual suspend fun auth(): AuthResult? = suspendCancellableCoroutine { continuation ->
+    private val suiteName = "group.net.openid.appauth.Example"
+    private val key = "kAppAuthExampleAuthStateKey"
+
+
+    init {
+        authState = loadState()
+    }
+
+    actual suspend fun auth(): Boolean? = suspendCancellableCoroutine { continuation ->
         val authRequest = createAuthRequest()
         val viewController = UIApplication.sharedApplication.keyWindow?.rootViewController
 
@@ -40,12 +52,12 @@ actual class AuthOpenId {
             callback = { authState, error ->
                 if (authState != null) {
                     this.authState = authState
+                    saveState(authState)
                     val accessToken = authState.lastTokenResponse?.accessToken ?: ""
                     val refreshToken = authState.lastTokenResponse?.refreshToken ?: ""
                     val idToken = authState.lastTokenResponse?.idToken ?: ""  // Extract ID token
-
                     println("Authentication successful: Access Token: $accessToken, Refresh Token: $refreshToken, ID Token: $idToken")
-                    continuation.resume(AuthResult(accessToken, refreshToken, idToken))
+                    continuation.resume(true)
                 } else {
                     println("Authorization error: ${error?.localizedDescription}")
                     continuation.resumeWithException(Exception("Authorization failed: ${error?.localizedDescription}"))
@@ -59,20 +71,18 @@ actual class AuthOpenId {
     }
 
 
-    actual suspend fun refreshToken(refreshToken: String): AuthResult? =
+    actual suspend fun refreshToken(refreshToken: String): Boolean? =
         suspendCancellableCoroutine { continuation ->
             val authState = this.authState ?: run {
                 continuation.resumeWithException(Exception("No auth state available"))
                 return@suspendCancellableCoroutine
             }
 
-            authState.performActionWithFreshTokens { accessToken, idToken, error ->
+
+            authState.performActionWithFreshTokens { _, _, error ->
                 if (error == null) {
-                    val newAccessToken = accessToken ?: ""
-                    val newIdToken = idToken ?: ""
-                    val newRefreshToken = authState.lastTokenResponse?.refreshToken
-                        ?: ""  // Retrieve new refresh token
-                    continuation.resume(AuthResult(newAccessToken, newRefreshToken, newIdToken))
+                    saveState(authState)
+                    continuation.resume(true)
                 } else {
                     println("Token refresh error: ${error.localizedDescription}")
                     continuation.resumeWithException(Exception("Token refresh failed: ${error.localizedDescription}"))
@@ -85,35 +95,7 @@ actual class AuthOpenId {
         }
 
 
-
-    private fun createAuthRequest(): OIDAuthorizationRequest {
-        val authConfig = getAuthConfig()
-        val clientId = OpenIdConfig.clientId
-        val scopesList: List<String> = OpenIdConfig.scope.split(" ")
-        val redirectUrl = NSURL(string = OpenIdConfig.redirectUrl)
-
-        return OIDAuthorizationRequest(
-            configuration = authConfig,
-            clientId = clientId,
-            clientSecret = null,
-            scopes = scopesList,
-            redirectURL = redirectUrl,
-            responseType = OIDResponseTypeCode!!,
-            additionalParameters = null
-        )
-    }
-
-    private fun getAuthConfig() = OIDServiceConfiguration(
-        authorizationEndpoint = NSURL(string = OpenIdConfig.authEndPoint),
-        tokenEndpoint = NSURL(string = OpenIdConfig.tokenEndPoint),
-        null,
-        null,
-        NSURL(string = OpenIdConfig.endSessionEndPoint),
-
-        )
-
-
-    actual suspend fun logout(idToken: String): AuthResult? =
+    actual suspend fun logout(idToken: String): Boolean? =
         suspendCancellableCoroutine { continuation ->
 
             val authConfig = getAuthConfig()
@@ -152,6 +134,81 @@ actual class AuthOpenId {
                 println("Logout flow was cancelled")
             }
         }
+
+    private fun createAuthRequest(): OIDAuthorizationRequest {
+        val authConfig = getAuthConfig()
+        val clientId = OpenIdConfig.clientId
+        val scopesList: List<String> = OpenIdConfig.scope.split(" ")
+        val redirectUrl = NSURL(string = OpenIdConfig.redirectUrl)
+
+        return OIDAuthorizationRequest(
+            configuration = authConfig,
+            clientId = clientId,
+            clientSecret = null,
+            scopes = scopesList,
+            redirectURL = redirectUrl,
+            responseType = OIDResponseTypeCode!!,
+            additionalParameters = null
+        )
+    }
+
+    private fun getAuthConfig(): OIDServiceConfiguration = OIDServiceConfiguration(
+        authorizationEndpoint = NSURL(string = OpenIdConfig.authEndPoint),
+        tokenEndpoint = NSURL(string = OpenIdConfig.tokenEndPoint),
+        null,
+        null,
+        NSURL(string = OpenIdConfig.endSessionEndPoint),
+
+
+        )
+
+
+    private fun saveState(authState: OIDAuthState?) {
+        val data = authState?.let {
+            NSKeyedArchiver.archivedDataWithRootObject(it)
+        }
+
+        val userDefaults = NSUserDefaults(suiteName)
+        if (data != null) {
+
+            userDefaults.setObject(data, key)
+        } else {
+            userDefaults.removeObjectForKey(key)
+        }
+        println("data saved is $data")
+        userDefaults.synchronize()
+    }
+
+    private fun loadState(): OIDAuthState? {
+        val userDefaults = NSUserDefaults(suiteName)
+        val data = userDefaults.objectForKey(key) as? NSData
+        println("Data retrieved: $data")
+
+        return try {
+            data?.let {
+                NSKeyedUnarchiver.unarchiveObjectWithData(it) as? OIDAuthState
+            }
+        } catch (e: Exception) {
+            println("Error during unarchiving: ${e.message}")
+            null
+        }
+    }
+
+
+    actual fun getLastAuth(): AuthResult? {
+        if (authState != null) {
+            val lastTokenResponse = authState!!.lastTokenResponse
+            if (lastTokenResponse != null) {
+                return AuthResult(
+                    accessToken = lastTokenResponse.accessToken!!,
+                    refreshToken = lastTokenResponse.refreshToken!!,
+                    idToken = lastTokenResponse.idToken!!,
+                )
+            }
+        }
+        println("authState is null")
+        return null
+    }
 
 }
 

@@ -26,11 +26,13 @@ fun authOpenIdConfig(
  expect class AuthOpenId() {
 
 
-     suspend fun auth(): AuthResult?
+     suspend fun auth(): Boolean?
 
-     suspend fun refreshToken(refreshToken:String): AuthResult?
+     suspend fun refreshToken(refreshToken: String): Boolean?
 
-     suspend fun logout(idToken: String): AuthResult?
+     suspend fun logout(idToken: String): Boolean?
+
+     fun getLastAuth(): AuthResult?
  }
 
 
