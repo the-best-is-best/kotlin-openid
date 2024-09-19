@@ -18,6 +18,9 @@ import kotlin.coroutines.resumeWithException
 
 actual class AuthOpenId {
 
+    actual fun init(key: String, group: String) {
+    }
+
     actual suspend fun auth(): Boolean? {
         val serviceConfig = getAuthServicesConfig()
 
@@ -37,7 +40,8 @@ actual class AuthOpenId {
         }
     }
 
-    actual suspend fun refreshToken(refreshToken: String): Boolean? {
+    actual suspend fun refreshToken(): Boolean? {
+        val refreshToken = ""
         val serviceConfig = getAuthServicesConfig()
 
         val tokenRequest = TokenRequest.Builder(
@@ -61,7 +65,8 @@ actual class AuthOpenId {
         }
     }
 
-    actual suspend fun logout(idToken: String): Boolean? {
+    actual suspend fun logout(): Boolean? {
+        val idToken: String = ""
         val serviceConfig = getAuthServicesConfig()
 
         val endSessionRequest = EndSessionRequest.Builder(serviceConfig)
@@ -88,6 +93,8 @@ actual class AuthOpenId {
     }
 
     actual fun getLastAuth(): AuthResult? {
-
+        return AuthResult("", "", "")
     }
+
+
 }

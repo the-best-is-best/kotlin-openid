@@ -30,9 +30,9 @@ tasks.withType<PublishToMavenRepository> {
         isMac.also {
             if (!isMac) logger.error(
                 """
-                    Publishing the library requires macOS to be able to generate iOS artifacts.
-                    Run the task on a mac or use the project GitHub workflows for publication and release.
-                """
+                        Publishing the library requires macOS to be able to generate iOS artifacts.
+                        Run the task on a mac or use the project GitHub workflows for publication and release.
+                    """
             )
         }
     }
@@ -99,34 +99,31 @@ kotlin {
         }
     }
 
-//    jvm()
-//
-//    js {
-//        browser()
-//        binaries.executable()
-//    }
-//
-//    @OptIn(ExperimentalWasmDsl::class)
-//    wasmJs {
-//        browser()
-//        binaries.executable()
-//    }
+    //    jvm()
+    //
+    //    js {
+    //        browser()
+    //        binaries.executable()
+    //    }
+    //
+    //    @OptIn(ExperimentalWasmDsl::class)
+    //    wasmJs {
+    //        browser()
+    //        binaries.executable()
+    //    }
 
-//    listOf(
-//        iosX64(),
-//        iosArm64(),
-//        iosSimulatorArm64()
-//    ).forEach {
-//        it.binaries.framework {
-//            baseName = "lib"
-//            isStatic = true
-//        }
-//    }
+    listOf(
+        iosX64(),
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach {
+        it.binaries.framework {
+            baseName = "KMMOpenId"
+            isStatic = true
+        }
+    }
 
 
-    iosArm64()
-    iosX64()
-    iosSimulatorArm64()
 
     cocoapods {
         version = "1.0"
@@ -148,11 +145,11 @@ kotlin {
             extraOpts += listOf("-compiler-option", "-fmodules")
 
         }
-        pod("KeychainAccess") {
-            version = "4.2.2"
-            extraOpts += listOf("-compiler-option", "-fmodules")
+//            pod("KServices") {
+//                version = "0.1.7" // Ensure this is the correct version
+//                extraOpts += listOf("-compiler-option", "-fmodules")
+//            }
 
-        }
 
     }
 
@@ -165,6 +162,10 @@ kotlin {
             implementation(compose.material3)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
+
+            implementation("io.github.the-best-is-best:kmm-crypto:1.0.0-5-SNAPSHOT")
+
+
         }
 
         commonTest.dependencies {
@@ -179,13 +180,13 @@ kotlin {
             implementation(libs.appauth)
         }
 
-//        jvmMain.dependencies {
-//            implementation(compose.desktop.currentOs)
-//        }
-//
-//        jsMain.dependencies {
-//            implementation(compose.html.core)
-//        }
+        //        jvmMain.dependencies {
+        //            implementation(compose.desktop.currentOs)
+        //        }
+        //
+        //        jsMain.dependencies {
+        //            implementation(compose.html.core)
+        //        }
 
         iosMain.dependencies {
         }

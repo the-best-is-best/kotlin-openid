@@ -28,6 +28,8 @@ dependencyResolutionManagement {
         mavenCentral()
         maven("https://maven.pkg.jetbrains.space/kotlin/p/wasm/experimental")
         maven("https://maven.pkg.jetbrains.space/public/p/ktor/eap")
+        maven("https://s01.oss.sonatype.org/content/repositories/snapshots/")
+
     }
 }
 include(":kmmOpenId")

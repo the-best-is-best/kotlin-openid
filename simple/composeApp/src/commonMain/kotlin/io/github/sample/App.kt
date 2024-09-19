@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.openid.AuthOpenId
 import io.github.openid.authOpenIdConfig
+
 import io.github.sample.theme.AppTheme
 import kotlinx.coroutines.launch
 
@@ -34,9 +35,9 @@ import kotlinx.coroutines.launch
 @Composable
 internal fun App() = AppTheme {
     val scope = rememberCoroutineScope()
-    var auth by remember { mutableStateOf<AuthOpenId?>(null) }
+    val auth = AuthOpenId()
 
-    var refreshToken by remember { mutableStateOf("0450368BB663FA761544B84719623BC827FAA088784E2B65E80BEC64E28777EF-1") }
+    var refreshToken by remember { mutableStateOf("") }
     var accessToken by remember { mutableStateOf("") }
     var idToken by remember { mutableStateOf("") }
 
@@ -51,16 +52,11 @@ internal fun App() = AppTheme {
             clientId = "interactive.public",
             redirectUrl = "com.duendesoftware.demo:/oauthredirect'",
             scope = "openid profile offline_access email api",
-            postLogoutRedirectURL = "com.duendesoftware.demo:/"
+            postLogoutRedirectURL = "com.duendesoftware.demo:/",
+
         )
-        auth = AuthOpenId()
-        val lastAuth = auth!!.getLastAuth()
-        println("last auth token ${lastAuth?.accessToken}")
-        if (lastAuth != null) {
-            accessToken = lastAuth.accessToken
-            refreshToken = lastAuth.refreshToken
-            idToken = lastAuth.idToken
-        }
+        auth.init("auth", "kmmOpenId")
+
 
     }
 
@@ -75,13 +71,25 @@ internal fun App() = AppTheme {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
+                Spacer(Modifier.height(20.dp))
+                Button(onClick = {
+                    val lastAuth = auth.getLastAuth()
+                    println("last auth token ${lastAuth?.accessToken}")
+                    if (lastAuth != null) {
+                        accessToken = lastAuth.accessToken
+                        refreshToken = lastAuth.refreshToken
+                        idToken = lastAuth.idToken
+                    }
+                }) {
+                    Text("Get data")
+                }
                 Button(onClick = {
                     scope.launch {
                         try {
 
                             println("Attempting to login")
-                            auth!!.auth()
-                            val result = auth!!.getLastAuth()
+                            auth.auth()
+                            val result = auth.getLastAuth()
 
                             if (result != null) {
                                 println("Login success ${result.accessToken}")
@@ -105,8 +113,8 @@ internal fun App() = AppTheme {
                         scope.launch {
                             try {
                                 println("Attempting to refresh token")
-                                auth!!.refreshToken(refreshToken)
-                                val result = auth!!.getLastAuth()
+                                auth.refreshToken()
+                                val result = auth.getLastAuth()
 
                                 if (result != null) {
                                     if (result.refreshToken == refreshToken) {
@@ -145,7 +153,7 @@ internal fun App() = AppTheme {
                     enabled = idToken.isNotEmpty(),
                     onClick = {
                         scope.launch {
-                            auth!!.logout(idToken)
+                            auth.logout()
                             accessToken = ""
                             idToken = ""
                             refreshToken = ""

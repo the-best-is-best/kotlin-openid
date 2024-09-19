@@ -8,13 +8,16 @@ import cocoapods.AppAuth.OIDEndSessionRequest
 import cocoapods.AppAuth.OIDExternalUserAgentIOS
 import cocoapods.AppAuth.OIDResponseTypeCode
 import cocoapods.AppAuth.OIDServiceConfiguration
+import io.github.kmmcrypto.KMMCrypto
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
-import platform.Foundation.NSData
 import platform.Foundation.NSKeyedArchiver
 import platform.Foundation.NSKeyedUnarchiver
 import platform.Foundation.NSURL
-import platform.Foundation.NSUserDefaults
 import platform.UIKit.UIApplication
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -22,15 +25,27 @@ import kotlin.coroutines.resumeWithException
 
 @OptIn(ExperimentalForeignApi::class)
 actual class AuthOpenId {
-    private var authState: OIDAuthState? = null
+    companion object {
+        private lateinit var service: String
+        private lateinit var group: String
 
-    private val suiteName = "group.net.openid.appauth.Example"
-    private val key = "kAppAuthExampleAuthStateKey"
+        private var authState: OIDAuthState? = null
 
+        private val crypto = KMMCrypto()
 
-    init {
-        authState = loadState()
     }
+
+
+    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+
+    actual fun init(key: String, group: String) {
+        service = key
+        AuthOpenId.group = group
+        scope.launch {
+            authState = loadState()
+        }
+    }
+
 
     actual suspend fun auth(): Boolean? = suspendCancellableCoroutine { continuation ->
         val authRequest = createAuthRequest()
@@ -51,13 +66,14 @@ actual class AuthOpenId {
             externalUserAgent = externalUserAgent,
             callback = { authState, error ->
                 if (authState != null) {
-                    this.authState = authState
-                    saveState(authState)
+                    AuthOpenId.authState = authState
                     val accessToken = authState.lastTokenResponse?.accessToken ?: ""
                     val refreshToken = authState.lastTokenResponse?.refreshToken ?: ""
                     val idToken = authState.lastTokenResponse?.idToken ?: ""  // Extract ID token
                     println("Authentication successful: Access Token: $accessToken, Refresh Token: $refreshToken, ID Token: $idToken")
+                    saveState(authState)
                     continuation.resume(true)
+
                 } else {
                     println("Authorization error: ${error?.localizedDescription}")
                     continuation.resumeWithException(Exception("Authorization failed: ${error?.localizedDescription}"))
@@ -71,17 +87,23 @@ actual class AuthOpenId {
     }
 
 
-    actual suspend fun refreshToken(refreshToken: String): Boolean? =
+    actual suspend fun refreshToken(): Boolean? =
+
         suspendCancellableCoroutine { continuation ->
-            val authState = this.authState ?: run {
+            val authState = AuthOpenId.authState ?: run {
+
                 continuation.resumeWithException(Exception("No auth state available"))
                 return@suspendCancellableCoroutine
             }
 
+//            val refreshToken = Companion.authState?.lastTokenResponse?.refreshToken
+//                ?: throw IllegalStateException("Refresh Token is null")
 
             authState.performActionWithFreshTokens { _, _, error ->
+
                 if (error == null) {
                     saveState(authState)
+
                     continuation.resume(true)
                 } else {
                     println("Token refresh error: ${error.localizedDescription}")
@@ -95,10 +117,13 @@ actual class AuthOpenId {
         }
 
 
-    actual suspend fun logout(idToken: String): Boolean? =
+    actual suspend fun logout(): Boolean? =
         suspendCancellableCoroutine { continuation ->
 
             val authConfig = getAuthConfig()
+
+            val idToken = authState?.lastTokenResponse?.idToken
+                ?: throw IllegalStateException("ID Token is null")
 
             val endSessionRequest = OIDEndSessionRequest(
                 configuration = authConfig,
@@ -164,33 +189,38 @@ actual class AuthOpenId {
 
 
     private fun saveState(authState: OIDAuthState?) {
-        val data = authState?.let {
-            NSKeyedArchiver.archivedDataWithRootObject(it)
+        try {
+            val data = authState?.let {
+                NSKeyedArchiver.archivedDataWithRootObject(it)
+            } ?: throw IllegalStateException("Data is null")
+            println("data will save is $data")
+            crypto.saveDataType(service, group, data)
+            println("data saved")
+        } catch (e: Exception) {
+            println("Error save data ${e.message}")
+            throw Exception(e.message)
         }
 
-        val userDefaults = NSUserDefaults(suiteName)
-        if (data != null) {
 
-            userDefaults.setObject(data, key)
-        } else {
-            userDefaults.removeObjectForKey(key)
-        }
-        println("data saved is $data")
-        userDefaults.synchronize()
     }
 
-    private fun loadState(): OIDAuthState? {
-        val userDefaults = NSUserDefaults(suiteName)
-        val data = userDefaults.objectForKey(key) as? NSData
-        println("Data retrieved: $data")
+    private suspend fun loadState(): OIDAuthState? {
 
-        return try {
-            data?.let {
-                NSKeyedUnarchiver.unarchiveObjectWithData(it) as? OIDAuthState
+        try {
+            val data = crypto.loadDataType(service, group)
+            println("Data retrieved: $data")
+
+            return try {
+                data?.let {
+                    NSKeyedUnarchiver.unarchiveObjectWithData(it) as? OIDAuthState
+                }
+            } catch (e: Exception) {
+                println("Error during unarchiving: ${e.message}")
+                null
             }
         } catch (e: Exception) {
-            println("Error during unarchiving: ${e.message}")
-            null
+            println("Error is ${e.message}")
+            return null
         }
     }
 
@@ -206,9 +236,9 @@ actual class AuthOpenId {
                 )
             }
         }
-        println("authState is null")
         return null
     }
+
 
 }
 

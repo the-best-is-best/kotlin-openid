@@ -13,6 +13,8 @@ fun authOpenIdConfig(
     postLogoutRedirectURL: String
 
 ) {
+
+
     OpenIdConfig.authEndPoint = "$issuerUrl/$authEndPoint"
     OpenIdConfig.scope = scope
     OpenIdConfig.clientId = clientId
@@ -22,15 +24,19 @@ fun authOpenIdConfig(
     OpenIdConfig.endSessionEndPoint = "$issuerUrl/$endSessionEndPoint"
     OpenIdConfig.postLogoutRedirectURL = postLogoutRedirectURL
 
+
 }
  expect class AuthOpenId() {
 
 
-     suspend fun auth(): Boolean?
+     fun init(key: String, group: String)
 
-     suspend fun refreshToken(refreshToken: String): Boolean?
 
-     suspend fun logout(idToken: String): Boolean?
+     fun auth(): Boolean?
+
+     fun refreshToken(): Boolean?
+
+     suspend fun logout(): Boolean?
 
      fun getLastAuth(): AuthResult?
  }
