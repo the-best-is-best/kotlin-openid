@@ -27,9 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.openid.AuthOpenId
 import io.github.openid.authOpenIdConfig
-
 import io.github.sample.theme.AppTheme
-import kotlinx.coroutines.launch
 
 
 @Composable
@@ -84,57 +82,72 @@ internal fun App() = AppTheme {
                     Text("Get data")
                 }
                 Button(onClick = {
-                    scope.launch {
                         try {
 
                             println("Attempting to login")
-                            auth.auth()
-                            val result = auth.getLastAuth()
+                            auth.auth { result ->
+                                result.onSuccess { isAuthenticated ->
+                                    if (isAuthenticated) {
+                                        println("Authentication successful!")
+                                        val resultAuth = auth.getLastAuth()
 
-                            if (result != null) {
-                                println("Login success ${result.accessToken}")
-                                println("refresh token is ${result.refreshToken}")
-                                refreshToken = result.refreshToken
-                                idToken = result.idToken
-                                accessToken = result.accessToken
-                            } else {
-                                println("Login failed: result is null")
+                                        if (resultAuth != null) {
+                                            println("Login success ${resultAuth.accessToken}")
+                                            println("refresh token is ${resultAuth.refreshToken}")
+                                            refreshToken = resultAuth.refreshToken
+                                            idToken = resultAuth.idToken
+                                            accessToken = resultAuth.accessToken
+                                        } else {
+                                            println("Login failed: result is null")
+                                        }
+                                    } else {
+                                        println("Authentication failed!")
+                                    }
+                                }.onFailure { error ->
+                                    println("Authentication error: ${error.message}")
+                                }
                             }
+
+
                         } catch (e: Exception) {
                             println("Login failed: ${e.message}")
                         }
-                    }
+
                 }) {
                     Text("Login")
                 }
                 Button(
                     enabled = refreshToken.isNotEmpty(),
                     onClick = {
-                        scope.launch {
                             try {
                                 println("Attempting to refresh token")
-                                auth.refreshToken()
-                                val result = auth.getLastAuth()
+                                auth.refreshToken { result ->
+                                    result.onSuccess { isAuthenticated ->
+                                        if (isAuthenticated) {
+                                            println("Authentication successful!")
+                                            val resultAuth = auth.getLastAuth()
 
-                                if (result != null) {
-                                    if (result.refreshToken == refreshToken) {
-                                        println("refresh token is the same")
+                                            if (resultAuth != null) {
+                                                println("Login success ${resultAuth.accessToken}")
+                                                println("refresh token is ${resultAuth.refreshToken}")
+                                                refreshToken = resultAuth.refreshToken
+                                                idToken = resultAuth.idToken
+                                                accessToken = resultAuth.accessToken
+                                            } else {
+                                                println("Login failed: result is null")
+                                            }
+                                        } else {
+                                            println("Authentication failed!")
+                                        }
+                                    }.onFailure { error ->
+                                        println("Authentication error: ${error.message}")
                                     }
-                                    if (accessToken == result.accessToken) {
-                                        println("acccess token is the same")
-                                    }
-                                    println("Refresh token success ${result.refreshToken}")
-                                    println("access token is ${result.accessToken}")
-                                    refreshToken = result.refreshToken
-                                    accessToken = result.accessToken
-                                    idToken = result.idToken
-                                } else {
-                                    println("Refresh token failed: result is null")
                                 }
+
                             } catch (e: Exception) {
                                 println("Refresh token failed: ${e.message}")
                             }
-                        }
+
                     }
                 ) {
                     Text("Refresh Token")
@@ -152,12 +165,16 @@ internal fun App() = AppTheme {
                 Button(
                     enabled = idToken.isNotEmpty(),
                     onClick = {
-                        scope.launch {
-                            auth.logout()
-                            accessToken = ""
-                            idToken = ""
-                            refreshToken = ""
+                        auth.logout { result ->
+                            result.onSuccess {
+                                accessToken = ""
+                                idToken = ""
+                                refreshToken = ""
+                            }
+
                         }
+
+
                     }) {
                     Text("Logout")
                 }

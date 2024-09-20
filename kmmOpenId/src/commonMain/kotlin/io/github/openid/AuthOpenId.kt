@@ -26,17 +26,18 @@ fun authOpenIdConfig(
 
 
 }
+
  expect class AuthOpenId() {
 
 
      fun init(key: String, group: String)
 
 
-     fun auth(): Boolean?
+     fun auth(callback: (Result<Boolean>) -> Unit)
 
-     fun refreshToken(): Boolean?
+     fun refreshToken(callback: (Result<Boolean>) -> Unit)
 
-     suspend fun logout(): Boolean?
+     fun logout(callback: (Result<Boolean?>) -> Unit)
 
      fun getLastAuth(): AuthResult?
  }
