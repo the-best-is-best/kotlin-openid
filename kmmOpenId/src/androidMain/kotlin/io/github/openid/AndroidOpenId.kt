@@ -5,9 +5,12 @@ import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import com.google.gson.Gson
+import io.github.kmmcrypto.KMMCrypto
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import net.openid.appauth.AuthorizationException
@@ -20,20 +23,31 @@ import kotlin.coroutines.resumeWithException
 @SuppressLint("StaticFieldLeak")
 object AndroidOpenId {
 
-     lateinit var authLauncher: ActivityResultLauncher<Intent>
-    lateinit var continuation: CancellableContinuation<Boolean?>
-     lateinit var authService: AuthorizationService
+    internal lateinit var authLauncher: ActivityResultLauncher<Intent>
+    internal lateinit var continuation: CancellableContinuation<Boolean?>
+    internal lateinit var authService: AuthorizationService
+
+
+    internal val kmmCrypto = KMMCrypto()
+
+    internal val gson = Gson()
 
     // Initialize the static members with an activity
+    @OptIn(InternalCoroutinesApi::class)
     @JvmStatic
     fun init(activity: ComponentActivity) {
+
         authService = AuthorizationService(activity)
         authLauncher = activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            CoroutineScope(Dispatchers.Main).launch {
-                val authResult = handleAuthResult(result)
-                continuation.resume(true)
+            if (::continuation.isInitialized) {
+                CoroutineScope(Dispatchers.Main).launch {
+                    handleAuthResult(result) // Handle result logic
+                    continuation.resume(true) // Ensure this is only called once
+
+                }
             }
         }
+
     }
 
     private suspend fun handleAuthResult(result: androidx.activity.result.ActivityResult): AuthResult? {
@@ -48,6 +62,7 @@ object AndroidOpenId {
                 handleAuthError(error)
             }
         }
+        saveData(null)
         return null
     }
 
@@ -58,7 +73,15 @@ object AndroidOpenId {
             authService.performTokenRequest(tokenRequest) { tokenResponse, exception ->
                 if (tokenResponse != null) {
                     val authResult = handleTokenResponse(tokenResponse)
-                    cont.resume(authResult)
+                    saveData(authResult)
+                    if (authResult != null) {
+
+                        cont.resume(authResult)
+
+                    } else {
+                        cont.resume(null)
+
+                    }
                 } else if (exception != null) {
                     cont.resumeWithException(exception)
                 } else {
@@ -72,13 +95,28 @@ object AndroidOpenId {
         println("Authorization error: ${error.message}")
     }
 
-     fun handleTokenResponse(tokenResponse: TokenResponse): AuthResult? {
-        val accessToken = tokenResponse.accessToken
-        val refreshToken = tokenResponse.refreshToken
-         val idToken = tokenResponse.idToken
+    fun handleTokenResponse(tokenResponse: TokenResponse?): AuthResult? {
+        val accessToken = tokenResponse?.accessToken
+        val refreshToken = tokenResponse?.refreshToken
+        val idToken = tokenResponse?.idToken
+
          return if (accessToken != null && refreshToken != null && idToken != null)
              AuthResult(accessToken, refreshToken, idToken)
         else null
     }
 
+    fun saveData(data: AuthResult?) {
+
+        if (data != null) {
+            val jsonString = gson.toJson(data)
+
+            kmmCrypto.saveData(AuthOpenId.key, AuthOpenId.group, jsonString)
+            println("data saved")
+        } else {
+            kmmCrypto.saveData(AuthOpenId.key, AuthOpenId.group, "")
+            println("data removed")
+        }
+    }
 }
+
+

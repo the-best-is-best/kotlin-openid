@@ -62,6 +62,7 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
 
             implementation(project(":kmmOpenId"))
+            implementation(libs.kmm.crypto)
 
 
         }
@@ -89,11 +90,20 @@ kotlin {
 
 
 android {
+    signingConfigs {
+        getByName("debug") {
+            storeFile =
+                file("/Users/michelleraouf/Desktop/kmm/kotlin-openid/simple/composeApp/src/androidMain/key")
+            storePassword = "key-pass"
+            keyPassword = "key-pass"
+            keyAlias = "key0"
+        }
+    }
     namespace = "io.github.sample"
     compileSdk = 34
 
     defaultConfig {
-        minSdk = 26
+        minSdk = 21
         targetSdk = 35
 
         applicationId = "io.github.sample.androidApp"

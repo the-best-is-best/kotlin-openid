@@ -210,18 +210,22 @@ actual class AuthOpenId {
     }
 
 
-    actual fun getLastAuth(): AuthResult? {
+    actual fun getLastAuth(callback: (Result<AuthResult?>) -> Unit) {
         if (authState != null) {
             val lastTokenResponse = authState!!.lastTokenResponse
             if (lastTokenResponse != null) {
-                return AuthResult(
-                    accessToken = lastTokenResponse.accessToken!!,
-                    refreshToken = lastTokenResponse.refreshToken!!,
-                    idToken = lastTokenResponse.idToken!!,
+                callback(
+                    Result.success(
+                        AuthResult(
+                            accessToken = lastTokenResponse.accessToken!!,
+                            refreshToken = lastTokenResponse.refreshToken!!,
+                            idToken = lastTokenResponse.idToken!!,
+                        )
+                    )
                 )
             }
         }
-        return null
+        return callback(Result.failure(Exception("No data available")))
     }
 
 

@@ -39,7 +39,7 @@ fun authOpenIdConfig(
 
      fun logout(callback: (Result<Boolean?>) -> Unit)
 
-     fun getLastAuth(): AuthResult?
+     fun getLastAuth(callback: (Result<AuthResult?>) -> Unit)
  }
 
 

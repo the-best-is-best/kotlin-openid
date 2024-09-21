@@ -163,7 +163,8 @@ kotlin {
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
 
-            implementation("io.github.the-best-is-best:kmm-crypto:1.0.0-5-SNAPSHOT")
+            implementation(libs.kmm.crypto)
+
 
 
         }
@@ -178,6 +179,8 @@ kotlin {
             implementation(compose.uiTooling)
             implementation(libs.androidx.activityCompose)
             implementation(libs.appauth)
+            implementation("com.google.code.gson:gson:2.11.0")
+
         }
 
         //        jvmMain.dependencies {

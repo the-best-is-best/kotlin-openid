@@ -17,7 +17,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,9 +31,7 @@ import io.github.sample.theme.AppTheme
 
 @Composable
 internal fun App() = AppTheme {
-    val scope = rememberCoroutineScope()
     val auth = AuthOpenId()
-
     var refreshToken by remember { mutableStateOf("") }
     var accessToken by remember { mutableStateOf("") }
     var idToken by remember { mutableStateOf("") }
@@ -71,13 +68,17 @@ internal fun App() = AppTheme {
             ) {
                 Spacer(Modifier.height(20.dp))
                 Button(onClick = {
-                    val lastAuth = auth.getLastAuth()
-                    println("last auth token ${lastAuth?.accessToken}")
-                    if (lastAuth != null) {
-                        accessToken = lastAuth.accessToken
-                        refreshToken = lastAuth.refreshToken
-                        idToken = lastAuth.idToken
-                    }
+                    auth.getLastAuth(callback = {
+                        it.onSuccess {
+                            println("last auth token ${it?.accessToken}")
+                            if (it != null) {
+                                accessToken = it.accessToken
+                                refreshToken = it.refreshToken
+                                idToken = it.idToken
+                            }
+                        }
+                    })
+
                 }) {
                     Text("Get data")
                 }
@@ -89,17 +90,21 @@ internal fun App() = AppTheme {
                                 result.onSuccess { isAuthenticated ->
                                     if (isAuthenticated) {
                                         println("Authentication successful!")
-                                        val resultAuth = auth.getLastAuth()
+                                        auth.getLastAuth(callback = {
+                                            it.onSuccess {
+                                                if (it != null) {
+                                                    println("Login success ${it.accessToken}")
+                                                    println("refresh token is ${it.refreshToken}")
+                                                    refreshToken = it.refreshToken
+                                                    idToken = it.idToken
+                                                    accessToken = it.accessToken
+                                                } else {
+                                                    println("Login failed: result is null")
+                                                }
+                                            }
+                                        })
 
-                                        if (resultAuth != null) {
-                                            println("Login success ${resultAuth.accessToken}")
-                                            println("refresh token is ${resultAuth.refreshToken}")
-                                            refreshToken = resultAuth.refreshToken
-                                            idToken = resultAuth.idToken
-                                            accessToken = resultAuth.accessToken
-                                        } else {
-                                            println("Login failed: result is null")
-                                        }
+
                                     } else {
                                         println("Authentication failed!")
                                     }
@@ -125,17 +130,21 @@ internal fun App() = AppTheme {
                                     result.onSuccess { isAuthenticated ->
                                         if (isAuthenticated) {
                                             println("Authentication successful!")
-                                            val resultAuth = auth.getLastAuth()
+                                            auth.getLastAuth(callback = {
+                                                it.onSuccess {
+                                                    if (it != null) {
+                                                        println("Login success ${it.accessToken}")
+                                                        println("refresh token is ${it.refreshToken}")
+                                                        refreshToken = it.refreshToken
+                                                        idToken = it.idToken
+                                                        accessToken = it.accessToken
+                                                    } else {
+                                                        println("Login failed: result is null")
+                                                    }
+                                                }
+                                            })
 
-                                            if (resultAuth != null) {
-                                                println("Login success ${resultAuth.accessToken}")
-                                                println("refresh token is ${resultAuth.refreshToken}")
-                                                refreshToken = resultAuth.refreshToken
-                                                idToken = resultAuth.idToken
-                                                accessToken = resultAuth.accessToken
-                                            } else {
-                                                println("Login failed: result is null")
-                                            }
+
                                         } else {
                                             println("Authentication failed!")
                                         }

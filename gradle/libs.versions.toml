@@ -1,6 +1,7 @@
 [versions]
 appauth = "0.11.1"
-kotlin = "2.0.20"
+kmmCrypto = "1.0.0-7-SNAPSHOT"
+kotlin = "2.1.0-Beta1"
 compose = "1.7.0-beta02"
 agp = "8.6.1"
 androidx-activityCompose = "1.9.2"
@@ -13,6 +14,7 @@ androidx-activityCompose = { module = "androidx.activity:activity-compose", vers
 androidx-testManifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "androidx-uiTest" }
 androidx-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "androidx-uiTest" }
 appauth = { module = "net.openid:appauth", version.ref = "appauth" }
+kmm-crypto = { module = "io.github.the-best-is-best:kmm-crypto", version.ref = "kmmCrypto" }
 
 [plugins]
 
