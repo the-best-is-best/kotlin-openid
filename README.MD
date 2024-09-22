@@ -15,7 +15,7 @@
 
 <hr>
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.the-best-is-best/\kapp-auth)](https://central.sonatype.com/artifact/io.github.the-best-is-best/kapp-auth)
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.the-best-is-best/kapp-auth)](https://central.sonatype.com/artifact/io.github.the-best-is-best/kapp-auth)
 
 KApp Auth is available on `mavenCentral()`.
 
