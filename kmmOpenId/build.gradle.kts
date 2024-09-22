@@ -41,15 +41,15 @@ tasks.withType<PublishToMavenRepository> {
 
 
 mavenPublishing {
-    coordinates("x", "xx", "xxx")
+    coordinates("io.github.the-best-is-best", "kapp-auth", "1.0.0")
 
     publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
     signAllPublications()
 
     pom {
-        name.set("x")
-        description.set("x")
-        url.set("x")
+        name.set("KApp Auth")
+        description.set("This package provides an abstraction around the Android and iOS AppAuth SDKs so it can be used to communicate with OAuth 2.0 and OpenID Connect providers")
+        url.set("https://github.com/the-best-is-best/kotlin-openid")
         licenses {
             license {
                 name.set("Apache-2.0")
@@ -57,25 +57,28 @@ mavenPublishing {
             }
         }
         issueManagement {
-            system.set("x")
-            url.set("x")
+            system.set("Github")
+            url.set("https://github.com/the-best-is-best/kotlin-openid")
         }
         scm {
-            connection.set("x")
-            url.set("x")
+            connection.set("https://github.com/the-best-is-best/kotlin-openid.git")
+            url.set("https://github.com/the-best-is-best/kotlin-openid")
         }
         developers {
             developer {
-                id.set("x")
-                name.set("x")
-                email.set("x")
+                id.set("MichelleRaouf")
+                name.set("Michelle Raouf")
+                email.set("eng.michelle.raouf@gmail.com")
             }
         }
     }
 
 }
 
-
+signing {
+    useGpgCmd()
+    sign(publishing.publications)
+}
 
 
 kotlin {
