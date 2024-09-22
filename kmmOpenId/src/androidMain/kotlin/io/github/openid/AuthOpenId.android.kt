@@ -171,7 +171,7 @@ actual class AuthOpenId {
         return AuthorizationServiceConfiguration(
             Uri.parse(OpenIdConfig.authEndPoint),
             Uri.parse(OpenIdConfig.tokenEndPoint),
-            Uri.parse(OpenIdConfig.registerEndPoint),
+            if (OpenIdConfig.registerEndPoint == null) null else Uri.parse(OpenIdConfig.registerEndPoint),
             Uri.parse(OpenIdConfig.endSessionEndPoint),
 
             )
