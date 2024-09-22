@@ -17,6 +17,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,7 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.openid.AuthOpenId
 import io.github.openid.authOpenIdConfig
+import io.github.sample.api.KtorServices
 import io.github.sample.theme.AppTheme
+import kotlinx.coroutines.launch
 
 
 @Composable
@@ -54,6 +57,8 @@ internal fun App() = AppTheme {
 
 
     }
+    val ktorServices = KtorServices()
+    val scope = rememberCoroutineScope()
 
     Surface(
         modifier = Modifier.fillMaxSize()
@@ -170,6 +175,16 @@ internal fun App() = AppTheme {
                     }) {
                     Text("Logout")
                 }
+                Spacer(modifier = Modifier.height(30.dp))
+                Button(onClick = {
+                    scope.launch {
+                        val result = ktorServices.testApi()
+                        println("data api is $result")
+                    }
+                }) {
+                    Text("Test Api")
+                }
+
             }
         }
     }

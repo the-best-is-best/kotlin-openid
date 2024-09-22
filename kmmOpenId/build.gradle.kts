@@ -161,6 +161,8 @@ kotlin {
 
             implementation(libs.kmm.crypto)
 
+            implementation(libs.ktor.client.core)
+
 
 
         }
