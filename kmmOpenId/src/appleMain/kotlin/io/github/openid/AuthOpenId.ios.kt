@@ -228,7 +228,7 @@ actual class AuthOpenId {
         if (authState != null) {
             val lastTokenResponse = authState!!.lastTokenResponse
             if (lastTokenResponse != null) {
-                println("data laoded token is ${lastTokenResponse.accessToken}")
+                println("data loaded token is ${lastTokenResponse.accessToken}")
                 callback(
                     Result.success(
                         AuthResult(
@@ -238,9 +238,10 @@ actual class AuthOpenId {
                         )
                     )
                 )
+                return // Early return to prevent further execution
             }
         }
-        callback(Result.failure(Exception("No data available")))
+        callback(Result.failure(Exception("No data available"))) // Only call this if no success callback has been executed
     }
 
 

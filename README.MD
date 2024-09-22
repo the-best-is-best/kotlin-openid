@@ -1,34 +1,194 @@
-# Compose Multiplatform Application
+<h1 align="center">KAppAuth</h1><br>
 
-## Before running!
- - check your system with [KDoctor](https://github.com/Kotlin/kdoctor)
- - install JDK 17 or higher on your machine
- - add `local.properties` file to the project root and set a path to Android SDK there
+<div align="center">
+<a href="https://opensource.org/licenses/Apache-2.0"><img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg"/></a>
+<a href="https://android-arsenal.com/api?level=21" rel="nofollow">
+    <img alt="API" src="https://img.shields.io/badge/API-21%2B-brightgreen.svg?style=flat" style="max-width: 100%;">
+</a>
+  <img src="https://img.shields.io/badge/Platform-Android-brightgreen.svg?logo=android" alt="Badge Android" />
+  <img src="https://img.shields.io/badge/Platform-iOS%20%2F%20macOS-lightgrey.svg?logo=apple" alt="Badge iOS" />
 
-### Android
-To run the application on android device/emulator:  
- - open project in Android Studio and run imported android run configuration
+<a href="https://github.com/the-best-is-best/"><img alt="Profile" src="https://img.shields.io/badge/github-%23181717.svg?&style=for-the-badge&logo=github&logoColor=white" height="20"/></a>
+</div>
 
-To build the application bundle:
- - run `./gradlew :composeApp:assembleDebug`
- - find `.apk` file in `composeApp/build/outputs/apk/debug/composeApp-debug.apk`
-Run android simulator UI tests: `./gradlew :composeApp:pixel5Check`
+### This package provides an abstraction around the Android and iOS AppAuth SDKs so it can be used to communicate with OAuth 2.0 and OpenID Connect providers
 
-### Desktop
-Run the desktop application: `./gradlew :composeApp:run`
-Run desktop UI tests: `./gradlew :composeApp:jvmTest`
+<hr>
 
-### iOS
-To run the application on iPhone device/simulator:
- - Open `iosApp/iosApp.xcproject` in Xcode and run standard configuration
- - Or use [Kotlin Multiplatform Mobile plugin](https://plugins.jetbrains.com/plugin/14936-kotlin-multiplatform-mobile) for Android Studio
-Run iOS simulator UI tests: `./gradlew :composeApp:iosSimulatorArm64Test`
+[![Maven Central](https://img.shields.io/maven-central/v/io.github.the-best-is-best/\kapp-auth)](https://central.sonatype.com/artifact/io.github.the-best-is-best/kapp-auth)
 
-### JS Browser (Experimental)
-Run the browser application: `./gradlew :composeApp:jsBrowserDevelopmentRun --continue`
-Run browser UI tests: `./gradlew :composeApp:jsBrowserTest`
+KApp Auth is available on `mavenCentral()`.
 
-### Wasm Browser (Alpha)
-Run the browser application: `./gradlew :composeApp:wasmJsBrowserDevelopmentRun --continue`
-Run browser UI tests: `./gradlew :composeApp:wasmJsBrowserTest`
+```kotlin
+implementation("io.github.the-best-is-best:kapp-auth:1.0.0")
+```
 
+## Need add this in pod file if not exist run ` pod init `
+
+```swift
+pod 'KServices' , '0.1.9'
+pod 'AppAuth' , '1.7.5'
+```
+
+## How to use it
+
+### First in androidMain
+
+<br>
+
+```kotlin
+AndroidKMMCrypto.init(this, "key0") // add alias key name
+```
+
+### Note: this package login and saved data so auth or refresh token will return true or false or exception
+
+### Auth
+
+```kotlin
+    val auth = AuthOpenId()
+  try {
+
+    println("Attempting to login")
+    auth.auth { result ->
+        result.onSuccess { isAuthenticated ->
+            if (isAuthenticated) {
+                println("Authentication successful!")
+            }
+        }.onFailure { error ->
+            println("Authentication error: ${error.message}")
+        }
+    }
+} catch (e: Exception) {
+    println("Login failed: ${e.message}")
+}
+```
+
+### Refresh token
+
+```kotlin
+
+ try {
+    println("Attempting to refresh token")
+    auth.refreshToken { result ->
+        result.onSuccess { isAuthenticated ->
+            if (isAuthenticated) {
+                println("Authentication successful!")
+                
+
+
+            } else {
+                println("Authentication failed!")
+            }
+        }.onFailure { error ->
+            println("Authentication error: ${error.message}")
+        }
+    }
+
+} catch (e: Exception) {
+    println("Refresh token failed: ${e.message}")
+}
+```
+
+### Get data
+
+```kotlin
+   auth.getLastAuth(callback = {
+    it.onSuccess {
+        println("last auth token ${it?.accessToken}")
+        if (it != null) {
+            accessToken = it.accessToken
+            refreshToken = it.refreshToken
+            idToken = it.idToken
+        }
+    }
+})
+```
+
+### logout
+
+```kotlin
+   auth.logout { result ->
+        result.onSuccess {
+        
+        }
+
+    }
+
+```
+
+### Finally we add interceptor for get token and refresh token auto in 401 or 403 and re call api ` But there is no test yet. `
+
+```kotlin
+package io.github.sample.api
+
+import io.github.openid.AuthOpenId
+import io.github.openid.ktor_feature.AppAutInterceptor
+import io.ktor.client.HttpClient
+import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.plugins.defaultRequest
+import io.ktor.client.plugins.logging.DEFAULT
+import io.ktor.client.plugins.logging.LogLevel
+import io.ktor.client.plugins.logging.Logger
+import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.request.HttpRequestBuilder
+import io.ktor.client.request.header
+import io.ktor.http.path
+import io.ktor.http.takeFrom
+import io.ktor.serialization.kotlinx.json.json
+import kotlinx.serialization.json.Json
+
+internal abstract class KtorApi {
+
+    val client = HttpClient {
+        expectSuccess = true
+        defaultRequest {
+            header("Content-Type", "application/json")
+        }
+        install(Logging) {
+            logger = Logger.DEFAULT
+            level = LogLevel.ALL
+        }
+
+        install(ContentNegotiation) {
+            json(
+                Json {
+                    ignoreUnknownKeys = true
+                    useAlternativeNames = false
+                }
+            )
+        }
+
+    }
+
+
+    fun HttpRequestBuilder.pathUrl(path: String) {
+        url {
+            takeFrom("https://demo.duendesoftware.com")
+                .path("api", path)
+        }
+    }
+
+    private val tokenInterceptor = AppAutInterceptor(AuthOpenId(), client)
+
+    suspend fun interceptRequest(request: HttpRequestBuilder) {
+        tokenInterceptor.intercept(request)
+    }
+}
+
+```
+
+### And
+
+```kotlin
+package io.github.sample.api
+
+import io.ktor.client.request.post
+import io.ktor.client.statement.bodyAsText
+
+internal class KtorServices : KtorApi() {
+    suspend fun testApi(): String = client.post {
+        pathUrl("/test")
+        interceptRequest(this)
+    }.bodyAsText()
+}
+```
