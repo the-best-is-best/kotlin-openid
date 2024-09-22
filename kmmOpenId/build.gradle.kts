@@ -145,10 +145,6 @@ kotlin {
             extraOpts += listOf("-compiler-option", "-fmodules")
 
         }
-//            pod("KServices") {
-//                version = "0.1.7" // Ensure this is the correct version
-//                extraOpts += listOf("-compiler-option", "-fmodules")
-//            }
 
 
     }
@@ -179,7 +175,7 @@ kotlin {
             implementation(compose.uiTooling)
             implementation(libs.androidx.activityCompose)
             implementation(libs.appauth)
-            implementation("com.google.code.gson:gson:2.11.0")
+            implementation(libs.gson)
 
         }
 

@@ -27,9 +27,10 @@ actual class AuthOpenId {
     companion object {
         private lateinit var service: String
         private lateinit var group: String
+        private var authState: OIDAuthState? = null
+
     }
 
-    private var authState: OIDAuthState? = null
     private val crypto = KMMCrypto()
 
     private var currentSession: OIDExternalUserAgentSessionProtocol? = null
@@ -67,7 +68,7 @@ actual class AuthOpenId {
                 externalUserAgent = externalUserAgent,
                 callback = { authState, error ->
                     if (authState != null) {
-                        this@AuthOpenId.authState = authState
+                        AuthOpenId.authState = authState
                         val accessToken = authState.lastTokenResponse?.accessToken ?: ""
                         val refreshToken = authState.lastTokenResponse?.refreshToken ?: ""
                         val idToken =
@@ -89,7 +90,7 @@ actual class AuthOpenId {
     actual fun refreshToken(callback: (Result<Boolean>) -> Unit) {
         CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
 
-            val authState = this@AuthOpenId.authState
+            val authState = AuthOpenId.authState
 
             if (authState == null) {
                 callback(Result.failure(Exception("No auth state available")))
@@ -223,9 +224,11 @@ actual class AuthOpenId {
 
 
     actual fun getLastAuth(callback: (Result<AuthResult?>) -> Unit) {
+        println("get last auth")
         if (authState != null) {
             val lastTokenResponse = authState!!.lastTokenResponse
             if (lastTokenResponse != null) {
+                println("data laoded token is ${lastTokenResponse.accessToken}")
                 callback(
                     Result.success(
                         AuthResult(
@@ -237,7 +240,7 @@ actual class AuthOpenId {
                 )
             }
         }
-        return callback(Result.failure(Exception("No data available")))
+        callback(Result.failure(Exception("No data available")))
     }
 
 

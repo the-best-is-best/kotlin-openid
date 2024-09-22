@@ -79,6 +79,7 @@ kotlin {
         androidMain.dependencies {
             implementation(compose.uiTooling)
             implementation(libs.androidx.activityCompose)
+
         }
 
 //        jvmMain.dependencies {
