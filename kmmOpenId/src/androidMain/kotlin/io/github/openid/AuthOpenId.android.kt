@@ -41,7 +41,9 @@ actual class AuthOpenId {
             OpenIdConfig.clientId,
             ResponseTypeValues.CODE,
             Uri.parse(OpenIdConfig.redirectUrl)
-        ).setScopes(OpenIdConfig.scope)
+        )
+            .setScopes(OpenIdConfig.scope)
+
             .build()
 
         val authIntent = authService.getAuthorizationRequestIntent(authRequest)
@@ -169,7 +171,7 @@ actual class AuthOpenId {
         return AuthorizationServiceConfiguration(
             Uri.parse(OpenIdConfig.authEndPoint),
             Uri.parse(OpenIdConfig.tokenEndPoint),
-            null,
+            Uri.parse(OpenIdConfig.registerEndPoint),
             Uri.parse(OpenIdConfig.endSessionEndPoint),
 
             )

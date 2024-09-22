@@ -7,6 +7,7 @@ fun authOpenIdConfig(
     tokenEndPoint: String,
     authEndPoint: String,
     endSessionEndPoint: String,
+    registerEndPoint: String? = null,
     clientId: String,
     redirectUrl: String,
     scope: String,
@@ -23,6 +24,7 @@ fun authOpenIdConfig(
     OpenIdConfig.tokenEndPoint = "$issuerUrl/$tokenEndPoint"
     OpenIdConfig.endSessionEndPoint = "$issuerUrl/$endSessionEndPoint"
     OpenIdConfig.postLogoutRedirectURL = postLogoutRedirectURL
+    OpenIdConfig.registerEndPoint = registerEndPoint
 
 
 }

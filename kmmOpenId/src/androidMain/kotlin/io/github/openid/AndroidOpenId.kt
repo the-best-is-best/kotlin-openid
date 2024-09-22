@@ -10,7 +10,6 @@ import io.github.kmmcrypto.KMMCrypto
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.InternalCoroutinesApi
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import net.openid.appauth.AuthorizationException
@@ -33,7 +32,6 @@ object AndroidOpenId {
     internal val gson = Gson()
 
     // Initialize the static members with an activity
-    @OptIn(InternalCoroutinesApi::class)
     @JvmStatic
     fun init(activity: ComponentActivity) {
 
@@ -95,7 +93,7 @@ object AndroidOpenId {
         println("Authorization error: ${error.message}")
     }
 
-    fun handleTokenResponse(tokenResponse: TokenResponse?): AuthResult? {
+    private fun handleTokenResponse(tokenResponse: TokenResponse?): AuthResult? {
         val accessToken = tokenResponse?.accessToken
         val refreshToken = tokenResponse?.refreshToken
         val idToken = tokenResponse?.idToken

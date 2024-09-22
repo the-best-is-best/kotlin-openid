@@ -178,7 +178,7 @@ actual class AuthOpenId {
         authorizationEndpoint = NSURL(string = OpenIdConfig.authEndPoint),
         tokenEndpoint = NSURL(string = OpenIdConfig.tokenEndPoint),
         null,
-        null,
+        if (OpenIdConfig.registerEndPoint == null) null else NSURL(string = OpenIdConfig.registerEndPoint!!),
         NSURL(string = OpenIdConfig.endSessionEndPoint),
 
 
