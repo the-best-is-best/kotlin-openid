@@ -90,23 +90,6 @@ internal fun App() = AppTheme {
                                 result.onSuccess { isAuthenticated ->
                                     if (isAuthenticated) {
                                         println("Authentication successful!")
-                                        auth.getLastAuth(callback = {
-                                            it.onSuccess {
-                                                if (it != null) {
-                                                    println("Login success ${it.accessToken}")
-                                                    println("refresh token is ${it.refreshToken}")
-                                                    refreshToken = it.refreshToken
-                                                    idToken = it.idToken
-                                                    accessToken = it.accessToken
-                                                } else {
-                                                    println("Login failed: result is null")
-                                                }
-                                            }
-                                        })
-
-
-                                    } else {
-                                        println("Authentication failed!")
                                     }
                                 }.onFailure { error ->
                                     println("Authentication error: ${error.message}")

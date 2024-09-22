@@ -6,6 +6,7 @@ import cocoapods.AppAuth.OIDAuthorizationRequest
 import cocoapods.AppAuth.OIDAuthorizationService
 import cocoapods.AppAuth.OIDEndSessionRequest
 import cocoapods.AppAuth.OIDExternalUserAgentIOS
+import cocoapods.AppAuth.OIDExternalUserAgentSessionProtocol
 import cocoapods.AppAuth.OIDResponseTypeCode
 import cocoapods.AppAuth.OIDServiceConfiguration
 import io.github.kmmcrypto.KMMCrypto
@@ -26,123 +27,134 @@ actual class AuthOpenId {
     companion object {
         private lateinit var service: String
         private lateinit var group: String
-
-        private var authState: OIDAuthState? = null
-
-        private val crypto = KMMCrypto()
-
     }
 
+    private var authState: OIDAuthState? = null
+    private val crypto = KMMCrypto()
 
-    private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
+    private var currentSession: OIDExternalUserAgentSessionProtocol? = null
+
+
 
     actual fun init(key: String, group: String) {
         service = key
         AuthOpenId.group = group
-        scope.launch {
+        CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
             authState = loadState()
         }
     }
 
 
+
     actual fun auth(callback: (Result<Boolean>) -> Unit) {
+        CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
+
         val authRequest = createAuthRequest()
-        val viewController = UIApplication.sharedApplication.keyWindow?.rootViewController
+            val viewController = UIApplication.sharedApplication.keyWindow?.rootViewController
 
-        if (viewController == null) {
-            callback(Result.failure(Exception("No root view controller available")))
-            return
-        }
-
-        val externalUserAgent = OIDExternalUserAgentIOS(
-            presentingViewController = viewController
-        )
-
-        println("Starting authentication request...")
-        OIDAuthState.authStateByPresentingAuthorizationRequest(
-            authorizationRequest = authRequest,
-            externalUserAgent = externalUserAgent,
-            callback = { authState, error ->
-                if (authState != null) {
-                    AuthOpenId.authState = authState
-                    val accessToken = authState.lastTokenResponse?.accessToken ?: ""
-                    val refreshToken = authState.lastTokenResponse?.refreshToken ?: ""
-                    val idToken = authState.lastTokenResponse?.idToken ?: ""  // Extract ID token
-                    println("Authentication successful: Access Token: $accessToken, Refresh Token: $refreshToken, ID Token: $idToken")
-                    saveState(authState)
-                    callback(Result.success(true))
-                } else {
-                    println("Authorization error: ${error?.localizedDescription}")
-                    callback(Result.failure(Exception("Authorization failed: ${error?.localizedDescription}")))
-                }
+            if (viewController == null) {
+                callback(Result.failure(Exception("No root view controller available")))
+                return@launch
             }
-        )
+
+            val externalUserAgent = OIDExternalUserAgentIOS(
+                presentingViewController = viewController
+            )
+
+            println("Starting authentication request...")
+            currentSession = OIDAuthState.authStateByPresentingAuthorizationRequest(
+                authorizationRequest = authRequest,
+                externalUserAgent = externalUserAgent,
+                callback = { authState, error ->
+                    if (authState != null) {
+                        this@AuthOpenId.authState = authState
+                        val accessToken = authState.lastTokenResponse?.accessToken ?: ""
+                        val refreshToken = authState.lastTokenResponse?.refreshToken ?: ""
+                        val idToken =
+                            authState.lastTokenResponse?.idToken ?: ""  // Extract ID token
+                        println("Authentication successful: Access Token: $accessToken, Refresh Token: $refreshToken, ID Token: $idToken")
+                        saveState(authState)
+                        callback(Result.success(true))
+                    } else {
+                        println("Authorization error: ${error?.localizedDescription}")
+                        callback(Result.failure(Exception("Authorization failed: ${error?.localizedDescription}")))
+                    }
+                }
+
+            )
+        }
     }
 
 
     actual fun refreshToken(callback: (Result<Boolean>) -> Unit) {
-        val authState = AuthOpenId.authState
+        CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
 
-        if (authState == null) {
-            callback(Result.failure(Exception("No auth state available")))
-            return
-        }
+            val authState = this@AuthOpenId.authState
 
-        authState.performActionWithFreshTokens { _, _, error ->
+            if (authState == null) {
+                callback(Result.failure(Exception("No auth state available")))
+                return@launch
+            }
 
-            if (error == null) {
-                saveState(authState)
-                callback(Result.success(true))
-            } else {
-                println("Token refresh error: ${error.localizedDescription}")
-                callback(Result.failure(Exception("Token refresh failed: ${error.localizedDescription}")))
+            authState.performActionWithFreshTokens { _, _, error ->
+
+                if (error == null) {
+                    saveState(authState)
+                    callback(Result.success(true))
+                } else {
+                    println("Token refresh error: ${error.localizedDescription}")
+                    callback(Result.failure(Exception("Token refresh failed: ${error.localizedDescription}")))
+                }
             }
         }
     }
 
-
+    @OptIn(ExperimentalForeignApi::class)
     actual fun logout(callback: (Result<Boolean?>) -> Unit) {
+        CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
+
         val authConfig = getAuthConfig()
 
-        val idToken = authState?.lastTokenResponse?.idToken
-        if (idToken == null) {
-            callback(Result.failure(IllegalStateException("ID Token is null")))
-            return
-        }
-
-        val endSessionRequest = OIDEndSessionRequest(
-            configuration = authConfig,
-            idTokenHint = idToken,
-            postLogoutRedirectURL = NSURL(string = OpenIdConfig.postLogoutRedirectURL),
-            additionalParameters = null
-        )
-
-        // Present the logout request in a web view (or default browser)
-        val viewController = UIApplication.sharedApplication.keyWindow?.rootViewController
-        if (viewController == null) {
-            callback(Result.failure(Exception("No root view controller available")))
-            return
-        }
-
-        val externalUserAgent = OIDExternalUserAgentIOS(
-            presentingViewController = viewController
-        )
-
-        OIDAuthorizationService.presentEndSessionRequest(
-            endSessionRequest,
-            externalUserAgent,
-            callback = { endSessionResponse, error ->
-                if (endSessionResponse != null) {
-                    authState = null
-                    // Handle successful logout
-                    crypto.saveDataType(service, group, NSData())
-                    callback(Result.success(null)) // Return null or any specific result if needed
-                } else {
-                    println("Logout error: ${error?.localizedDescription}")
-                    callback(Result.failure(Exception("Logout failed: ${error?.localizedDescription}")))
-                }
+            val idToken = authState?.lastTokenResponse?.idToken
+            if (idToken == null) {
+                callback(Result.failure(IllegalStateException("ID Token is null")))
+                return@launch
             }
-        )
+
+            val endSessionRequest = OIDEndSessionRequest(
+                configuration = authConfig,
+                idTokenHint = idToken,
+                postLogoutRedirectURL = NSURL(string = OpenIdConfig.postLogoutRedirectURL),
+                additionalParameters = null
+            )
+
+            // Present the logout request in a web view (or default browser)
+            val viewController = UIApplication.sharedApplication.keyWindow?.rootViewController
+            if (viewController == null) {
+                callback(Result.failure(Exception("No root view controller available")))
+                return@launch
+            }
+
+            val externalUserAgent = OIDExternalUserAgentIOS(
+                presentingViewController = viewController
+            )
+
+            currentSession = OIDAuthorizationService.presentEndSessionRequest(
+                endSessionRequest,
+                externalUserAgent,
+                callback = { endSessionResponse, error ->
+                    if (endSessionResponse != null) {
+                        authState = null
+                        // Handle successful logout
+                        crypto.saveDataType(service, group, NSData())
+                        callback(Result.success(null)) // Return null or any specific result if needed
+                    } else {
+                        println("Logout error: ${error?.localizedDescription}")
+                        callback(Result.failure(Exception("Logout failed: ${error?.localizedDescription}")))
+                    }
+                }
+            )
+        }
     }
 
     private fun createAuthRequest(): OIDAuthorizationRequest {

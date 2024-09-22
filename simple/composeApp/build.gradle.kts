@@ -40,6 +40,8 @@ kotlin {
 //        browser()
 //        binaries.executable()
 //    }
+
+
     listOf(
         iosArm64(),
         iosX64(),
@@ -49,6 +51,7 @@ kotlin {
             framework {
                 baseName = "ComposeApp"
                 isStatic = true
+
             }
         }
     }
