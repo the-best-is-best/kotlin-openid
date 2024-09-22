@@ -2,6 +2,8 @@ package io.github.openid.ktor_feature
 
 import io.github.openid.AuthOpenId
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.ServerResponseException
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.request
 import io.ktor.client.statement.HttpResponse
@@ -14,16 +16,31 @@ import kotlin.coroutines.resumeWithException
 class AppAutInterceptor(private val authOpenId: AuthOpenId, private val httpClient: HttpClient) {
 
     suspend fun intercept(request: HttpRequestBuilder): HttpResponse {
-        // Add the token to the request
-        val token = getToken()
-        request.headers[HttpHeaders.Authorization] = "Bearer $token"
+        try {
+            // Obtain the token and add it to the request headers
+            val token = getToken()
+            request.headers[HttpHeaders.Authorization] = "Bearer $token"
 
-        // Execute the request and get the response
-        val response = httpClient.request(request)
+            // Execute the request
+            val response = httpClient.request(request)
 
-        // Handle the response
-        return handleResponse(response, request)
+            // Handle the response normally
+            return handleResponse(response, request)
+
+        } catch (e: ClientRequestException) {
+            // This handles HTTP 4xx errors such as 401 or 403
+            return handleResponse(e.response, request)
+        } catch (e: ServerResponseException) {
+            // Handle 5xx HTTP errors (e.g., Internal Server Error)
+            println("ServerResponseException occurred: ${e.response.status} - ${e.message}")
+            throw e
+        } catch (e: Exception) {
+            // Handle any other exceptions
+            println("An unexpected error occurred: ${e.message}")
+            throw e
+        }
     }
+
 
     private suspend fun getToken(): String {
         return suspendCancellableCoroutine { continuation ->
@@ -48,7 +65,8 @@ class AppAutInterceptor(private val authOpenId: AuthOpenId, private val httpClie
     ): HttpResponse {
         return when (response.status) {
             HttpStatusCode.Forbidden, HttpStatusCode.Unauthorized -> {
-                if (refreshToken()) {
+                val refreshed = refreshToken()
+                if (refreshed) {
                     val newToken = getToken()
                     originalRequest.headers[HttpHeaders.Authorization] = "Bearer $newToken"
                     httpClient.request(originalRequest) // Re-execute the original request
