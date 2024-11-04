@@ -21,6 +21,8 @@ KApp Auth is available on `mavenCentral()`.
 
 ```kotlin
 implementation("io.github.the-best-is-best:kapp-auth:1.0.2")
+implementation("io.github.the-best-is-best:kmm-crypto:1.0.2")
+
 ```
 
 ## Need add this in pod file if not exist run ` pod init `
@@ -38,6 +40,7 @@ pod 'AppAuth' , '1.7.5'
 
 ```kotlin
 AndroidKMMCrypto.init(this, "key0") // add alias key name
+AndroidOpenId.init(this)
 ```
 
 ### Note: this package login and saved data so auth or refresh token will return true or false or exception
