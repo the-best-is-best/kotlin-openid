@@ -1,15 +1,13 @@
 import com.vanniktech.maven.publish.SonatypeHost
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem
-import org.jetbrains.compose.ExperimentalComposeLibrary
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
 plugins {
     alias(libs.plugins.multiplatform)
-    alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.compose)
+//    alias(libs.plugins.compose.compiler)
+//    alias(libs.plugins.compose)
     alias(libs.plugins.android.library)
     alias(libs.plugins.native.cocoapods)
     id("maven-publish")
@@ -41,7 +39,7 @@ tasks.withType<PublishToMavenRepository> {
 
 
 mavenPublishing {
-    coordinates("io.github.the-best-is-best", "kapp-auth", "1.0.2")
+    coordinates("io.github.the-best-is-best", "kapp-auth", "1.0.3")
 
     publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
     signAllPublications()
@@ -156,11 +154,11 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
+//            implementation(compose.runtime)
+//            implementation(compose.foundation)
+//            implementation(compose.material3)
+//            implementation(compose.components.resources)
+//            implementation(compose.components.uiToolingPreview)
 
             implementation(libs.kmm.crypto)
 
@@ -172,13 +170,13 @@ kotlin {
 
         commonTest.dependencies {
             implementation(kotlin("test"))
-            @OptIn(ExperimentalComposeLibrary::class)
-            implementation(compose.uiTest)
+//            @OptIn(ExperimentalComposeLibrary::class)
+//            implementation(compose.uiTest)
         }
 
         androidMain.dependencies {
-            implementation(compose.uiTooling)
-            implementation(libs.androidx.activityCompose)
+//            implementation(compose.uiTooling)
+//            implementation(libs.androidx.activityCompose)
             implementation(libs.appauth)
             implementation(libs.gson)
 
@@ -199,8 +197,8 @@ kotlin {
 }
 
 android {
-    namespace = "io.github.lib"
-    compileSdk = 34
+    namespace = "io.github.kmmopenid"
+    compileSdk = 35
 
     defaultConfig {
         minSdk = 21
@@ -209,20 +207,20 @@ android {
             sourceCompatibility = JavaVersion.VERSION_1_8
             targetCompatibility = JavaVersion.VERSION_1_8
         }
-        buildFeatures {
-            //enables a Compose tooling support in the AndroidStudio
-            compose = true
-        }
+//        buildFeatures {
+//            //enables a Compose tooling support in the AndroidStudio
+//            compose = true
+//        }
     }
 }
-compose.desktop {
-    application {
-        mainClass = "MainKt"
-
-        nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "io.github.lib.desktopApp"
-            packageVersion = "1.0.0"
-        }
-    }
-}
+//compose.desktop {
+//    application {
+//        mainClass = "MainKt"
+//
+//        nativeDistributions {
+//            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+//            packageName = "io.github.lib.desktopApp"
+//            packageVersion = "1.0.0"
+//        }
+//    }
+//}
