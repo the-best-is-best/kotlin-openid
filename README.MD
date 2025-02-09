@@ -20,16 +20,16 @@
 KApp Auth is available on `mavenCentral()`.
 
 ```kotlin
-implementation("io.github.the-best-is-best:kapp-auth:1.0.2")
-implementation("io.github.the-best-is-best:kmm-crypto:1.0.2")
+implementation("io.github.the-best-is-best:kapp-auth:1.0.3")
+implementation("io.github.the-best-is-best:kmm-crypto:1.1.1")
 
 ```
 
 ## Need add this in pod file if not exist run ` pod init `
 
 ```swift
-pod 'KServices' , '0.1.9'
-pod 'AppAuth' , '1.7.5'
+pod 'KServices' , '0.2.2'
+pod 'AppAuth' , '1.7.6'
 ```
 
 ## How to use it

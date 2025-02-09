@@ -144,7 +144,7 @@ kotlin {
         ios.deploymentTarget = "12.0"  // Update this to the required version
 
         pod("AppAuth") {
-            version = "1.7.5"
+            version = "1.7.6"
             extraOpts += listOf("-compiler-option", "-fmodules")
 
         }
