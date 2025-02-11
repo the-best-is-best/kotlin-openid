@@ -1,12 +1,12 @@
 package io.github.sample
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -67,34 +67,38 @@ internal fun App() = AppTheme {
         color = Color.White,
     ) {
         MaterialTheme(colorScheme = lightColorScheme()) {
-            Column(
+            LazyColumn(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Spacer(Modifier.height(20.dp))
-                Button(onClick = {
-                    auth.getLastAuth(callback = {
-                        it.onSuccess {
-                            println("last auth token ${it?.accessToken}")
-                            if (it != null) {
-                                accessToken = it.accessToken
-                                refreshToken = it.refreshToken
-                                idToken = it.idToken
+                item {
+                    Spacer(Modifier.height(20.dp))
+                    Button(onClick = {
+                        auth.getLastAuth(callback = {
+                            it.onSuccess {
+                                println("last auth token ${it?.accessToken}")
+                                if (it != null) {
+                                    accessToken = it.accessToken
+                                    refreshToken = it.refreshToken
+                                    idToken = it.idToken
+                                }
                             }
-                        }
-                    })
+                        })
 
-                }) {
-                    Text("Get data")
-                }
-                Button(onClick = {
+                    }) {
+                        Text("Get data")
+                    }
+                    Button(onClick = {
                         try {
 
                             println("Attempting to login")
                             auth.auth { result ->
                                 result.onSuccess { isAuthenticated ->
-                                    if (isAuthenticated) {
+                                    if (isAuthenticated == true) {
                                         println("Authentication successful!")
+                                    } else {
+                                        println("Authentication failed!")
+
                                     }
                                 }.onFailure { error ->
                                     println("Authentication error: ${error.message}")
@@ -106,12 +110,12 @@ internal fun App() = AppTheme {
                             println("Login failed: ${e.message}")
                         }
 
-                }) {
-                    Text("Login")
-                }
-                Button(
-                    enabled = refreshToken.isNotEmpty(),
-                    onClick = {
+                    }) {
+                        Text("Login")
+                    }
+                    Button(
+                        enabled = refreshToken.isNotEmpty(),
+                        onClick = {
                             try {
                                 println("Attempting to refresh token")
                                 auth.refreshToken { result ->
@@ -145,46 +149,47 @@ internal fun App() = AppTheme {
                                 println("Refresh token failed: ${e.message}")
                             }
 
+                        }
+                    ) {
+                        Text("Refresh Token")
                     }
-                ) {
-                    Text("Refresh Token")
-                }
 
-                Spacer(Modifier.height(10.dp))
-                Text("access token $accessToken", style = TextStyle(fontSize = 10.sp))
-                Spacer(Modifier.height(10.dp))
-                Text("refresh token $refreshToken", style = TextStyle(fontSize = 10.sp))
-                Spacer(Modifier.height(10.dp))
-                Text("id token $idToken", style = TextStyle(fontSize = 10.sp))
+                    Spacer(Modifier.height(10.dp))
+                    Text("access token $accessToken", style = TextStyle(fontSize = 10.sp))
+                    Spacer(Modifier.height(10.dp))
+                    Text("refresh token $refreshToken", style = TextStyle(fontSize = 10.sp))
+                    Spacer(Modifier.height(10.dp))
+                    Text("id token $idToken", style = TextStyle(fontSize = 10.sp))
 
 
-                Spacer(Modifier.height(50.dp))
-                Button(
-                    enabled = idToken.isNotEmpty(),
-                    onClick = {
-                        auth.logout { result ->
-                            result.onSuccess {
-                                accessToken = ""
-                                idToken = ""
-                                refreshToken = ""
+                    Spacer(Modifier.height(50.dp))
+                    Button(
+                        enabled = idToken.isNotEmpty(),
+                        onClick = {
+                            auth.logout { result ->
+                                result.onSuccess {
+                                    accessToken = ""
+                                    idToken = ""
+                                    refreshToken = ""
+                                }
+
                             }
 
-                        }
 
-
-                    }) {
-                    Text("Logout")
-                }
-                Spacer(modifier = Modifier.height(30.dp))
-                Button(onClick = {
-                    scope.launch {
-                        val result = ktorServices.testApi()
-                        println("data api is $result")
+                        }) {
+                        Text("Logout")
                     }
-                }) {
-                    Text("Test Api")
-                }
+                    Spacer(modifier = Modifier.height(30.dp))
+                    Button(onClick = {
+                        scope.launch {
+                            val result = ktorServices.testApi()
+                            println("data api is $result")
+                        }
+                    }) {
+                        Text("Test Api")
+                    }
 
+                }
             }
         }
     }

@@ -33,7 +33,7 @@ actual class AuthOpenId {
         AuthOpenId.group = group
     }
 
-    actual fun auth(callback: (Result<Boolean>) -> Unit) {
+    actual fun auth(callback: (Result<Boolean?>) -> Unit) {
         val serviceConfig = getAuthServicesConfig()
 
         val authRequest = AuthorizationRequest.Builder(
@@ -43,20 +43,24 @@ actual class AuthOpenId {
             Uri.parse(OpenIdConfig.redirectUrl)
         )
             .setScopes(OpenIdConfig.scope)
-
             .build()
 
         val authIntent = authService.getAuthorizationRequestIntent(authRequest)
 
         CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
-            suspendCancellableCoroutine { cont ->
-                // Launch the intent
-                authLauncher.launch(authIntent)
-                // Store the continuation for the result
+            val result = suspendCancellableCoroutine { cont ->
                 continuation = cont
-            }.let { result ->
-                callback(Result.success(result ?: false))
+                authLauncher.launch(authIntent)
+
+                // Handle cancellation
+                cont.invokeOnCancellation {
+                    if (!cont.isCompleted) {
+                        cont.resume(false)
+                    }
+                }
             }
+
+            callback(Result.success(result))
         }
     }
 

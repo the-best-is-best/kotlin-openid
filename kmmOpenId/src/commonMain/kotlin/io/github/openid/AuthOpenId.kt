@@ -35,7 +35,7 @@ fun authOpenIdConfig(
      fun init(key: String, group: String)
 
 
-     fun auth(callback: (Result<Boolean>) -> Unit)
+     fun auth(callback: (Result<Boolean?>) -> Unit)
 
      fun refreshToken(callback: (Result<Boolean>) -> Unit)
 

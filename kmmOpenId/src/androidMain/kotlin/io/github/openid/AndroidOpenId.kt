@@ -37,14 +37,14 @@ object AndroidOpenId {
 
         authService = AuthorizationService(activity)
         authLauncher = activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (::continuation.isInitialized) {
+            if (::continuation.isInitialized && !continuation.isCompleted) {
                 CoroutineScope(Dispatchers.Main).launch {
-                    handleAuthResult(result) // Handle result logic
-                    continuation.resume(true) // Ensure this is only called once
-
+                    val isSuccess = handleAuthResult(result) // Check if login was successful
+                    continuation.resume(isSuccess != null) // Resume with correct result
                 }
             }
         }
+
 
     }
 

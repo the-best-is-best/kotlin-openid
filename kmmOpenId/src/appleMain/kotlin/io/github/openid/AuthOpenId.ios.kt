@@ -46,8 +46,7 @@ actual class AuthOpenId {
     }
 
 
-
-    actual fun auth(callback: (Result<Boolean>) -> Unit) {
+    actual fun auth(callback: (Result<Boolean?>) -> Unit) {
         CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
 
         val authRequest = createAuthRequest()
