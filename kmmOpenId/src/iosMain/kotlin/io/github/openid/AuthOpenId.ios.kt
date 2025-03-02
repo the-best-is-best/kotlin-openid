@@ -1,14 +1,8 @@
 // iosMain/src/AuthOpenId.kt
 package io.github.openid
 
-import cocoapods.AppAuth.OIDAuthState
-import cocoapods.AppAuth.OIDAuthorizationRequest
-import cocoapods.AppAuth.OIDAuthorizationService
-import cocoapods.AppAuth.OIDEndSessionRequest
-import cocoapods.AppAuth.OIDExternalUserAgentIOS
-import cocoapods.AppAuth.OIDExternalUserAgentSessionProtocol
-import cocoapods.AppAuth.OIDResponseTypeCode
-import cocoapods.AppAuth.OIDServiceConfiguration
+
+import cocoapods.AppAuth.*
 import io.github.kmmcrypto.KMMCrypto
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CoroutineScope
@@ -49,7 +43,7 @@ actual class AuthOpenId {
     actual fun auth(callback: (Result<Boolean?>) -> Unit) {
         CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
 
-        val authRequest = createAuthRequest()
+            val authRequest = createAuthRequest()
             val viewController = UIApplication.sharedApplication.keyWindow?.rootViewController
 
             if (viewController == null) {
@@ -113,7 +107,7 @@ actual class AuthOpenId {
     actual fun logout(callback: (Result<Boolean?>) -> Unit) {
         CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
 
-        val authConfig = getAuthConfig()
+            val authConfig = getAuthConfig()
 
             val idToken = authState?.lastTokenResponse?.idToken
             if (idToken == null) {
