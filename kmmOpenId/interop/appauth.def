@@ -1,0 +1,8 @@
+language = Objective-C
+headers = /Users/michelleraouf/Library/Developer/Xcode/DerivedData/iosApp-eibrzdrxsqigzogxnhwhbtvwgikn/SourcePackages/checkouts/AppAuth-iOS/Sources/AppAuth.h
+compilerOpts = \
+  -I/Users/michelleraouf/Library/Developer/Xcode/DerivedData/iosApp-eibrzdrxsqigzogxnhwhbtvwgikn/SourcePackages/checkouts/AppAuth-iOS/Sources \
+  -I/Users/michelleraouf/Library/Developer/Xcode/DerivedData/iosApp-eibrzdrxsqigzogxnhwhbtvwgikn/SourcePackages/checkouts/AppAuth-iOS/Sources/AppAuthCore \
+  -I/Users/michelleraouf/Library/Developer/Xcode/DerivedData/iosApp-eibrzdrxsqigzogxnhwhbtvwgikn/SourcePackages/checkouts/AppAuth-iOS/Sources/AppAuth/iOS
+
+linkerOpts = -framework AppAuth

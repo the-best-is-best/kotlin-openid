@@ -2,7 +2,14 @@
 package io.github.openid
 
 
-import cocoapods.AppAuth.*
+import io.github.appauth.OIDAuthState
+import io.github.appauth.OIDAuthorizationRequest
+import io.github.appauth.OIDAuthorizationService
+import io.github.appauth.OIDEndSessionRequest
+import io.github.appauth.OIDExternalUserAgentIOS
+import io.github.appauth.OIDExternalUserAgentSessionProtocol
+import io.github.appauth.OIDResponseTypeCode
+import io.github.appauth.OIDServiceConfiguration
 import io.github.kmmcrypto.KMMCrypto
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CoroutineScope
