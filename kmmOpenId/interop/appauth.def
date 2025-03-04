@@ -1,8 +1,8 @@
 language = Objective-C
-headers = /Users/michelleraouf/Library/Developer/Xcode/DerivedData/iosApp-eibrzdrxsqigzogxnhwhbtvwgikn/SourcePackages/checkouts/AppAuth-iOS/Sources/AppAuth.h
+headers = /Users/michelleraouf/Desktop/kmm/kotlin-openid/kmmOpenId/interop/src/AppAuth.h
 compilerOpts = \
-  -I/Users/michelleraouf/Library/Developer/Xcode/DerivedData/iosApp-eibrzdrxsqigzogxnhwhbtvwgikn/SourcePackages/checkouts/AppAuth-iOS/Sources \
-  -I/Users/michelleraouf/Library/Developer/Xcode/DerivedData/iosApp-eibrzdrxsqigzogxnhwhbtvwgikn/SourcePackages/checkouts/AppAuth-iOS/Sources/AppAuthCore \
-  -I/Users/michelleraouf/Library/Developer/Xcode/DerivedData/iosApp-eibrzdrxsqigzogxnhwhbtvwgikn/SourcePackages/checkouts/AppAuth-iOS/Sources/AppAuth/iOS
+  -I//Users/michelleraouf/Desktop/kmm/kotlin-openid/kmmOpenId/interop/src \
+  -I/Users/michelleraouf/Desktop/kmm/kotlin-openid/kmmOpenId/interop/src/AppAuthCore \
+  -I/U/Users/michelleraouf/Desktop/kmm/kotlin-openid/kmmOpenId/interop/src/AppAuth/iOS
 
 linkerOpts = -framework AppAuth

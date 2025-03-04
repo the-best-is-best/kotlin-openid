@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		410F414B2D75CECC00C77188 /* AppAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 410F414A2D75CECC00C77188 /* AppAuth */; };
+		410F414D2D75CECC00C77188 /* AppAuthCore in Frameworks */ = {isa = PBXBuildFile; productRef = 410F414C2D75CECC00C77188 /* AppAuthCore */; };
 		419C54FC2D75B0B400E2E5DA /* AppAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 419C54FB2D75B0B400E2E5DA /* AppAuth */; };
 		419C54FE2D75B0B400E2E5DA /* AppAuthCore in Frameworks */ = {isa = PBXBuildFile; productRef = 419C54FD2D75B0B400E2E5DA /* AppAuthCore */; };
 		A93A953B29CC810C00F8E227 /* iosApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A93A953A29CC810C00F8E227 /* iosApp.swift */; };
@@ -27,8 +29,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				410F414B2D75CECC00C77188 /* AppAuth in Frameworks */,
 				419C54FC2D75B0B400E2E5DA /* AppAuth in Frameworks */,
 				419C54FE2D75B0B400E2E5DA /* AppAuthCore in Frameworks */,
+				410F414D2D75CECC00C77188 /* AppAuthCore in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -123,6 +127,7 @@
 			);
 			mainGroup = A93A952E29CC810C00F8E227;
 			packageReferences = (
+				410F41492D75CECC00C77188 /* XCRemoteSwiftPackageReference "AppAuth-iOS" */,
 			);
 			productRefGroup = A93A953829CC810C00F8E227 /* Products */;
 			projectDirPath = "";
@@ -367,6 +372,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		410F41492D75CECC00C77188 /* XCRemoteSwiftPackageReference "AppAuth-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/openid/AppAuth-iOS.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.7.6;
+			};
+		};
 		419C54FA2D75B0B400E2E5DA /* XCRemoteSwiftPackageReference "AppAuth-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/openid/AppAuth-iOS.git";
@@ -378,6 +391,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		410F414A2D75CECC00C77188 /* AppAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 410F41492D75CECC00C77188 /* XCRemoteSwiftPackageReference "AppAuth-iOS" */;
+			productName = AppAuth;
+		};
+		410F414C2D75CECC00C77188 /* AppAuthCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 410F41492D75CECC00C77188 /* XCRemoteSwiftPackageReference "AppAuth-iOS" */;
+			productName = AppAuthCore;
+		};
 		419C54FB2D75B0B400E2E5DA /* AppAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 419C54FA2D75B0B400E2E5DA /* XCRemoteSwiftPackageReference "AppAuth-iOS" */;
