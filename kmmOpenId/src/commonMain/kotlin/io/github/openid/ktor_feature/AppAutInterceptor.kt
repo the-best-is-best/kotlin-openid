@@ -11,7 +11,6 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 class AppAutInterceptor(private val authOpenId: AuthOpenId, private val httpClient: HttpClient) {
 
@@ -50,10 +49,10 @@ class AppAutInterceptor(private val authOpenId: AuthOpenId, private val httpClie
                     if (accessToken != null) {
                         continuation.resume(accessToken)
                     } else {
-                        continuation.resumeWithException(IllegalStateException("Access token is null"))
+                        continuation.resume("")
                     }
-                }.onFailure { exception ->
-                    continuation.resumeWithException(exception)
+                }.onFailure { _ ->
+                    continuation.resume("")
                 }
             }
         }

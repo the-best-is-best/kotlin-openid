@@ -168,9 +168,11 @@ internal fun App() = AppTheme {
                         onClick = {
                             auth.logout { result ->
                                 result.onSuccess {
-                                    accessToken = ""
-                                    idToken = ""
-                                    refreshToken = ""
+                                    if (it == true) {
+                                        accessToken = ""
+                                        idToken = ""
+                                        refreshToken = ""
+                                    }
                                 }
 
                             }

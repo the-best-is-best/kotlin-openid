@@ -26,6 +26,9 @@ object AndroidOpenId {
     internal lateinit var continuation: CancellableContinuation<Boolean?>
     internal lateinit var authService: AuthorizationService
 
+    internal lateinit var logoutLauncher: ActivityResultLauncher<Intent>
+
+
 
     internal val kmmCrypto = KMMCrypto()
 
@@ -45,7 +48,20 @@ object AndroidOpenId {
             }
         }
 
+        logoutLauncher =
+            activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (::continuation.isInitialized && !continuation.isCompleted) {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        val isSuccess = handleLogoutResult(result) // ← أضف دالة لمعالجة النتيجة
+                        continuation.resume(isSuccess)
+                    }
+                }
+            }
 
+    }
+
+    private fun handleLogoutResult(result: androidx.activity.result.ActivityResult): Boolean {
+        return result.resultCode == ComponentActivity.RESULT_OK
     }
 
     private suspend fun handleAuthResult(result: androidx.activity.result.ActivityResult): AuthResult? {

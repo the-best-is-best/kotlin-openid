@@ -1,0 +1,8 @@
+language = Objective-C
+headers = /Users/michelleraouf/Desktop/kmm/kotlin-openid/kmmOpenId/interop/src/AppAuth.h
+compilerOpts = \
+  -I//Users/michelleraouf/Desktop/kmm/kotlin-openid/kmmOpenId/interop/src \
+  -I/Users/michelleraouf/Desktop/kmm/kotlin-openid/kmmOpenId/interop/src/AppAuthCore \
+  -I/U/Users/michelleraouf/Desktop/kmm/kotlin-openid/kmmOpenId/interop/src/AppAuth/iOS
+
+linkerOpts = -framework AppAuth

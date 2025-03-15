@@ -1,11 +1,13 @@
 package io.github.openid
 
-import android.net.Uri
 import android.util.Log
+import androidx.browser.customtabs.CustomTabsIntent
+import androidx.core.net.toUri
 import io.github.openid.AndroidOpenId.authLauncher
 import io.github.openid.AndroidOpenId.authService
 import io.github.openid.AndroidOpenId.continuation
 import io.github.openid.AndroidOpenId.kmmCrypto
+import io.github.openid.AndroidOpenId.logoutLauncher
 import io.github.openid.AndroidOpenId.saveData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -40,17 +42,21 @@ actual class AuthOpenId {
             serviceConfig,
             OpenIdConfig.clientId,
             ResponseTypeValues.CODE,
-            Uri.parse(OpenIdConfig.redirectUrl)
+            OpenIdConfig.redirectUrl.toUri()
         )
             .setScopes(OpenIdConfig.scope)
             .build()
 
-        val authIntent = authService.getAuthorizationRequestIntent(authRequest)
-
+        val authRequestIntent = authService.getAuthorizationRequestIntent(
+            authRequest,
+            CustomTabsIntent.Builder()
+                .setShowTitle(true)
+                .build()
+        )
         CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
             val result = suspendCancellableCoroutine { cont ->
                 continuation = cont
-                authLauncher.launch(authIntent)
+                authLauncher.launch(authRequestIntent)
 
                 // Handle cancellation
                 cont.invokeOnCancellation {
@@ -66,8 +72,8 @@ actual class AuthOpenId {
 
 
     actual fun refreshToken(callback: (Result<Boolean>) -> Unit) {
-        getLastAuth { result ->
-            result.onSuccess { authData ->
+        getLastAuth { data ->
+            data.onSuccess { authData ->
                 val refreshToken = authData?.refreshToken ?: ""
                 if (refreshToken.isEmpty()) {
                     callback(Result.failure(Exception("Refresh token is null or empty")))
@@ -145,24 +151,36 @@ actual class AuthOpenId {
                 val serviceConfig = getAuthServicesConfig()
                 val endSessionRequest = EndSessionRequest.Builder(serviceConfig)
                     .setIdTokenHint(idToken)
-                    .setPostLogoutRedirectUri(Uri.parse(OpenIdConfig.postLogoutRedirectURL))
+                    .setPostLogoutRedirectUri(OpenIdConfig.postLogoutRedirectURL.toUri())
                     .build()
 
-                val endSessionIntent = authService.getEndSessionRequestIntent(endSessionRequest)
+                val endSessionIntent = authService.getEndSessionRequestIntent(
+                    endSessionRequest,
+                    CustomTabsIntent.Builder()
+                        .setShowTitle(true)
+                        .build()
+                )
 
                 // Launch the intent and handle the result in a callback
                 CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
-                    val isSuccess = suspendCancellableCoroutine<Boolean?> { cont ->
+                    val isSuccess = suspendCancellableCoroutine { cont ->
                         // Set the continuation to the launch result
-                        authLauncher.launch(endSessionIntent)
+                        logoutLauncher.launch(endSessionIntent)
                         continuation = cont
-                    }
 
-                    if (isSuccess == true) {
-                        callback(Result.success(true))
-                    } else {
-                        callback(Result.failure(Exception("Logout failed")))
+                        cont.invokeOnCancellation {
+                            if (!continuation.isCompleted) {
+                                continuation.resume(false)
+                            }
+                        }
+
                     }
+                    if (isSuccess == true) {
+                        kmmCrypto.deleteData(key, group)
+                    }
+                    callback(Result.success(isSuccess))
+
+
                 }
             }.onFailure { exception ->
                 callback(Result.failure(Exception("Failed to get last auth: ${exception.message}")))
@@ -173,10 +191,10 @@ actual class AuthOpenId {
 
     private fun getAuthServicesConfig(): AuthorizationServiceConfiguration {
         return AuthorizationServiceConfiguration(
-            Uri.parse(OpenIdConfig.authEndPoint),
-            Uri.parse(OpenIdConfig.tokenEndPoint),
-            if (OpenIdConfig.registerEndPoint == null) null else Uri.parse(OpenIdConfig.registerEndPoint),
-            Uri.parse(OpenIdConfig.endSessionEndPoint),
+            OpenIdConfig.authEndPoint.toUri(),
+            OpenIdConfig.tokenEndPoint.toUri(),
+            if (OpenIdConfig.registerEndPoint == null) null else OpenIdConfig.registerEndPoint?.toUri(),
+            OpenIdConfig.endSessionEndPoint.toUri(),
 
             )
     }

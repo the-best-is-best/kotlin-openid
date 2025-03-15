@@ -20,15 +20,32 @@
 KApp Auth is available on `mavenCentral()`.
 
 ```kotlin
-implementation("io.github.the-best-is-best:kapp-auth:1.0.6")
-implementation("io.github.the-best-is-best:kmm-crypto:1.1.3")
+implementation("io.github.the-best-is-best:kapp-auth:1.0.9")
+
+// Not need add it with v 1.0.9
+implementation("io.github.the-best-is-best:kmm-crypto:1.1.4")
 
 ```
 
-## Need add this in pod file if not exist run ` pod init `
+## 📢 Kapp-Auth 1.0.8 – Now Supports SPM! 🚀
 
-```swift
-pod 'KServices' , '0.2.2'
+### ✅ **Install via SPM (No Need for CocoaPods)**
+
+Starting from **Kapp-Auth 1.0.8**, you no longer need a `Podfile`.  
+You can install **AppAuth** directly using **Swift Package Manager (SPM)** from:  
+🔗 [AppAuth-iOS on GitHub](https://github.com/openid/AppAuth-iOS)
+
+### ⚠️ **For Versions Before 1.0.8 (e.g., 1.0.7 and earlier)**
+
+If you are using an **older version** of `Kapp-Auth` (before 1.0.8), you still need to add **AppAuth
+** to your `Podfile`.
+
+If you don’t have a `Podfile`, create one using:
+
+```sh
+pod init
+// not need it in kmm-crypto:1.1.4
+// pod 'KServices' , '0.2.2'
 pod 'AppAuth' , '1.7.6'
 ```
 

@@ -1,7 +1,5 @@
 import com.vanniktech.maven.publish.SonatypeHost
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem
-import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
-import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
 plugins {
@@ -9,7 +7,6 @@ plugins {
 //    alias(libs.plugins.compose.compiler)
 //    alias(libs.plugins.compose)
     alias(libs.plugins.android.library)
-    alias(libs.plugins.native.cocoapods)
     id("maven-publish")
     id("signing")
     alias(libs.plugins.maven.publish)
@@ -39,7 +36,7 @@ tasks.withType<PublishToMavenRepository> {
 
 
 mavenPublishing {
-    coordinates("io.github.the-best-is-best", "kapp-auth", "1.0.6")
+    coordinates("io.github.the-best-is-best", "kapp-auth", "1.0.9")
 
     publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
     signAllPublications()
@@ -80,24 +77,10 @@ signing {
 
 
 kotlin {
+    jvmToolchain(17)
     androidTarget {
-        compilations.all {
-            compileTaskProvider {
-                compilerOptions {
-                    jvmTarget.set(JvmTarget.JVM_1_8)
-                    freeCompilerArgs.add("-Xjdk-release=${JavaVersion.VERSION_1_8}")
-                }
-            }
-        }
         //https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-test.html
-        @OptIn(ExperimentalKotlinGradlePluginApi::class)
-        instrumentedTestVariant {
-            sourceSetTree.set(KotlinSourceSetTree.test)
-            dependencies {
-                debugImplementation(libs.androidx.testManifest)
-                implementation(libs.androidx.junit4)
-            }
-        }
+        instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test)
     }
 
     //    jvm()
@@ -122,32 +105,12 @@ kotlin {
             baseName = "KMMOpenId"
             isStatic = true
         }
-    }
-
-
-
-    cocoapods {
-        version = "1.0"
-        summary = "Some description for a Kotlin/Native module"
-        homepage = "Link to a Kotlin/Native module homepage"
-
-        // Optional properties
-        // Configure the Pod name here instead of changing the Gradle project name
-        name = "KMMOpenId"
-
-        framework {
-            baseName = "KMMOpenId"
+        it.compilations["main"].cinterops {
+            val appauth by creating {
+                defFile(project.file("interop/appauth.def"))
+                packageName("io.github.appauth")
+            }
         }
-        noPodspec()
-        ios.deploymentTarget = "12.0"  // Update this to the required version
-
-        pod("AppAuth") {
-            version = "1.7.6"
-            extraOpts += listOf("-compiler-option", "-fmodules")
-
-        }
-
-
     }
 
 
@@ -160,7 +123,10 @@ kotlin {
 //            implementation(compose.components.resources)
 //            implementation(compose.components.uiToolingPreview)
 
-            implementation(libs.kmm.crypto)
+            implementation(libs.kotlinx.coroutines.core)
+
+
+            api(libs.kmm.crypto)
 
             implementation(libs.ktor.client.core)
 

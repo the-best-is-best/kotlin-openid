@@ -1,21 +1,21 @@
 // iosMain/src/AuthOpenId.kt
 package io.github.openid
 
-import cocoapods.AppAuth.OIDAuthState
-import cocoapods.AppAuth.OIDAuthorizationRequest
-import cocoapods.AppAuth.OIDAuthorizationService
-import cocoapods.AppAuth.OIDEndSessionRequest
-import cocoapods.AppAuth.OIDExternalUserAgentIOS
-import cocoapods.AppAuth.OIDExternalUserAgentSessionProtocol
-import cocoapods.AppAuth.OIDResponseTypeCode
-import cocoapods.AppAuth.OIDServiceConfiguration
+
+import io.github.appauth.OIDAuthState
+import io.github.appauth.OIDAuthorizationRequest
+import io.github.appauth.OIDAuthorizationService
+import io.github.appauth.OIDEndSessionRequest
+import io.github.appauth.OIDExternalUserAgentIOS
+import io.github.appauth.OIDExternalUserAgentSessionProtocol
+import io.github.appauth.OIDResponseTypeCode
+import io.github.appauth.OIDServiceConfiguration
 import io.github.kmmcrypto.KMMCrypto
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import platform.Foundation.NSData
 import platform.Foundation.NSKeyedArchiver
 import platform.Foundation.NSKeyedUnarchiver
 import platform.Foundation.NSURL
@@ -49,7 +49,7 @@ actual class AuthOpenId {
     actual fun auth(callback: (Result<Boolean?>) -> Unit) {
         CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
 
-        val authRequest = createAuthRequest()
+            val authRequest = createAuthRequest()
             val viewController = UIApplication.sharedApplication.keyWindow?.rootViewController
 
             if (viewController == null) {
@@ -113,7 +113,7 @@ actual class AuthOpenId {
     actual fun logout(callback: (Result<Boolean?>) -> Unit) {
         CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
 
-        val authConfig = getAuthConfig()
+            val authConfig = getAuthConfig()
 
             val idToken = authState?.lastTokenResponse?.idToken
             if (idToken == null) {
@@ -146,8 +146,8 @@ actual class AuthOpenId {
                     if (endSessionResponse != null) {
                         authState = null
                         // Handle successful logout
-                        crypto.saveDataType(service, group, NSData())
-                        callback(Result.success(null)) // Return null or any specific result if needed
+                        crypto.deleteData(service, group)
+                        callback(Result.success(true)) // Return null or any specific result if needed
                     } else {
                         println("Logout error: ${error?.localizedDescription}")
                         callback(Result.failure(Exception("Logout failed: ${error?.localizedDescription}")))

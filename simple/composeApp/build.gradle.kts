@@ -65,7 +65,7 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
 
             implementation(project(":kmmOpenId"))
-            implementation(libs.kmm.crypto)
+//            implementation(libs.kmm.crypto)
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.logging)
             implementation(libs.ktor.client.content.negotiation)
