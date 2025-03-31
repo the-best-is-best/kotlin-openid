@@ -50,8 +50,13 @@ actual class AuthOpenId {
         val authRequestIntent = authService.getAuthorizationRequestIntent(
             authRequest,
             CustomTabsIntent.Builder()
-                .setShowTitle(true)
+                .setShowTitle(false)
+                .setUrlBarHidingEnabled(true)
                 .build()
+                .apply {
+                    intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NO_HISTORY) // يجعل المتصفح يُغلق عند العودة للتطبيق
+                    intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
         )
         CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
             val result = suspendCancellableCoroutine { cont ->
@@ -157,8 +162,13 @@ actual class AuthOpenId {
                 val endSessionIntent = authService.getEndSessionRequestIntent(
                     endSessionRequest,
                     CustomTabsIntent.Builder()
-                        .setShowTitle(true)
+                        .setShowTitle(false)
+                        .setUrlBarHidingEnabled(true)
                         .build()
+                        .apply {
+                            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NO_HISTORY) // يجعل المتصفح يُغلق عند العودة للتطبيق
+                            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                        }
                 )
 
                 // Launch the intent and handle the result in a callback

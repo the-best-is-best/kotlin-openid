@@ -20,7 +20,7 @@
 KApp Auth is available on `mavenCentral()`.
 
 ```kotlin
-implementation("io.github.the-best-is-best:kapp-auth:1.0.9")
+implementation("io.github.the-best-is-best:kapp-auth:1.0.10")
 
 // Not need add it with v 1.0.9
 implementation("io.github.the-best-is-best:kmm-crypto:1.1.4")
