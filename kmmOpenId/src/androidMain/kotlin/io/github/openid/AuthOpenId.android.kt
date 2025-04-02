@@ -3,8 +3,8 @@ package io.github.openid
 import android.util.Log
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
+import io.github.openid.AndroidOpenId.activity
 import io.github.openid.AndroidOpenId.authLauncher
-import io.github.openid.AndroidOpenId.authService
 import io.github.openid.AndroidOpenId.continuation
 import io.github.openid.AndroidOpenId.kmmCrypto
 import io.github.openid.AndroidOpenId.logoutLauncher
@@ -15,6 +15,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import net.openid.appauth.AuthorizationRequest
+import net.openid.appauth.AuthorizationService
 import net.openid.appauth.AuthorizationServiceConfiguration
 import net.openid.appauth.EndSessionRequest
 import net.openid.appauth.GrantTypeValues
@@ -25,6 +26,8 @@ import kotlin.coroutines.resumeWithException
 
 
 actual class AuthOpenId {
+    val authService = AuthorizationService(activity.get()!!)
+
     companion object {
         lateinit var key: String
         lateinit var group: String
@@ -36,6 +39,7 @@ actual class AuthOpenId {
     }
 
     actual fun auth(callback: (Result<Boolean?>) -> Unit) {
+
         val serviceConfig = getAuthServicesConfig()
 
         val authRequest = AuthorizationRequest.Builder(
@@ -159,7 +163,7 @@ actual class AuthOpenId {
                     .setPostLogoutRedirectUri(OpenIdConfig.postLogoutRedirectURL.toUri())
                     .build()
 
-                val endSessionIntent = authService.getEndSessionRequestIntent(
+                val endSessionIntent =  authService .getEndSessionRequestIntent(
                     endSessionRequest,
                     CustomTabsIntent.Builder()
                         .setShowTitle(false)

@@ -1,6 +1,6 @@
 package io.github.openid
 
-import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Intent
 import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResultLauncher
@@ -16,15 +16,16 @@ import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
 import net.openid.appauth.AuthorizationService
 import net.openid.appauth.TokenResponse
+import java.lang.ref.WeakReference
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-@SuppressLint("StaticFieldLeak")
 object AndroidOpenId {
 
     internal lateinit var authLauncher: ActivityResultLauncher<Intent>
     internal lateinit var continuation: CancellableContinuation<Boolean?>
-    internal lateinit var authService: AuthorizationService
+//    internal var authServiceRef: WeakReference<AuthorizationService> = WeakReference(null)
+     internal var activity: WeakReference<Activity> = WeakReference(null)
 
     internal lateinit var logoutLauncher: ActivityResultLauncher<Intent>
 
@@ -38,7 +39,9 @@ object AndroidOpenId {
     @JvmStatic
     fun init(activity: ComponentActivity) {
 
-        authService = AuthorizationService(activity)
+        this.activity = WeakReference(activity)
+//        val authService = AuthorizationService(activity)
+//        authServiceRef = WeakReference(authService)
         authLauncher = activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (::continuation.isInitialized && !continuation.isCompleted) {
                 CoroutineScope(Dispatchers.Main).launch {
@@ -82,6 +85,7 @@ object AndroidOpenId {
 
     private suspend fun exchangeAuthorizationCode(response: AuthorizationResponse): AuthResult? {
         val tokenRequest = response.createTokenExchangeRequest()
+        val authService = AuthorizationService(activity.get()!!)
 
         return suspendCancellableCoroutine { cont ->
             authService.performTokenRequest(tokenRequest) { tokenResponse, exception ->
