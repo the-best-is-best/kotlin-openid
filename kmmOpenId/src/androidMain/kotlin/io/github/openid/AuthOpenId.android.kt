@@ -26,7 +26,7 @@ import kotlin.coroutines.resumeWithException
 
 
 actual class AuthOpenId {
-    val authService = AuthorizationService(activity.get()!!)
+    private val authService = AuthorizationService(activity.get()!!)
 
     companion object {
         lateinit var key: String
