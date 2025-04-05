@@ -26,6 +26,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import io.github.openid.AuthOpenId
+import io.github.openid.RememberAuthOpenId
+import io.github.openid.RememberLogoutOpenId
 import io.github.openid.authOpenIdConfig
 import io.github.sample.api.KtorServices
 import io.github.sample.theme.AppTheme
@@ -38,7 +40,46 @@ internal fun App() = AppTheme {
     var refreshToken by remember { mutableStateOf("") }
     var accessToken by remember { mutableStateOf("") }
     var idToken by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
 
+    val authRes = RememberAuthOpenId {
+        println("Auth result $it")
+        it?.let { isAuthenticated ->
+            if (isAuthenticated) {
+                scope.launch {
+
+                    auth.getLastAuth { res ->
+                        res.onSuccess { it ->
+                            accessToken = it!!.accessToken
+                            refreshToken = it.refreshToken
+                            idToken = it.idToken
+                        }
+                    }
+                    println("Authentication successful!")
+                }
+            } else {
+                println("Authentication failed!")
+
+            }
+        }
+    }
+    val authLogout = RememberLogoutOpenId {
+        println("Logout result $it")
+        it?.let { isLogout ->
+            if (isLogout) {
+                accessToken = ""
+                refreshToken = ""
+                idToken = ""
+
+                println("Logout successful!")
+            } else {
+                println("Logout failed!")
+
+            }
+
+
+        }
+    }
     LaunchedEffect(Unit) {
         val issuerUrl = "https://demo.duendesoftware.com"
         authOpenIdConfig(
@@ -58,7 +99,6 @@ internal fun App() = AppTheme {
 
     }
     val ktorServices = KtorServices()
-    val scope = rememberCoroutineScope()
 
     Surface(
         modifier = Modifier.fillMaxSize()
@@ -74,6 +114,7 @@ internal fun App() = AppTheme {
                 item {
                     Spacer(Modifier.height(20.dp))
                     Button(onClick = {
+                        scope.launch {
                         auth.getLastAuth(callback = {
                             it.onSuccess {
                                 println("last auth token ${it?.accessToken}")
@@ -84,30 +125,14 @@ internal fun App() = AppTheme {
                                 }
                             }
                         })
+                        }
 
                     }) {
                         Text("Get data")
                     }
                     Button(onClick = {
-                        try {
-
-                            println("Attempting to login")
-                            auth.auth { result ->
-                                result.onSuccess { isAuthenticated ->
-                                    if (isAuthenticated == true) {
-                                        println("Authentication successful!")
-                                    } else {
-                                        println("Authentication failed!")
-
-                                    }
-                                }.onFailure { error ->
-                                    println("Authentication error: ${error.message}")
-                                }
-                            }
-
-
-                        } catch (e: Exception) {
-                            println("Login failed: ${e.message}")
+                        scope.launch {
+                            authRes.launch()
                         }
 
                     }) {
@@ -118,30 +143,36 @@ internal fun App() = AppTheme {
                         onClick = {
                             try {
                                 println("Attempting to refresh token")
-                                auth.refreshToken { result ->
-                                    result.onSuccess { isAuthenticated ->
-                                        if (isAuthenticated) {
-                                            println("Authentication successful!")
-                                            auth.getLastAuth(callback = {
-                                                it.onSuccess {
-                                                    if (it != null) {
-                                                        println("Login success ${it.accessToken}")
-                                                        println("refresh token is ${it.refreshToken}")
-                                                        refreshToken = it.refreshToken
-                                                        idToken = it.idToken
-                                                        accessToken = it.accessToken
-                                                    } else {
-                                                        println("Login failed: result is null")
-                                                    }
+                                scope.launch {
+
+                                    auth.refreshToken { result ->
+                                        result.onSuccess { isAuthenticated ->
+                                            if (isAuthenticated) {
+                                                println("Authentication successful!")
+                                                scope.launch {
+
+                                                    auth.getLastAuth(callback = {
+                                                        it.onSuccess {
+                                                            if (it != null) {
+                                                                println("Login success ${it.accessToken}")
+                                                                println("refresh token is ${it.refreshToken}")
+                                                                refreshToken = it.refreshToken
+                                                                idToken = it.idToken
+                                                                accessToken = it.accessToken
+                                                            } else {
+                                                                println("Login failed: result is null")
+                                                            }
+                                                        }
+                                                    })
                                                 }
-                                            })
 
+                                            } else {
+                                                println("Authentication failed!")
+                                            }
 
-                                        } else {
-                                            println("Authentication failed!")
+                                        }.onFailure { error ->
+                                            println("Authentication error: ${error.message}")
                                         }
-                                    }.onFailure { error ->
-                                        println("Authentication error: ${error.message}")
                                     }
                                 }
 
@@ -166,18 +197,9 @@ internal fun App() = AppTheme {
                     Button(
                         enabled = idToken.isNotEmpty(),
                         onClick = {
-                            auth.logout { result ->
-                                result.onSuccess {
-                                    if (it == true) {
-                                        accessToken = ""
-                                        idToken = ""
-                                        refreshToken = ""
-                                    }
-                                }
-
+                            scope.launch {
+                                authLogout.launch()
                             }
-
-
                         }) {
                         Text("Logout")
                     }

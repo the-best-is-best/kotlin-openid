@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		410F414B2D75CECC00C77188 /* AppAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 410F414A2D75CECC00C77188 /* AppAuth */; };
 		410F414D2D75CECC00C77188 /* AppAuthCore in Frameworks */ = {isa = PBXBuildFile; productRef = 410F414C2D75CECC00C77188 /* AppAuthCore */; };
+		41927CA02DA1E01900A8660D /* kmmcrypto in Frameworks */ = {isa = PBXBuildFile; productRef = 41927C9F2DA1E01900A8660D /* kmmcrypto */; };
 		419C54FC2D75B0B400E2E5DA /* AppAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 419C54FB2D75B0B400E2E5DA /* AppAuth */; };
 		419C54FE2D75B0B400E2E5DA /* AppAuthCore in Frameworks */ = {isa = PBXBuildFile; productRef = 419C54FD2D75B0B400E2E5DA /* AppAuthCore */; };
 		A93A953B29CC810C00F8E227 /* iosApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A93A953A29CC810C00F8E227 /* iosApp.swift */; };
@@ -31,6 +32,7 @@
 			files = (
 				410F414B2D75CECC00C77188 /* AppAuth in Frameworks */,
 				419C54FC2D75B0B400E2E5DA /* AppAuth in Frameworks */,
+				41927CA02DA1E01900A8660D /* kmmcrypto in Frameworks */,
 				419C54FE2D75B0B400E2E5DA /* AppAuthCore in Frameworks */,
 				410F414D2D75CECC00C77188 /* AppAuthCore in Frameworks */,
 			);
@@ -128,6 +130,7 @@
 			mainGroup = A93A952E29CC810C00F8E227;
 			packageReferences = (
 				410F41492D75CECC00C77188 /* XCRemoteSwiftPackageReference "AppAuth-iOS" */,
+				41927C9E2DA1E01900A8660D /* XCRemoteSwiftPackageReference "IOSCrypto" */,
 			);
 			productRefGroup = A93A953829CC810C00F8E227 /* Products */;
 			projectDirPath = "";
@@ -380,6 +383,14 @@
 				minimumVersion = 1.7.6;
 			};
 		};
+		41927C9E2DA1E01900A8660D /* XCRemoteSwiftPackageReference "IOSCrypto" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/the-best-is-best/IOSCrypto";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		419C54FA2D75B0B400E2E5DA /* XCRemoteSwiftPackageReference "AppAuth-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/openid/AppAuth-iOS.git";
@@ -400,6 +411,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 410F41492D75CECC00C77188 /* XCRemoteSwiftPackageReference "AppAuth-iOS" */;
 			productName = AppAuthCore;
+		};
+		41927C9F2DA1E01900A8660D /* kmmcrypto */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 41927C9E2DA1E01900A8660D /* XCRemoteSwiftPackageReference "IOSCrypto" */;
+			productName = kmmcrypto;
 		};
 		419C54FB2D75B0B400E2E5DA /* AppAuth */ = {
 			isa = XCSwiftPackageProductDependency;
