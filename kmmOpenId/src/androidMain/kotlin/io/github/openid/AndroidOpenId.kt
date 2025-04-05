@@ -3,8 +3,10 @@ package io.github.openid
 import android.app.Activity
 import android.content.Intent
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.Composable
 import com.google.gson.Gson
 import io.github.kmmcrypto.KMMCrypto
 import kotlinx.coroutines.CancellableContinuation
@@ -24,8 +26,6 @@ object AndroidOpenId {
 
     internal lateinit var authLauncher: ActivityResultLauncher<Intent>
     internal lateinit var continuation: CancellableContinuation<Boolean?>
-//    internal var authServiceRef: WeakReference<AuthorizationService> = WeakReference(null)
-     internal var activity: WeakReference<Activity> = WeakReference(null)
 
     internal lateinit var logoutLauncher: ActivityResultLauncher<Intent>
 
@@ -34,37 +34,37 @@ object AndroidOpenId {
     internal val kmmCrypto = KMMCrypto()
 
     internal val gson = Gson()
+    @Composable
+    fun Init() {
+        // Get the context and make sure it's an Activity
 
-    // Initialize the static members with an activity
-    @JvmStatic
-    fun init(activity: ComponentActivity) {
-
-        this.activity = WeakReference(activity)
-//        val authService = AuthorizationService(activity)
-//        authServiceRef = WeakReference(authService)
-        authLauncher = activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            if (::continuation.isInitialized && !continuation.isCompleted) {
-                CoroutineScope(Dispatchers.Main).launch {
-                    val isSuccess = handleAuthResult(result) // Check if login was successful
-                    continuation.resume(isSuccess != null) // Resume with correct result
-                }
-            }
-        }
-
-        logoutLauncher =
-            activity.registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        // Initialize authLauncher using rememberLauncherForActivityResult
+        authLauncher =
+            rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
                 if (::continuation.isInitialized && !continuation.isCompleted) {
                     CoroutineScope(Dispatchers.Main).launch {
-                        val isSuccess = handleLogoutResult(result) // ← أضف دالة لمعالجة النتيجة
-                        continuation.resume(isSuccess)
+                        val isSuccess = handleAuthResult(result) // Check if login was successful
+                        continuation.resume(isSuccess != null) // Resume with correct result
                     }
                 }
             }
 
+        // Initialize logoutLauncher using rememberLauncherForActivityResult
+        logoutLauncher =
+            rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+                if (::continuation.isInitialized && !continuation.isCompleted) {
+                    CoroutineScope(Dispatchers.Main).launch {
+                        val isSuccess = handleLogoutResult(result) // Handle logout result
+                        continuation.resume(isSuccess)
+                    }
+                }
+            }
     }
 
+
+
     private fun handleLogoutResult(result: androidx.activity.result.ActivityResult): Boolean {
-        return result.resultCode == ComponentActivity.RESULT_OK
+        return result.resultCode == Activity.RESULT_OK
     }
 
     private suspend fun handleAuthResult(result: androidx.activity.result.ActivityResult): AuthResult? {
@@ -85,7 +85,7 @@ object AndroidOpenId {
 
     private suspend fun exchangeAuthorizationCode(response: AuthorizationResponse): AuthResult? {
         val tokenRequest = response.createTokenExchangeRequest()
-        val authService = AuthorizationService(activity.get()!!)
+        val authService = AuthorizationService(applicationContext)
 
         return suspendCancellableCoroutine { cont ->
             authService.performTokenRequest(tokenRequest) { tokenResponse, exception ->

@@ -3,7 +3,6 @@ package io.github.openid
 import android.util.Log
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.core.net.toUri
-import io.github.openid.AndroidOpenId.activity
 import io.github.openid.AndroidOpenId.authLauncher
 import io.github.openid.AndroidOpenId.continuation
 import io.github.openid.AndroidOpenId.kmmCrypto
@@ -26,7 +25,7 @@ import kotlin.coroutines.resumeWithException
 
 
 actual class AuthOpenId {
-    private val authService = AuthorizationService(activity.get()!!)
+    private val authService = AuthorizationService(applicationContext)
 
     companion object {
         lateinit var key: String

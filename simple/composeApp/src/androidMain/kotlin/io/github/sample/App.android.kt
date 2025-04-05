@@ -14,9 +14,12 @@ class AppActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        AndroidOpenId.init(this)
         AndroidKMMCrypto.init(this, "key0")
-        setContent { App() }
+        setContent {
+            AndroidOpenId.Init()
+
+            App()
+        }
     }
 
 

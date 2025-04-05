@@ -4,8 +4,8 @@ import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
 plugins {
     alias(libs.plugins.multiplatform)
-//    alias(libs.plugins.compose.compiler)
-//    alias(libs.plugins.compose)
+    alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.compose)
     alias(libs.plugins.android.library)
     id("maven-publish")
     id("signing")
@@ -36,7 +36,7 @@ tasks.withType<PublishToMavenRepository> {
 
 
 mavenPublishing {
-    coordinates("io.github.the-best-is-best", "kapp-auth", "1.0.11")
+    coordinates("io.github.the-best-is-best", "kapp-auth", "1.0.12")
 
     publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
     signAllPublications()
@@ -117,7 +117,7 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-//            implementation(compose.runtime)
+            implementation(compose.runtime)
 //            implementation(compose.foundation)
 //            implementation(compose.material3)
 //            implementation(compose.components.resources)
@@ -145,7 +145,8 @@ kotlin {
 //            implementation(libs.androidx.activityCompose)
             implementation(libs.appauth)
             implementation(libs.gson)
-
+            implementation(libs.androidx.activityCompose)
+            implementation(libs.androidx.startup.runtime)
         }
 
         //        jvmMain.dependencies {
@@ -173,10 +174,10 @@ android {
             sourceCompatibility = JavaVersion.VERSION_1_8
             targetCompatibility = JavaVersion.VERSION_1_8
         }
-//        buildFeatures {
-//            //enables a Compose tooling support in the AndroidStudio
-//            compose = true
-//        }
+        buildFeatures {
+            //enables a Compose tooling support in the AndroidStudio
+            compose = true
+        }
     }
 }
 //compose.desktop {
