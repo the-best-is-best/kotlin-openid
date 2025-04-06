@@ -20,34 +20,17 @@
 KApp Auth is available on `mavenCentral()`.
 
 ```kotlin
-implementation("io.github.the-best-is-best:kapp-auth:1.0.10")
-
-// Not need add it with v 1.0.9
-implementation("io.github.the-best-is-best:kmm-crypto:1.1.4")
+implementation("io.github.the-best-is-best:kapp-auth:1.1.0-rc1")
 
 ```
 
-## 📢 Kapp-Auth 1.0.8 – Now Supports SPM! 🚀
+### ✅ **Install via SPM**
 
-### ✅ **Install via SPM (No Need for CocoaPods)**
-
-Starting from **Kapp-Auth 1.0.8**, you no longer need a `Podfile`.  
 You can install **AppAuth** directly using **Swift Package Manager (SPM)** from:  
 🔗 [AppAuth-iOS on GitHub](https://github.com/openid/AppAuth-iOS)
 
-### ⚠️ **For Versions Before 1.0.8 (e.g., 1.0.7 and earlier)**
-
-If you are using an **older version** of `Kapp-Auth` (before 1.0.8), you still need to add **AppAuth
-** to your `Podfile`.
-
-If you don’t have a `Podfile`, create one using:
-
-```sh
-pod init
-// not need it in kmm-crypto:1.1.4
-// pod 'KServices' , '0.2.2'
-pod 'AppAuth' , '1.7.6'
-```
+You need install **IOSCrypto** directly using **Swift Package Manager (SPM)** from:  
+🔗 [IOSCryptoManager-iOS on GitHub](https://github.com/the-best-is-best/IOSCrypto)
 
 ## How to use it
 
@@ -56,8 +39,7 @@ pod 'AppAuth' , '1.7.6'
 <br>
 
 ```kotlin
-AndroidKMMCrypto.init(this, "key0") // add alias key name
-AndroidOpenId.init(this)
+AndroidKMMCrypto.init("key0") // add alias key name
 ```
 
 ### Note: this package login and saved data so auth or refresh token will return true or false or exception
@@ -65,28 +47,40 @@ AndroidOpenId.init(this)
 ### Auth
 
 ```kotlin
-    val auth = AuthOpenId()
-  try {
-
-    println("Attempting to login")
-    auth.auth { result ->
-        result.onSuccess { isAuthenticated ->
+       val authRes = RememberAuthOpenId {
+        println("Auth result $it")
+        it?.let { isAuthenticated ->
             if (isAuthenticated) {
-                println("Authentication successful!")
+                scope.launch {
+
+                    auth.getLastAuth { res ->
+                        res.onSuccess { it ->
+                            accessToken = it!!.accessToken
+                            refreshToken = it.refreshToken
+                            idToken = it.idToken
+                        }
+                    }
+                    println("Authentication successful!")
+                }
+            } else {
+                println("Authentication failed!")
+
             }
-        }.onFailure { error ->
-            println("Authentication error: ${error.message}")
         }
     }
-} catch (e: Exception) {
-    println("Login failed: ${e.message}")
-}
+
+   ...
+   Button(onClick:(){
+     authRes.launch()
+   }){
+    Text("login")
+   }
 ```
 
 ### Refresh token
 
 ```kotlin
-
+val auth = AuthOpenId()
  try {
     println("Attempting to refresh token")
     auth.refreshToken { result ->
@@ -112,6 +106,7 @@ AndroidOpenId.init(this)
 ### Get data
 
 ```kotlin
+val auth = AuthOpenId()
    auth.getLastAuth(callback = {
     it.onSuccess {
         println("last auth token ${it?.accessToken}")
@@ -127,11 +122,27 @@ AndroidOpenId.init(this)
 ### logout
 
 ```kotlin
-   auth.logout { result ->
-        result.onSuccess {
-        
-        }
+   val authLogout = RememberLogoutOpenId {
+        println("Logout result $it")
+        it?.let { isLogout ->
+            if (isLogout) {
+                accessToken = ""
+                refreshToken = ""
+                idToken = ""
 
+                println("Logout successful!")
+            } else {
+                println("Logout failed!")
+
+            }
+
+
+        }
+    }
+    Button(onClick:(){
+        authLogout.launch()
+    }){
+        Text("Logout")
     }
 
 ```
