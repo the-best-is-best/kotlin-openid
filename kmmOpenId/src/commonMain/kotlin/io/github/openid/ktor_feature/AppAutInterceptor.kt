@@ -9,6 +9,10 @@ import io.ktor.client.request.request
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
@@ -41,22 +45,19 @@ class AppAutInterceptor(private val authOpenId: AuthOpenId, private val httpClie
     }
 
 
-    private suspend fun getToken(): String {
-        return suspendCancellableCoroutine { continuation ->
+    private suspend fun getToken(): String = suspendCancellableCoroutine { continuation ->
+        // إطلاق Coroutine فرعي جوه Dispatcher عادي
+        CoroutineScope(Dispatchers.IO).launch {
             authOpenId.getLastAuth { result ->
-                result.onSuccess { authResult ->
-                    val accessToken = authResult?.accessToken
-                    if (accessToken != null) {
-                        continuation.resume(accessToken)
-                    } else {
-                        continuation.resume("")
-                    }
-                }.onFailure { _ ->
+                result.onSuccess { auth ->
+                    continuation.resume(auth?.accessToken ?: "")
+                }.onFailure {
                     continuation.resume("")
                 }
             }
         }
     }
+
 
     private suspend fun handleResponse(
         response: HttpResponse,
@@ -78,17 +79,15 @@ class AppAutInterceptor(private val authOpenId: AuthOpenId, private val httpClie
         }
     }
 
-    private suspend fun refreshToken(): Boolean {
-        return runCatching {
-            suspendCancellableCoroutine { continuation ->
-                authOpenId.refreshToken { result ->
-                    result.onSuccess {
-                        continuation.resume(true)
-                    }.onFailure {
-                        continuation.resume(false)
-                    }
+    private suspend fun refreshToken(): Boolean = suspendCancellableCoroutine { continuation ->
+        CoroutineScope(Dispatchers.IO).launch {
+            authOpenId.refreshToken { result ->
+                result.onSuccess {
+                    continuation.resume(true)
+                }.onFailure {
+                    continuation.resume(false)
                 }
             }
-        }.isSuccess
+        }
     }
 }
