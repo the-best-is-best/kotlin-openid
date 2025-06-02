@@ -29,48 +29,6 @@ actual class AuthOpenId {
     }
 
 
-//    actual fun auth(callback: (Result<Boolean?>) -> Unit) {
-//
-//        val serviceConfig = getAuthServicesConfig()
-//
-//        val authRequest = AuthorizationRequest.Builder(
-//            serviceConfig,
-//            OpenIdConfig.clientId,
-//            ResponseTypeValues.CODE,
-//            OpenIdConfig.redirectUrl.toUri()
-//        )
-//            .setScopes(OpenIdConfig.scope)
-//            .build()
-//
-//        val authRequestIntent = authService.getAuthorizationRequestIntent(
-//            authRequest,
-//            CustomTabsIntent.Builder()
-//                .setShowTitle(false)
-//                .setUrlBarHidingEnabled(true)
-//                .build()
-//                .apply {
-//                    intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NO_HISTORY) // يجعل المتصفح يُغلق عند العودة للتطبيق
-//                    intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-//                }
-//        )
-//        CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
-//            val result = suspendCancellableCoroutine { cont ->
-//                continuation = cont
-//                authLauncher.launch(authRequestIntent)
-//
-//                // Handle cancellation
-//                cont.invokeOnCancellation {
-//                    if (!cont.isCompleted) {
-//                        cont.resume(false)
-//                    }
-//                }
-//            }
-//
-//            callback(Result.success(result))
-//        }
-//    }
-
-
     actual suspend fun refreshToken(callback: (Result<Boolean>) -> Unit) {
         getLastAuth { data ->
             data.onSuccess { authData ->
@@ -91,7 +49,6 @@ actual class AuthOpenId {
 
                 CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
                     try {
-
                         val result = suspendCancellableCoroutine<Boolean?> { cont ->
                             authService.performTokenRequest(tokenRequest) { tokenResponse, exception ->
                                 if (tokenResponse != null) {
@@ -139,61 +96,6 @@ actual class AuthOpenId {
     }
 
 
-//    actual fun logout(callback: (Result<Boolean?>) -> Unit) {
-//        getLastAuth { result ->
-//            result.onSuccess { authData ->
-//                val idToken = authData?.idToken ?: ""
-//                if (idToken.isEmpty()) {
-//                    callback(Result.failure(Exception("ID token is null")))
-//                    return@onSuccess
-//                }
-//
-//                val serviceConfig = getAuthServicesConfig()
-//                val endSessionRequest = EndSessionRequest.Builder(serviceConfig)
-//                    .setIdTokenHint(idToken)
-//                    .setPostLogoutRedirectUri(OpenIdConfig.postLogoutRedirectURL.toUri())
-//                    .build()
-//
-//                val endSessionIntent =  authService .getEndSessionRequestIntent(
-//                    endSessionRequest,
-//                    CustomTabsIntent.Builder()
-//                        .setShowTitle(false)
-//                        .setUrlBarHidingEnabled(true)
-//                        .build()
-//                        .apply {
-//                            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NO_HISTORY) // يجعل المتصفح يُغلق عند العودة للتطبيق
-//                            intent.addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
-//                        }
-//                )
-//
-//                // Launch the intent and handle the result in a callback
-//                CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
-//                    val isSuccess = suspendCancellableCoroutine { cont ->
-//                        // Set the continuation to the launch result
-//                        logoutLauncher.launch(endSessionIntent)
-//                        continuation = cont
-//
-//                        cont.invokeOnCancellation {
-//                            if (!continuation.isCompleted) {
-//                                continuation.resume(false)
-//                            }
-//                        }
-//
-//                    }
-//                    if (isSuccess == true) {
-//                        kmmCrypto.deleteData(key, group)
-//                    }
-//                    callback(Result.success(isSuccess))
-//
-//
-//                }
-//            }.onFailure { exception ->
-//                callback(Result.failure(Exception("Failed to get last auth: ${exception.message}")))
-//            }
-//        }
-//    }
-
-
     actual suspend fun getLastAuth(callback: (Result<AuthResult?>) -> Unit) {
         try {
             CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
@@ -218,10 +120,8 @@ actual class AuthOpenId {
             val jsonString = Gson().toJson(data)
 
             kmmCrypto.saveData(key, group, jsonString)
-            println("data saved")
         } else {
             kmmCrypto.saveData(key, group, "")
-            println("data removed")
         }
     }
 }

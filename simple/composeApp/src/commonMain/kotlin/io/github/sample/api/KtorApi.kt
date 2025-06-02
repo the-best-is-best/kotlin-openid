@@ -1,7 +1,5 @@
 package io.github.sample.api
 
-import io.github.openid.AuthOpenId
-import io.github.openid.ktor_feature.AppAutInterceptor
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
@@ -47,9 +45,5 @@ internal abstract class KtorApi {
         }
     }
 
-    private val tokenInterceptor = AppAutInterceptor(AuthOpenId(), client)
 
-    suspend fun interceptRequest(request: HttpRequestBuilder) {
-        tokenInterceptor.intercept(request)
-    }
 }

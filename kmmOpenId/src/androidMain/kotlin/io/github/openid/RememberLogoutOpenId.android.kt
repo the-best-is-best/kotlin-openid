@@ -1,5 +1,6 @@
 package io.github.openid
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -14,6 +15,7 @@ import io.github.openid.AuthOpenId.Companion.key
 import net.openid.appauth.AuthorizationService
 import net.openid.appauth.EndSessionRequest
 
+@SuppressLint("ComposableNaming")
 @Composable
 actual fun RememberLogoutOpenId(onLogoutResult: (Boolean?) -> Unit): LogoutOpenIdState {
     val kmmCrypto = KMMCrypto()

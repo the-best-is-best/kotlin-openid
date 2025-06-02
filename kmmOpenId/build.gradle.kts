@@ -36,7 +36,7 @@ tasks.withType<PublishToMavenRepository> {
 
 
 mavenPublishing {
-    coordinates("io.github.the-best-is-best", "kapp-auth", "1.1.0-rc1")
+    coordinates("io.github.the-best-is-best", "kapp-auth", "1.1.0")
 
     publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
     signAllPublications()
@@ -103,7 +103,6 @@ kotlin {
     ).forEach {
         it.binaries.framework {
             baseName = "KMMOpenId"
-            isStatic = true
         }
         it.compilations["main"].cinterops {
             val appauth by creating {
@@ -128,7 +127,7 @@ kotlin {
 
             api(libs.kmm.crypto)
 
-            implementation(libs.ktor.client.core)
+//            implementation(libs.ktor.client.core)
 
 
 
@@ -165,15 +164,11 @@ kotlin {
 
 android {
     namespace = "io.github.kmmopenid"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 21
 
-        compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_1_8
-            targetCompatibility = JavaVersion.VERSION_1_8
-        }
         buildFeatures {
             //enables a Compose tooling support in the AndroidStudio
             compose = true

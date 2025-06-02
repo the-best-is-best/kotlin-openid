@@ -48,7 +48,6 @@ actual class AuthOpenId {
                     saveState(authState)
                     callback(Result.success(true))
                 } else {
-                    println("Token refresh error: ${error.localizedDescription}")
                     callback(Result.failure(Exception("Token refresh failed: ${error.localizedDescription}")))
                 }
             }
@@ -61,11 +60,8 @@ actual class AuthOpenId {
             val data = authState?.let {
                 NSKeyedArchiver.archivedDataWithRootObject(it)
             } ?: throw IllegalStateException("Data is null")
-            println("data will save is $data")
             crypto.saveDataType(service, group, data)
-            println("data saved")
         } catch (e: Exception) {
-            println("Error save data ${e.message}")
             throw Exception(e.message)
         }
 
@@ -76,18 +72,14 @@ actual class AuthOpenId {
 
         try {
             val data = crypto.loadDataType(service, group)
-            println("Data retrieved: $data")
-
             return try {
                 data?.let {
                     NSKeyedUnarchiver.unarchiveObjectWithData(it) as? OIDAuthState
                 }
             } catch (e: Exception) {
-                println("Error during unarchiving: ${e.message}")
                 null
             }
         } catch (e: Exception) {
-            println("Error is ${e.message}")
             return null
         }
     }
@@ -95,11 +87,9 @@ actual class AuthOpenId {
 
     actual suspend fun getLastAuth(callback: (Result<AuthResult?>) -> Unit) {
         val loadState = loadState()
-        println("get last auth")
         if (loadState != null) {
             val lastTokenResponse = loadState.lastTokenResponse
             if (lastTokenResponse != null) {
-                println("data loaded token is ${lastTokenResponse.accessToken}")
                 callback(
                     Result.success(
                         AuthResult(

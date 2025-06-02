@@ -1,5 +1,6 @@
 package io.github.openid
 
+import android.annotation.SuppressLint
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResultLauncher
@@ -14,6 +15,7 @@ import net.openid.appauth.AuthorizationRequest
 import net.openid.appauth.AuthorizationService
 import net.openid.appauth.ResponseTypeValues
 
+@SuppressLint("ComposableNaming")
 @Composable
 actual fun RememberAuthOpenId(onAuthResult: (Boolean?) -> Unit): AuthOpenIdState {
     val scope = rememberCoroutineScope()
@@ -38,8 +40,6 @@ actual class AuthOpenIdState actual constructor(authLauncher: Any) {
     private val authService = AuthorizationService(applicationContext)
     private var continuation: kotlin.coroutines.Continuation<Boolean?>? = null
     actual suspend fun launch() {
-
-
         // Configure OpenID service
         val serviceConfig = getAuthServicesConfig()
 
