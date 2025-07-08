@@ -1,4 +1,3 @@
-import com.vanniktech.maven.publish.SonatypeHost
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem
 import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
@@ -36,9 +35,10 @@ tasks.withType<PublishToMavenRepository> {
 
 
 mavenPublishing {
-    coordinates("io.github.the-best-is-best", "kapp-auth", "1.1.0")
+    coordinates("io.github.the-best-is-best", "kapp-auth", "1.1.1")
 
-    publishToMavenCentral(SonatypeHost.S01, automaticRelease = true)
+    publishToMavenCentral(true)
+
     signAllPublications()
 
     pom {
