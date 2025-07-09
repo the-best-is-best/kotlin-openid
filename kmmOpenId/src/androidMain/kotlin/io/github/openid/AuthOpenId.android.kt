@@ -29,7 +29,7 @@ actual class AuthOpenId {
     }
 
 
-    actual suspend fun refreshToken(callback: (Result<Boolean>) -> Unit) {
+    actual fun refreshToken(callback: (Result<Boolean>) -> Unit) {
         getLastAuth { data ->
             data.onSuccess { authData ->
                 val refreshToken = authData?.refreshToken ?: ""
@@ -96,7 +96,7 @@ actual class AuthOpenId {
     }
 
 
-    actual suspend fun getLastAuth(callback: (Result<AuthResult?>) -> Unit) {
+    actual fun getLastAuth(callback: (Result<AuthResult?>) -> Unit) {
         try {
             CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
 

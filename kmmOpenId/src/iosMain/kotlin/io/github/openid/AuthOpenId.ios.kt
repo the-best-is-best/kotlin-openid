@@ -8,6 +8,7 @@ import io.github.kmmcrypto.KMMCrypto
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import platform.Foundation.NSKeyedArchiver
@@ -28,7 +29,7 @@ actual class AuthOpenId {
         AuthOpenId.group = group
     }
 
-    actual suspend fun refreshToken(callback: (Result<Boolean>) -> Unit) {
+    actual fun refreshToken(callback: (Result<Boolean>) -> Unit) {
         CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
             val authState = loadState()
 
@@ -83,23 +84,30 @@ actual class AuthOpenId {
         }
     }
 
-    actual suspend fun getLastAuth(callback: (Result<AuthResult?>) -> Unit) {
-        val state = loadState()
-        if (state != null) {
-            val token = state.lastTokenResponse
-            if (token != null) {
-                callback(
-                    Result.success(
-                        AuthResult(
-                            accessToken = token.accessToken ?: "",
-                            refreshToken = token.refreshToken ?: "",
-                            idToken = token.idToken ?: "",
+    actual fun getLastAuth(callback: (Result<AuthResult?>) -> Unit) {
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val state = loadState()
+                if (state != null) {
+                    val token = state.lastTokenResponse
+                    if (token != null) {
+                        callback(
+                            Result.success(
+                                AuthResult(
+                                    accessToken = token.accessToken ?: "",
+                                    refreshToken = token.refreshToken ?: "",
+                                    idToken = token.idToken ?: ""
+                                )
+                            )
                         )
-                    )
-                )
-                return
+                        return@launch
+                    }
+                }
+                callback(Result.failure(Exception("No data available")))
+            } catch (e: Exception) {
+                callback(Result.failure(e))
             }
         }
-        callback(Result.failure(Exception("No data available")))
     }
+
 }
