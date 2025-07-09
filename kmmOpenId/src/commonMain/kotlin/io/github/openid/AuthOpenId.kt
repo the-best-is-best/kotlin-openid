@@ -34,8 +34,8 @@ fun authOpenIdConfig(
 
      fun init(key: String, group: String)
 
-     fun refreshToken(callback: (Result<Boolean>) -> Unit)
+     suspend fun refreshToken(): Result<AuthResult>
+     suspend fun getLastAuth(): Result<AuthResult?>
 
-     fun getLastAuth(callback: (Result<AuthResult?>) -> Unit)
  }
 

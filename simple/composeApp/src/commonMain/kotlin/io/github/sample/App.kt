@@ -48,15 +48,14 @@ internal fun App() = AppTheme {
             if (isAuthenticated) {
                 scope.launch {
 
-                    auth.getLastAuth { res ->
-                        res.onSuccess { it ->
-                            accessToken = it!!.accessToken
-                            refreshToken = it.refreshToken
-                            idToken = it.idToken
+                    val res = auth.getLastAuth()
+                    res.onSuccess { result ->
+                        accessToken = result!!.accessToken
+                        refreshToken = result.refreshToken
+                        idToken = result.idToken
                         }
                     }
                     println("Authentication successful!")
-                }
             } else {
                 println("Authentication failed!")
 
@@ -115,8 +114,8 @@ internal fun App() = AppTheme {
                     Spacer(Modifier.height(20.dp))
                     Button(onClick = {
                         scope.launch {
-                        auth.getLastAuth(callback = {
-                            it.onSuccess {
+                            val res = auth.getLastAuth()
+                            res.onSuccess {
                                 println("last auth token ${it?.accessToken}")
                                 if (it != null) {
                                     accessToken = it.accessToken
@@ -124,9 +123,7 @@ internal fun App() = AppTheme {
                                     idToken = it.idToken
                                 }
                             }
-                        })
                         }
-
                     }) {
                         Text("Get data")
                     }
@@ -145,37 +142,29 @@ internal fun App() = AppTheme {
                                 println("Attempting to refresh token")
                                 scope.launch {
 
-                                    auth.refreshToken { result ->
+                                    val result = auth.refreshToken()
                                         result.onSuccess { isAuthenticated ->
-                                            if (isAuthenticated) {
-                                                println("Authentication successful!")
-                                                scope.launch {
+                                            println("Authentication successful!")
+                                            scope.launch {
 
-                                                    auth.getLastAuth(callback = {
-                                                        it.onSuccess {
-                                                            if (it != null) {
-                                                                println("Login success ${it.accessToken}")
-                                                                println("refresh token is ${it.refreshToken}")
-                                                                refreshToken = it.refreshToken
-                                                                idToken = it.idToken
-                                                                accessToken = it.accessToken
-                                                            } else {
-                                                                println("Login failed: result is null")
-                                                            }
-                                                        }
-                                                    })
+                                                val newAuth = auth.getLastAuth()
+                                                newAuth.onSuccess {
+                                                    if (it != null) {
+                                                        println("Login success ${it.accessToken}")
+                                                        println("refresh token is ${it.refreshToken}")
+                                                        refreshToken = it.refreshToken
+                                                        idToken = it.idToken
+                                                        accessToken = it.accessToken
+                                                    } else {
+                                                        println("Login failed: result is null")
+                                                    }
                                                 }
-
-                                            } else {
-                                                println("Authentication failed!")
                                             }
 
                                         }.onFailure { error ->
                                             println("Authentication error: ${error.message}")
                                         }
                                     }
-                                }
-
                             } catch (e: Exception) {
                                 println("Refresh token failed: ${e.message}")
                             }

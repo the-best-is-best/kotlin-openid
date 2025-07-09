@@ -1,18 +1,15 @@
-// iosMain/src/AuthOpenId.kt
 package io.github.openid
-
 
 import io.github.appauth.OIDAuthState
 import io.github.appauth.OIDAuthorizationService
+import io.github.appauth.OIDTokenResponse
 import io.github.kmmcrypto.KMMCrypto
 import kotlinx.cinterop.ExperimentalForeignApi
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import platform.Foundation.NSKeyedArchiver
 import platform.Foundation.NSKeyedUnarchiver
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 @OptIn(ExperimentalForeignApi::class)
 actual class AuthOpenId {
@@ -29,38 +26,64 @@ actual class AuthOpenId {
         AuthOpenId.group = group
     }
 
-    actual fun refreshToken(callback: (Result<Boolean>) -> Unit) {
-        CoroutineScope(Dispatchers.Main + SupervisorJob()).launch {
-            val authState = loadState()
-
-            if (authState == null) {
-                callback(Result.failure(Exception("No auth state available")))
-                return@launch
-            }
+    actual suspend fun refreshToken(): Result<AuthResult> {
+        return try {
+            val authState = loadState() ?: return Result.failure(Exception("Auth state missing"))
 
             val refreshRequest = authState.tokenRefreshRequest()
-            if (refreshRequest == null) {
-                callback(Result.failure(Exception("No refresh token available")))
-                return@launch
+                ?: return Result.failure(Exception("Refresh request is null"))
+
+            val tokenResponse = suspendCancellableCoroutine<OIDTokenResponse> { cont ->
+                OIDAuthorizationService.performTokenRequest(
+                    request = refreshRequest,
+                    callback = { response, error ->
+                        if (response != null) cont.resume(response)
+                        else cont.resumeWithException(
+                            error?.let { Exception("Token refresh failed: ${it.localizedDescription}") }
+                                ?: Exception("Unknown error")
+                        )
+                    }
+                )
             }
 
-            // ✅ استدعاء static method مباشرة من OIDAuthorizationService
-            OIDAuthorizationService.performTokenRequest(
-                request = refreshRequest,
-                callback = { response, error ->
+            authState.updateWithTokenResponse(tokenResponse, null)
+            saveState(authState)
 
-                    if (error == null && response != null) {
-                        // ✅ استدعاء الطريقة الصحيحة لتحديث الحالة
-                        authState.updateWithTokenResponse(response, null)
-                        saveState(authState)
-                        callback(Result.success(true))
-                    } else {
-                        callback(Result.failure(Exception("Token refresh failed: ${error?.localizedDescription ?: "Unknown error"}")))
-                    }
-                }
+            val newAuthResult = AuthResult(
+                accessToken = tokenResponse.accessToken ?: "",
+                refreshToken = tokenResponse.refreshToken ?: "",
+                idToken = tokenResponse.idToken ?: ""
             )
+
+            Result.success(newAuthResult)
+
+        } catch (e: Exception) {
+            Result.failure(e)
         }
     }
+
+
+    actual suspend fun getLastAuth(): Result<AuthResult?> {
+        return try {
+            val state = loadState()
+            val token = state?.lastTokenResponse
+
+            if (token != null) {
+                Result.success(
+                    AuthResult(
+                        accessToken = token.accessToken ?: "",
+                        refreshToken = token.refreshToken ?: "",
+                        idToken = token.idToken ?: ""
+                    )
+                )
+            } else {
+                Result.failure(Exception("No token response"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
 
     internal fun saveState(authState: OIDAuthState?) {
         try {
@@ -72,7 +95,6 @@ actual class AuthOpenId {
             throw Exception(e.message)
         }
     }
-
     internal suspend fun loadState(): OIDAuthState? {
         return try {
             val data = crypto.loadDataType(service, group)
@@ -83,31 +105,4 @@ actual class AuthOpenId {
             null
         }
     }
-
-    actual fun getLastAuth(callback: (Result<AuthResult?>) -> Unit) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val state = loadState()
-                if (state != null) {
-                    val token = state.lastTokenResponse
-                    if (token != null) {
-                        callback(
-                            Result.success(
-                                AuthResult(
-                                    accessToken = token.accessToken ?: "",
-                                    refreshToken = token.refreshToken ?: "",
-                                    idToken = token.idToken ?: ""
-                                )
-                            )
-                        )
-                        return@launch
-                    }
-                }
-                callback(Result.failure(Exception("No data available")))
-            } catch (e: Exception) {
-                callback(Result.failure(e))
-            }
-        }
-    }
-
 }
