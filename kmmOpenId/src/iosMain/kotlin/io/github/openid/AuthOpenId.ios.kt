@@ -8,6 +8,8 @@ import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import platform.Foundation.NSKeyedArchiver
 import platform.Foundation.NSKeyedUnarchiver
+import platform.Foundation.NSURL
+import platform.UIKit.UIApplication
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
@@ -104,5 +106,101 @@ actual class AuthOpenId {
         } catch (e: Exception) {
             null
         }
+    }
+
+    suspend fun login(onAuthResult: (Boolean?) -> Unit) {
+        var currentSession: OIDExternalUserAgentSessionProtocol? = null
+        val authRequest = createAuthRequest()
+        val viewController = UIApplication.sharedApplication.keyWindow?.rootViewController
+
+        if (viewController == null) {
+            onAuthResult(false)
+            return
+        }
+
+        val externalUserAgent = OIDExternalUserAgentIOS(
+            presentingViewController = viewController
+        )
+
+        currentSession = OIDAuthState.authStateByPresentingAuthorizationRequest(
+            authorizationRequest = authRequest,
+            externalUserAgent = externalUserAgent,
+            callback = { authState, _ ->
+                if (authState != null) {
+
+                    val accessToken = authState.lastTokenResponse?.accessToken ?: ""
+                    val refreshToken = authState.lastTokenResponse?.refreshToken ?: ""
+                    val idToken =
+                        authState.lastTokenResponse?.idToken ?: ""  // Extract ID token
+                    println("Authentication successful: Access Token: $accessToken, Refresh Token: $refreshToken, ID Token: $idToken")
+                    AuthOpenId().saveState(authState)
+                    onAuthResult(true)
+                } else {
+                    onAuthResult(false)
+                }
+            }
+
+        )
+    }
+
+    suspend fun logout(callback: (Boolean?) -> Unit) {
+        var currentSession: OIDExternalUserAgentSessionProtocol? = null
+        val authConfig = getAuthConfig()
+
+        val idToken = AuthOpenId().loadState()?.lastTokenResponse?.idToken
+        if (idToken == null) {
+            callback(false)
+            return
+        }
+
+        val endSessionRequest = OIDEndSessionRequest(
+            configuration = authConfig,
+            idTokenHint = idToken,
+            postLogoutRedirectURL = NSURL(string = OpenIdConfig.postLogoutRedirectURL),
+            additionalParameters = null
+        )
+
+        // Present the logout request in a web view (or default browser)
+        val viewController = UIApplication.sharedApplication.keyWindow?.rootViewController
+        if (viewController == null) {
+            callback(false)
+            return
+        }
+
+        val externalUserAgent = OIDExternalUserAgentIOS(
+            presentingViewController = viewController
+        )
+
+        currentSession = OIDAuthorizationService.presentEndSessionRequest(
+            endSessionRequest,
+            externalUserAgent,
+            callback = { endSessionResponse, error ->
+                if (endSessionResponse != null) {
+                    // Handle successful logout
+                    KMMCrypto().deleteData(service, group)
+                    callback(true) // Return null or any specific result if needed
+                } else {
+                    callback(false)
+                }
+            }
+        )
+    }
+
+    @OptIn(ExperimentalForeignApi::class)
+    private fun createAuthRequest(): OIDAuthorizationRequest {
+        val authConfig = getAuthConfig()
+        val clientId = OpenIdConfig.clientId
+        val scopesList: List<String> = OpenIdConfig.scope.split(" ")
+        val redirectUrl = NSURL(string = OpenIdConfig.redirectUrl)
+
+        return OIDAuthorizationRequest(
+            configuration = authConfig,
+            clientId = clientId,
+            clientSecret = null,
+            scopes = scopesList,
+            redirectURL = redirectUrl,
+            responseType = OIDResponseTypeCode!!,
+            additionalParameters = null
+        )
     }
 }
