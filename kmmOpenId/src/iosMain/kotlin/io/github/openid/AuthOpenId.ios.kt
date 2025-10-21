@@ -1,8 +1,11 @@
 package io.github.openid
 
 import io.github.appauth.OIDAuthState
+import io.github.appauth.OIDAuthorizationRequest
 import io.github.appauth.OIDAuthorizationService
-import io.github.appauth.OIDTokenResponse
+import io.github.appauth.OIDEndSessionRequest
+import io.github.appauth.OIDExternalUserAgentIOS
+import io.github.appauth.OIDResponseTypeCode
 import io.github.kmmcrypto.KMMCrypto
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -35,7 +38,7 @@ actual class AuthOpenId {
             val refreshRequest = authState.tokenRefreshRequest()
                 ?: return Result.failure(Exception("Refresh request is null"))
 
-            val tokenResponse = suspendCancellableCoroutine<OIDTokenResponse> { cont ->
+            val tokenResponse = suspendCancellableCoroutine { cont ->
                 OIDAuthorizationService.performTokenRequest(
                     request = refreshRequest,
                     callback = { response, error ->
@@ -87,7 +90,7 @@ actual class AuthOpenId {
     }
 
 
-    internal fun saveState(authState: OIDAuthState?) {
+    private fun saveState(authState: OIDAuthState?) {
         try {
             val data = authState?.let {
                 NSKeyedArchiver.archivedDataWithRootObject(it)
@@ -97,7 +100,8 @@ actual class AuthOpenId {
             throw Exception(e.message)
         }
     }
-    internal suspend fun loadState(): OIDAuthState? {
+
+    private suspend fun loadState(): OIDAuthState? {
         return try {
             val data = crypto.loadDataType(service, group)
             data?.let {
@@ -108,8 +112,7 @@ actual class AuthOpenId {
         }
     }
 
-    suspend fun login(onAuthResult: (Boolean?) -> Unit) {
-        var currentSession: OIDExternalUserAgentSessionProtocol? = null
+    fun login(onAuthResult: (Boolean?) -> Unit) {
         val authRequest = createAuthRequest()
         val viewController = UIApplication.sharedApplication.keyWindow?.rootViewController
 
@@ -122,7 +125,7 @@ actual class AuthOpenId {
             presentingViewController = viewController
         )
 
-        currentSession = OIDAuthState.authStateByPresentingAuthorizationRequest(
+        OIDAuthState.authStateByPresentingAuthorizationRequest(
             authorizationRequest = authRequest,
             externalUserAgent = externalUserAgent,
             callback = { authState, _ ->
@@ -144,7 +147,6 @@ actual class AuthOpenId {
     }
 
     suspend fun logout(callback: (Boolean?) -> Unit) {
-        var currentSession: OIDExternalUserAgentSessionProtocol? = null
         val authConfig = getAuthConfig()
 
         val idToken = AuthOpenId().loadState()?.lastTokenResponse?.idToken
@@ -171,7 +173,7 @@ actual class AuthOpenId {
             presentingViewController = viewController
         )
 
-        currentSession = OIDAuthorizationService.presentEndSessionRequest(
+        OIDAuthorizationService.presentEndSessionRequest(
             endSessionRequest,
             externalUserAgent,
             callback = { endSessionResponse, error ->

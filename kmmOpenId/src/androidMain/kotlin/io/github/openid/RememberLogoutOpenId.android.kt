@@ -39,35 +39,34 @@ actual class LogoutOpenIdState actual constructor(logoutLauncher: Any) {
 
 
     actual suspend fun launch() {
-        AuthOpenId().getLastAuth { result ->
-            result.onSuccess { authData ->
-                val idToken = authData?.idToken ?: ""
-                if (idToken.isEmpty()) {
-                    return@onSuccess
-                }
+        val result = AuthOpenId().getLastAuth()
 
-                val serviceConfig = getAuthServicesConfig()
-                val endSessionRequest = EndSessionRequest.Builder(serviceConfig)
-                    .setIdTokenHint(idToken)
-                    .setPostLogoutRedirectUri(OpenIdConfig.postLogoutRedirectURL.toUri())
+        result.onSuccess { authData ->
+            val idToken = authData?.idToken ?: ""
+            if (idToken.isEmpty()) return@onSuccess
+
+            val serviceConfig = getAuthServicesConfig()
+            val endSessionRequest = EndSessionRequest.Builder(serviceConfig)
+                .setIdTokenHint(idToken)
+                .setPostLogoutRedirectUri(OpenIdConfig.postLogoutRedirectURL.toUri())
+                .build()
+
+            val endSessionIntent = authService.getEndSessionRequestIntent(
+                endSessionRequest,
+                CustomTabsIntent.Builder()
+                    .setShowTitle(false)
+                    .setUrlBarHidingEnabled(true)
                     .build()
+                    .apply {
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
+                        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+            )
 
-                val endSessionIntent = authService.getEndSessionRequestIntent(
-                    endSessionRequest,
-                    CustomTabsIntent.Builder()
-                        .setShowTitle(false)
-                        .setUrlBarHidingEnabled(true)
-                        .build()
-                        .apply {
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-                            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-                        }
-                )
-
-                logoutLauncher.launch(endSessionIntent)
-
-            }.onFailure {
-            }
+            logoutLauncher.launch(endSessionIntent)
+        }.onFailure {
+            // handle failure if needed
         }
     }
+
 }

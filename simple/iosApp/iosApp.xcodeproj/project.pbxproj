@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		410020752EA7B50C0027BA6E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 410020742EA7B50A0027BA6E /* ContentView.swift */; };
 		410F414B2D75CECC00C77188 /* AppAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 410F414A2D75CECC00C77188 /* AppAuth */; };
 		410F414D2D75CECC00C77188 /* AppAuthCore in Frameworks */ = {isa = PBXBuildFile; productRef = 410F414C2D75CECC00C77188 /* AppAuthCore */; };
 		41927CA02DA1E01900A8660D /* kmmcrypto in Frameworks */ = {isa = PBXBuildFile; productRef = 41927C9F2DA1E01900A8660D /* kmmcrypto */; };
@@ -18,6 +19,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		410020742EA7B50A0027BA6E /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		410F41432D75BE8000C77188 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		A93A953729CC810C00F8E227 /* lib.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = lib.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		A93A953A29CC810C00F8E227 /* iosApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iosApp.swift; sourceTree = "<group>"; };
@@ -61,6 +63,7 @@
 		A93A953929CC810C00F8E227 /* iosApp */ = {
 			isa = PBXGroup;
 			children = (
+				410020742EA7B50A0027BA6E /* ContentView.swift */,
 				410F41432D75BE8000C77188 /* Info.plist */,
 				A93A953A29CC810C00F8E227 /* iosApp.swift */,
 				A93A953E29CC810D00F8E227 /* Assets.xcassets */,
@@ -178,6 +181,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				410020752EA7B50C0027BA6E /* ContentView.swift in Sources */,
 				A93A953B29CC810C00F8E227 /* iosApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -311,7 +315,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iosApp/Info.plist;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12;
+				IPHONEOS_DEPLOYMENT_TARGET = 14;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -337,7 +341,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = iosApp/Info.plist;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 12;
+				IPHONEOS_DEPLOYMENT_TARGET = 14;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
