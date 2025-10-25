@@ -21,7 +21,6 @@ kotlin {
                 }
             }
         }
-        //https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-test.html
 
     }
 
@@ -107,7 +106,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        minSdk = 23
+        minSdk = 21
         targetSdk = 36
 
         applicationId = "io.github.sample.androidApp"
