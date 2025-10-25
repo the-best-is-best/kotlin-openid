@@ -387,8 +387,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/the-best-is-best/IOSCrypto";
 			requirement = {
-				branch = main;
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.0;
 			};
 		};
 		419C54FA2D75B0B400E2E5DA /* XCRemoteSwiftPackageReference "AppAuth-iOS" */ = {

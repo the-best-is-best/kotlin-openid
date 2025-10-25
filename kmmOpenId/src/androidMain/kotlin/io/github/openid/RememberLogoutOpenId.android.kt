@@ -39,8 +39,8 @@ actual class LogoutOpenIdState actual constructor(logoutLauncher: Any) {
 
 
     actual suspend fun launch() {
-        AuthOpenId().getLastAuth { result ->
-            result.onSuccess { authData ->
+        val auth = AuthOpenId().getLastAuth()
+        auth.onSuccess { authData ->
                 val idToken = authData?.idToken ?: ""
                 if (idToken.isEmpty()) {
                     return@onSuccess
@@ -69,5 +69,4 @@ actual class LogoutOpenIdState actual constructor(logoutLauncher: Any) {
             }.onFailure {
             }
         }
-    }
 }

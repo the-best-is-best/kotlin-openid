@@ -35,7 +35,7 @@ tasks.withType<PublishToMavenRepository> {
 
 
 mavenPublishing {
-    coordinates("io.github.the-best-is-best", "kapp-auth", "2.0.1")
+    coordinates("io.github.the-best-is-best", "kapp-auth", "2.2.0")
 
     publishToMavenCentral(true)
 
@@ -70,10 +70,10 @@ mavenPublishing {
 
 }
 
-signing {
-    useGpgCmd()
-    sign(publishing.publications)
-}
+//signing {
+//    useGpgCmd()
+//    sign(publishing.publications)
+//}
 
 
 kotlin {
@@ -167,7 +167,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 23
 
         buildFeatures {
             //enables a Compose tooling support in the AndroidStudio
