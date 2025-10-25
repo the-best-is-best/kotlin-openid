@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/the-best-is-best/IOSCrypto",
       "state" : {
-        "branch" : "main",
-        "revision" : "6c57d1fb60d2a95d44e1a3fd0a2caeb0a5193e34"
+        "revision" : "6c57d1fb60d2a95d44e1a3fd0a2caeb0a5193e34",
+        "version" : "1.0.1"
       }
     }
   ],

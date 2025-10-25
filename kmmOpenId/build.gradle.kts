@@ -70,10 +70,10 @@ mavenPublishing {
 
 }
 
-signing {
-    useGpgCmd()
-    sign(publishing.publications)
-}
+//signing {
+//    useGpgCmd()
+//    sign(publishing.publications)
+//}
 
 
 kotlin {
@@ -167,7 +167,7 @@ android {
     compileSdk = 36
 
     defaultConfig {
-        minSdk = 21
+        minSdk = 23
 
         buildFeatures {
             //enables a Compose tooling support in the AndroidStudio
