@@ -1,6 +1,7 @@
 package io.github.openid
 
 object OpenIdConfig {
+    lateinit var issuerUrl: String
     lateinit var discoveryUrl: String
     lateinit var tokenEndPoint: String
     lateinit var authEndPoint: String

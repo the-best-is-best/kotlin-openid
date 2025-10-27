@@ -88,7 +88,7 @@ internal fun App() = AppTheme {
             authEndPoint = "connect/authorize",
             endSessionEndPoint = "connect/endsession",
             clientId = "interactive.public",
-            redirectUrl = "com.duendesoftware.demo:/oauthredirect'",
+            redirectUrl = "com.duendesoftware.demo:/oauthredirect",
             scope = "openid profile offline_access email api",
             postLogoutRedirectURL = "com.duendesoftware.demo:/",
 

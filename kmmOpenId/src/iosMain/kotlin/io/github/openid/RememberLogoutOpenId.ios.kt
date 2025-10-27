@@ -16,6 +16,9 @@ actual class LogoutOpenIdState actual constructor(logoutLauncher: Any) {
     private val callback = (logoutLauncher as (Boolean?) -> Unit)
 
     actual suspend fun launch() {
-        AuthOpenId().logout(callback)
+        val res = AuthOpenId().logout()
+        println(res)
+
+        callback(res)
     }
 }

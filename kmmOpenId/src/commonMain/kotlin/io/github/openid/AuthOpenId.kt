@@ -15,14 +15,14 @@ fun authOpenIdConfig(
 
 ) {
 
-
-    OpenIdConfig.authEndPoint = "$issuerUrl/$authEndPoint"
+    OpenIdConfig.issuerUrl = issuerUrl
+    OpenIdConfig.authEndPoint = authEndPoint
     OpenIdConfig.scope = scope
     OpenIdConfig.clientId = clientId
     OpenIdConfig.redirectUrl = redirectUrl
-    OpenIdConfig.discoveryUrl = "$issuerUrl/$discoveryUrl"
-    OpenIdConfig.tokenEndPoint = "$issuerUrl/$tokenEndPoint"
-    OpenIdConfig.endSessionEndPoint = "$issuerUrl/$endSessionEndPoint"
+    OpenIdConfig.discoveryUrl = discoveryUrl
+    OpenIdConfig.tokenEndPoint = tokenEndPoint
+    OpenIdConfig.endSessionEndPoint = endSessionEndPoint
     OpenIdConfig.postLogoutRedirectURL = postLogoutRedirectURL
     OpenIdConfig.registerEndPoint = registerEndPoint
 

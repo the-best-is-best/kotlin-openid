@@ -38,7 +38,6 @@ actual fun RememberAuthOpenId(onAuthResult: (Boolean?) -> Unit): AuthOpenIdState
 actual class AuthOpenIdState actual constructor(authLauncher: Any) {
     private val authLauncher = authLauncher as ActivityResultLauncher<Intent>
     private val authService = AuthorizationService(applicationContext)
-    private var continuation: kotlin.coroutines.Continuation<Boolean?>? = null
     actual suspend fun launch() {
         // Configure OpenID service
         val serviceConfig = getAuthServicesConfig()

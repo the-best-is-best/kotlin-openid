@@ -35,7 +35,7 @@ tasks.withType<PublishToMavenRepository> {
 
 
 mavenPublishing {
-    coordinates("io.github.the-best-is-best", "kapp-auth", "2.2.0")
+    coordinates("io.github.the-best-is-best", "kapp-auth", "3.0.0")
 
     publishToMavenCentral(true)
 
@@ -107,7 +107,7 @@ kotlin {
         it.compilations["main"].cinterops {
             val appauth by creating {
                 defFile(project.file("interop/appauth.def"))
-                packageName("io.github.appauth")
+                packageName("io.native.appauth")
             }
         }
     }

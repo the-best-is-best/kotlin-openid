@@ -16,7 +16,11 @@ actual fun RememberAuthOpenId(onAuthResult: (Boolean?) -> Unit): AuthOpenIdState
 actual class AuthOpenIdState actual constructor(authLauncher: Any) {
     private val onAuthResult = (authLauncher as (Boolean?) -> Unit)
     actual suspend fun launch() {
-        AuthOpenId().login(onAuthResult)
+        AuthOpenId().login().onSuccess {
+            onAuthResult(true)
+        }.onFailure {
+            onAuthResult(false)
+        }
 
     }
 
