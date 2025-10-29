@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/the-best-is-best/AppAuthIntrop",
       "state" : {
-        "revision" : "df8308e5776a7b9bfa0105df3c1bcebaf9220443",
-        "version" : "0.2.0"
+        "branch" : "fix",
+        "revision" : "f473c15f8586f99e90c0a106b445eba1d498e23c"
       }
     },
     {

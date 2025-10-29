@@ -5,6 +5,6 @@ import io.ktor.client.statement.bodyAsText
 
 internal class KtorServices : KtorApi() {
     suspend fun testApi(): String = client.post {
-        pathUrl("/test")
+        pathUrl("test")
     }.bodyAsText()
 }

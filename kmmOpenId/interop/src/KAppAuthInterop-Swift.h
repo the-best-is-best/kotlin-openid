@@ -26,7 +26,6 @@
 #include <Foundation/Foundation.h>
 #endif
 #if defined(__cplusplus)
-
 #include <cstdint>
 #include <cstddef>
 #include <cstdbool>
@@ -34,7 +33,6 @@
 #include <stdlib.h>
 #include <new>
 #include <type_traits>
-
 #else
 #include <stdint.h>
 #include <stddef.h>
@@ -63,9 +61,7 @@
 #if !defined(SWIFT_TYPEDEFS)
 # define SWIFT_TYPEDEFS 1
 # if __has_include(<uchar.h>)
-
 #  include <uchar.h>
-
 # elif !defined(__cplusplus)
 typedef unsigned char char8_t;
 typedef uint_least16_t char16_t;
@@ -328,7 +324,7 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) KAuthManager
 - (void)login:(void (^ _Nonnull)(AuthTokens * _Nullable, NSString * _Nullable))completion;
 - (void)logout:(void (^ _Nonnull)(BOOL, NSString * _Nullable))completion;
 - (void)refreshAccessToken:(void (^ _Nonnull)(AuthTokens * _Nullable, NSString * _Nullable))completion;
-- (AuthTokens * _Nullable)getAuthTokens SWIFT_WARN_UNUSED_RESULT;
+- (void)getAuthTokens:(void (^ _Nonnull)(AuthTokens * _Nullable))completion;
 - (void)getUserInfo:(void (^ _Nonnull)(NSDictionary<NSString *, id> * _Nullable, NSString * _Nullable))completion;
 - (nonnull instancetype)init OBJC_DESIGNATED_INITIALIZER;
 @end

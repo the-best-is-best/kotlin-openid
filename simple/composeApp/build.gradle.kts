@@ -63,6 +63,9 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
 
+            implementation("io.insert-koin:koin-androidx-compose:4.1.1")
+
+
 
         }
 

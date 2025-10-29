@@ -32,6 +32,9 @@ import io.github.openid.authOpenIdConfig
 import io.github.sample.api.KtorServices
 import io.github.sample.theme.AppTheme
 import kotlinx.coroutines.launch
+import org.koin.compose.KoinApplication
+import org.koin.compose.getKoin
+import org.koin.dsl.module
 
 
 @Composable
@@ -42,107 +45,117 @@ internal fun App() = AppTheme {
     var idToken by remember { mutableStateOf("") }
     val scope = rememberCoroutineScope()
 
-    val authRes = RememberAuthOpenId {
-        println("Auth result $it")
-        it?.let { isAuthenticated ->
-            if (isAuthenticated) {
-                scope.launch {
+    val appModule = module {
+        single { KtorServices() }
+    }
 
-                    val res = auth.getLastAuth()
-                    res.onSuccess { result ->
-                        accessToken = result!!.accessToken
-                        refreshToken = result.refreshToken
-                        idToken = result.idToken
+    KoinApplication(
+        application = {
+            modules(appModule)
+        }
+    ) {
+        val apiService = getKoin().get<KtorServices>()
+
+        val authRes = RememberAuthOpenId {
+            println("Auth result $it")
+            it?.let { isAuthenticated ->
+                if (isAuthenticated) {
+                    scope.launch {
+
+                        val res = auth.getLastAuth()
+                        res.onSuccess { result ->
+                            accessToken = result!!.accessToken
+                            refreshToken = result.refreshToken
+                            idToken = result.idToken
                         }
                     }
                     println("Authentication successful!")
-            } else {
-                println("Authentication failed!")
+                } else {
+                    println("Authentication failed!")
+
+                }
+            }
+        }
+        val authLogout = RememberLogoutOpenId {
+            println("Logout result $it")
+            it?.let { isLogout ->
+                if (isLogout) {
+                    accessToken = ""
+                    refreshToken = ""
+                    idToken = ""
+
+                    println("Logout successful!")
+                } else {
+                    println("Logout failed!")
+
+                }
+
 
             }
         }
-    }
-    val authLogout = RememberLogoutOpenId {
-        println("Logout result $it")
-        it?.let { isLogout ->
-            if (isLogout) {
-                accessToken = ""
-                refreshToken = ""
-                idToken = ""
+        LaunchedEffect(Unit) {
+            val issuerUrl = "https://demo.duendesoftware.com"
+            authOpenIdConfig(
+                issuerUrl = issuerUrl,
+                discoveryUrl = ".well-known/openid-configuration",
+                tokenEndPoint = "connect/token",
+                authEndPoint = "connect/authorize",
+                endSessionEndPoint = "connect/endsession",
+                clientId = "interactive.public",
+                redirectUrl = "com.duendesoftware.demo:/oauthredirect",
+                scope = "openid profile offline_access email api",
+                postLogoutRedirectURL = "com.duendesoftware.demo:/",
 
-                println("Logout successful!")
-            } else {
-                println("Logout failed!")
-
-            }
+                )
+            auth.init("auth", "kmmOpenId")
 
 
         }
-    }
-    LaunchedEffect(Unit) {
-        val issuerUrl = "https://demo.duendesoftware.com"
-        authOpenIdConfig(
-            issuerUrl = issuerUrl,
-            discoveryUrl = ".well-known/openid-configuration",
-            tokenEndPoint = "connect/token",
-            authEndPoint = "connect/authorize",
-            endSessionEndPoint = "connect/endsession",
-            clientId = "interactive.public",
-            redirectUrl = "com.duendesoftware.demo:/oauthredirect",
-            scope = "openid profile offline_access email api",
-            postLogoutRedirectURL = "com.duendesoftware.demo:/",
 
-        )
-        auth.init("auth", "kmmOpenId")
-
-
-    }
-    val ktorServices = KtorServices()
-
-    Surface(
-        modifier = Modifier.fillMaxSize()
-            .navigationBarsPadding()
-            .imePadding(),
-        color = Color.White,
-    ) {
-        MaterialTheme(colorScheme = lightColorScheme()) {
-            LazyColumn(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                item {
-                    Spacer(Modifier.height(20.dp))
-                    Button(onClick = {
-                        scope.launch {
-                            val res = auth.getLastAuth()
-                            res.onSuccess {
-                                println("last auth token ${it?.accessToken}")
-                                if (it != null) {
-                                    accessToken = it.accessToken
-                                    refreshToken = it.refreshToken
-                                    idToken = it.idToken
+        Surface(
+            modifier = Modifier.fillMaxSize()
+                .navigationBarsPadding()
+                .imePadding(),
+            color = Color.White,
+        ) {
+            MaterialTheme(colorScheme = lightColorScheme()) {
+                LazyColumn(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    item {
+                        Spacer(Modifier.height(20.dp))
+                        Button(onClick = {
+                            scope.launch {
+                                val res = auth.getLastAuth()
+                                res.onSuccess {
+                                    println("last auth token ${it?.accessToken}")
+                                    if (it != null) {
+                                        accessToken = it.accessToken
+                                        refreshToken = it.refreshToken
+                                        idToken = it.idToken
+                                    }
                                 }
                             }
+                        }) {
+                            Text("Get data")
                         }
-                    }) {
-                        Text("Get data")
-                    }
-                    Button(onClick = {
-                        scope.launch {
-                            authRes.launch()
+                        Button(onClick = {
+                            scope.launch {
+                                authRes.launch()
+                            }
+
+                        }) {
+                            Text("Login")
                         }
+                        Button(
+                            enabled = refreshToken.isNotEmpty(),
+                            onClick = {
+                                try {
+                                    println("Attempting to refresh token")
+                                    scope.launch {
 
-                    }) {
-                        Text("Login")
-                    }
-                    Button(
-                        enabled = refreshToken.isNotEmpty(),
-                        onClick = {
-                            try {
-                                println("Attempting to refresh token")
-                                scope.launch {
-
-                                    val result = auth.refreshToken()
+                                        val result = auth.refreshToken()
                                         result.onSuccess { isAuthenticated ->
                                             println("Authentication successful!")
                                             scope.launch {
@@ -165,45 +178,51 @@ internal fun App() = AppTheme {
                                             println("Authentication error: ${error.message}")
                                         }
                                     }
-                            } catch (e: Exception) {
-                                println("Refresh token failed: ${e.message}")
+                                } catch (e: Exception) {
+                                    println("Refresh token failed: ${e.message}")
+                                }
+
                             }
-
+                        ) {
+                            Text("Refresh Token")
                         }
-                    ) {
-                        Text("Refresh Token")
-                    }
 
-                    Spacer(Modifier.height(10.dp))
-                    Text("access token $accessToken", style = TextStyle(fontSize = 10.sp))
-                    Spacer(Modifier.height(10.dp))
-                    Text("refresh token $refreshToken", style = TextStyle(fontSize = 10.sp))
-                    Spacer(Modifier.height(10.dp))
-                    Text("id token $idToken", style = TextStyle(fontSize = 10.sp))
+                        Spacer(Modifier.height(10.dp))
+                        Text("access token $accessToken", style = TextStyle(fontSize = 10.sp))
+                        Spacer(Modifier.height(10.dp))
+                        Text("refresh token $refreshToken", style = TextStyle(fontSize = 10.sp))
+                        Spacer(Modifier.height(10.dp))
+                        Text("id token $idToken", style = TextStyle(fontSize = 10.sp))
 
 
-                    Spacer(Modifier.height(50.dp))
-                    Button(
-                        enabled = idToken.isNotEmpty(),
-                        onClick = {
+                        Spacer(Modifier.height(50.dp))
+                        Button(
+                            enabled = idToken.isNotEmpty(),
+                            onClick = {
+                                scope.launch {
+                                    authLogout.launch()
+                                }
+                            }) {
+                            Text("Logout")
+                        }
+                        Spacer(modifier = Modifier.height(30.dp))
+                        Button(onClick = {
                             scope.launch {
-                                authLogout.launch()
+                                try {
+                                    val result = apiService.testApi()
+                                    println("data api is $result")
+                                } catch (e: Exception) {
+                                    println("error is ${e.message}")
+                                }
                             }
                         }) {
-                        Text("Logout")
-                    }
-                    Spacer(modifier = Modifier.height(30.dp))
-                    Button(onClick = {
-                        scope.launch {
-                            val result = ktorServices.testApi()
-                            println("data api is $result")
+                            Text("Test Api")
                         }
-                    }) {
-                        Text("Test Api")
-                    }
 
+                    }
                 }
             }
         }
     }
+
 }

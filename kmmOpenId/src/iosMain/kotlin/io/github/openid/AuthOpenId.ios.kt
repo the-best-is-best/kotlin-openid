@@ -1,5 +1,6 @@
 package io.github.openid
 
+import io.native.appauth.AuthTokens
 import io.native.appauth.KAuthManager
 import io.native.appauth.KOpenIdConfig
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -7,6 +8,8 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
 
 @OptIn(ExperimentalForeignApi::class)
 actual class AuthOpenId {
@@ -53,19 +56,23 @@ actual class AuthOpenId {
 
     actual suspend fun getLastAuth(): Result<AuthResult?> {
         return try {
-            val userAuthInfo = auth.getAuthTokens()
-
-            if (userAuthInfo != null) {
-                Result.success(
-                    AuthResult(
-                        accessToken = userAuthInfo.accessToken() ?: "",
-                        refreshToken = userAuthInfo.refreshToken() ?: "",
-                        idToken = userAuthInfo.idToken() ?: ""
-                    )
-                )
-            } else {
-                Result.failure(Exception("No token response"))
+            val userAuthInfo = suspendCoroutine<AuthTokens?> { cont ->
+                auth.getAuthTokens { res ->
+                    if (res != null) {
+                        cont.resume(res)
+                    } else {
+                        cont.resumeWithException(Exception("No token response"))
+                    }
+                }
             }
+
+            Result.success(
+                AuthResult(
+                    accessToken = userAuthInfo?.accessToken() ?: "",
+                    refreshToken = userAuthInfo?.refreshToken() ?: "",
+                    idToken = userAuthInfo?.idToken() ?: ""
+                )
+            )
         } catch (e: Exception) {
             Result.failure(e)
         }
@@ -75,7 +82,6 @@ actual class AuthOpenId {
         suspendCancellableCoroutine { cont ->
             auth.login { authTokens, error ->
                 MainScope().launch {
-
                     if (authTokens != null) {
                         cont.resume(
                             Result.success(
