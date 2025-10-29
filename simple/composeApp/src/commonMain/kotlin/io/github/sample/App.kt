@@ -39,7 +39,6 @@ import org.koin.dsl.module
 
 @Composable
 internal fun App() = AppTheme {
-    val auth = AuthOpenId()
     var refreshToken by remember { mutableStateOf("") }
     var accessToken by remember { mutableStateOf("") }
     var idToken by remember { mutableStateOf("") }
@@ -62,7 +61,7 @@ internal fun App() = AppTheme {
                 if (isAuthenticated) {
                     scope.launch {
 
-                        val res = auth.getLastAuth()
+                        val res = AuthOpenId.getLastAuth()
                         res.onSuccess { result ->
                             accessToken = result!!.accessToken
                             refreshToken = result.refreshToken
@@ -107,7 +106,7 @@ internal fun App() = AppTheme {
                 postLogoutRedirectURL = "com.duendesoftware.demo:/",
 
                 )
-            auth.init("auth", "kmmOpenId")
+            AuthOpenId.init("auth", "kmmOpenId")
 
 
         }
@@ -127,7 +126,7 @@ internal fun App() = AppTheme {
                         Spacer(Modifier.height(20.dp))
                         Button(onClick = {
                             scope.launch {
-                                val res = auth.getLastAuth()
+                                val res = AuthOpenId.getLastAuth()
                                 res.onSuccess {
                                     println("last auth token ${it?.accessToken}")
                                     if (it != null) {
@@ -155,12 +154,12 @@ internal fun App() = AppTheme {
                                     println("Attempting to refresh token")
                                     scope.launch {
 
-                                        val result = auth.refreshToken()
+                                        val result = AuthOpenId.refreshToken()
                                         result.onSuccess { isAuthenticated ->
                                             println("Authentication successful!")
                                             scope.launch {
 
-                                                val newAuth = auth.getLastAuth()
+                                                val newAuth = AuthOpenId.getLastAuth()
                                                 newAuth.onSuccess {
                                                     if (it != null) {
                                                         println("Login success ${it.accessToken}")

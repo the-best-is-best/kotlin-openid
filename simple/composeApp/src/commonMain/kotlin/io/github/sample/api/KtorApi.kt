@@ -22,7 +22,6 @@ import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
 
 internal abstract class KtorApi {
-    private val auth = AuthOpenId()
     val client = HttpClient {
         expectSuccess = true
         defaultRequest {
@@ -59,7 +58,7 @@ internal abstract class KtorApi {
             bearer {
                 loadTokens {
                     try {
-                        val res = auth.getLastAuth()
+                        val res = AuthOpenId.getLastAuth()
                         var token: BearerTokens? = null
                         res.onSuccess {
                             println("res token ${it?.accessToken}")
@@ -77,7 +76,7 @@ internal abstract class KtorApi {
                 }
                 refreshTokens {
                     var token: BearerTokens? = null
-                    val res = auth.refreshToken()
+                    val res = AuthOpenId.refreshToken()
                     res.onSuccess {
                         if (it.accessToken.isNotBlank()) {
                             println("res token after refresh ${it.accessToken}")

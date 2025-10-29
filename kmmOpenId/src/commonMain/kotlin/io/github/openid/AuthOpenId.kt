@@ -29,7 +29,7 @@ fun authOpenIdConfig(
 
 }
 
- expect class AuthOpenId() {
+expect object AuthOpenId {
 
 
      fun init(key: String, group: String)

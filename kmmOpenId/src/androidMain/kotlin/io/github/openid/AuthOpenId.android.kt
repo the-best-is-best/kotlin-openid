@@ -10,13 +10,13 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 
-actual class AuthOpenId {
-    private val authService = AuthorizationService(applicationContext)
+actual object AuthOpenId {
+    private val authService by lazy { AuthorizationService(applicationContext) }
 
-    companion object {
-        lateinit var key: String
+
+    lateinit var key: String
         lateinit var group: String
-    }
+
 
     actual fun init(key: String, group: String) {
         AuthOpenId.key = key

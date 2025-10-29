@@ -12,7 +12,7 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 @OptIn(ExperimentalForeignApi::class)
-actual class AuthOpenId {
+actual object AuthOpenId {
 
     private val auth = KAuthManager.shared()
 

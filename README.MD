@@ -20,7 +20,7 @@
 KApp Auth is available on `mavenCentral()`.
 
 ```kotlin
-implementation("io.github.the-best-is-best:kapp-auth:3.1.0")
+implementation("io.github.the-best-is-best:kapp-auth:3.2.0")
 
 ```
 
@@ -83,10 +83,9 @@ AndroidKMMCrypto.init("key0") // add alias key name
 ### Refresh token
 
 ```kotlin
-val auth = AuthOpenId()
  try {
     println("Attempting to refresh token")
-    auth.refreshToken { result ->
+    AuthOpenId.refreshToken { result ->
         result.onSuccess { isAuthenticated ->
             if (isAuthenticated) {
                 println("Authentication successful!")
@@ -109,8 +108,7 @@ val auth = AuthOpenId()
 ### Get data
 
 ```kotlin
-val auth = AuthOpenId()
-   auth.getLastAuth(callback = {
+   AuthOpenId.getLastAuth(callback = {
     it.onSuccess {
         println("last auth token ${it?.accessToken}")
         if (it != null) {
@@ -202,7 +200,7 @@ internal abstract class KtorApi {
         }
     }
 
-    private val tokenInterceptor = AppAutInterceptor(AuthOpenId(), client)
+    private val tokenInterceptor = AppAutInterceptor(AuthOpenId, client)
 
     suspend fun interceptRequest(request: HttpRequestBuilder) {
         tokenInterceptor.intercept(request)
