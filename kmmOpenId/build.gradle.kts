@@ -35,7 +35,7 @@ tasks.withType<PublishToMavenRepository> {
 
 
 mavenPublishing {
-    coordinates("io.github.the-best-is-best", "kapp-auth", "3.2.0-1-snapshot")
+    coordinates("io.github.the-best-is-best", "kapp-auth", "3.2.0-2-snapshot")
 
     publishToMavenCentral(true)
 

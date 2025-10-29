@@ -314,11 +314,12 @@ SWIFT_CLASS("_TtC13AppAuthIntrop10AuthTokens")
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
 @end
 
+@class KOpenIdConfig;
 SWIFT_CLASS("_TtC13AppAuthIntrop12KAuthManager")
 @interface KAuthManager : NSObject
 SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) KAuthManager * _Nonnull shared;)
 + (KAuthManager * _Nonnull)shared SWIFT_WARN_UNUSED_RESULT;
-- (void)initCryptoWithService:(NSString * _Nonnull)service group:(NSString * _Nonnull)group SWIFT_METHOD_FAMILY(none);
+- (void)initCryptoWithService:(NSString * _Nonnull)service group:(NSString * _Nonnull)group client:(KOpenIdConfig * _Nonnull)client SWIFT_METHOD_FAMILY(none);
 @property (nonatomic, readonly, copy) NSString * _Nullable accessToken;
 @property (nonatomic, readonly, copy) NSString * _Nullable refreshToken;
 - (void)login:(void (^ _Nonnull)(AuthTokens * _Nullable, NSString * _Nullable))completion;
@@ -331,16 +332,14 @@ SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) KAuthManager
 
 SWIFT_CLASS("_TtC13AppAuthIntrop13KOpenIdConfig")
 @interface KOpenIdConfig : NSObject
-SWIFT_CLASS_PROPERTY(@property (nonatomic, class, readonly, strong) KOpenIdConfig * _Nonnull shared;)
-+ (KOpenIdConfig * _Nonnull)shared SWIFT_WARN_UNUSED_RESULT;
+@property (nonatomic, copy) NSString * _Nonnull discoveryUrl;
+@property (nonatomic, copy) NSString * _Nonnull clientId;
+@property (nonatomic, copy) NSString * _Nonnull redirectUrl;
+@property (nonatomic, copy) NSString * _Nonnull scope;
+@property (nonatomic, copy) NSString * _Nonnull postLogoutRedirectURL;
+- (nonnull instancetype)initWithDiscoveryUrl:(NSString * _Nonnull)discoveryUrl clientId:(NSString * _Nonnull)clientId redirectUrl:(NSString * _Nonnull)redirectUrl scope:(NSString * _Nonnull)scope postLogoutRedirectURL:(NSString * _Nonnull)postLogoutRedirectURL OBJC_DESIGNATED_INITIALIZER;
 - (nonnull instancetype)init SWIFT_UNAVAILABLE;
 + (nonnull instancetype)new SWIFT_UNAVAILABLE_MSG("-init is unavailable");
-- (void)configureWithDiscoveryUrl:(NSString * _Nonnull)discoveryUrl clientId:(NSString * _Nonnull)clientId redirectUrl:(NSString * _Nonnull)redirectUrl scope:(NSString * _Nonnull)scope postLogoutRedirectURL:(NSString * _Nonnull)postLogoutRedirectURL;
-- (void)getDiscoveryUrlWithCompletionHandler:(void (^ _Nonnull)(NSString * _Nonnull))completionHandler;
-- (void)getClientIdWithCompletionHandler:(void (^ _Nonnull)(NSString * _Nonnull))completionHandler;
-- (void)getRedirectUrlWithCompletionHandler:(void (^ _Nonnull)(NSString * _Nonnull))completionHandler;
-- (void)getScopeWithCompletionHandler:(void (^ _Nonnull)(NSString * _Nonnull))completionHandler;
-- (void)getPostLogoutRedirectURLWithCompletionHandler:(void (^ _Nonnull)(NSString * _Nonnull))completionHandler;
 @end
 
 #endif

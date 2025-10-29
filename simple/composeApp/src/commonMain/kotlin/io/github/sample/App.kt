@@ -13,7 +13,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,11 +24,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.openid.AuthOpenId
 import io.github.openid.RememberAuthOpenId
 import io.github.openid.RememberLogoutOpenId
-import io.github.openid.authOpenIdConfig
 import io.github.sample.api.KtorServices
+import io.github.sample.services.OpenIdService
 import io.github.sample.theme.AppTheme
 import kotlinx.coroutines.launch
 import org.koin.compose.KoinApplication
@@ -48,6 +46,10 @@ internal fun App() = AppTheme {
         single { KtorServices() }
     }
 
+//    LaunchedEffect(Unit){
+//        OpenIdService.init()
+//    }
+
     KoinApplication(
         application = {
             modules(appModule)
@@ -61,7 +63,7 @@ internal fun App() = AppTheme {
                 if (isAuthenticated) {
                     scope.launch {
 
-                        val res = AuthOpenId.getLastAuth()
+                        val res = OpenIdService.getAuth.getLastAuth()
                         res.onSuccess { result ->
                             accessToken = result!!.accessToken
                             refreshToken = result.refreshToken
@@ -92,24 +94,6 @@ internal fun App() = AppTheme {
 
             }
         }
-        LaunchedEffect(Unit) {
-            val issuerUrl = "https://demo.duendesoftware.com"
-            authOpenIdConfig(
-                issuerUrl = issuerUrl,
-                discoveryUrl = ".well-known/openid-configuration",
-                tokenEndPoint = "connect/token",
-                authEndPoint = "connect/authorize",
-                endSessionEndPoint = "connect/endsession",
-                clientId = "interactive.public",
-                redirectUrl = "com.duendesoftware.demo:/oauthredirect",
-                scope = "openid profile offline_access email api",
-                postLogoutRedirectURL = "com.duendesoftware.demo:/",
-
-                )
-            AuthOpenId.init("auth", "kmmOpenId")
-
-
-        }
 
         Surface(
             modifier = Modifier.fillMaxSize()
@@ -126,7 +110,7 @@ internal fun App() = AppTheme {
                         Spacer(Modifier.height(20.dp))
                         Button(onClick = {
                             scope.launch {
-                                val res = AuthOpenId.getLastAuth()
+                                val res = OpenIdService.getAuth.getLastAuth()
                                 res.onSuccess {
                                     println("last auth token ${it?.accessToken}")
                                     if (it != null) {
@@ -141,7 +125,7 @@ internal fun App() = AppTheme {
                         }
                         Button(onClick = {
                             scope.launch {
-                                authRes.launch()
+                                authRes.launch(OpenIdService.getAuth)
                             }
 
                         }) {
@@ -154,12 +138,12 @@ internal fun App() = AppTheme {
                                     println("Attempting to refresh token")
                                     scope.launch {
 
-                                        val result = AuthOpenId.refreshToken()
+                                        val result = OpenIdService.getAuth.refreshToken()
                                         result.onSuccess { isAuthenticated ->
                                             println("Authentication successful!")
                                             scope.launch {
 
-                                                val newAuth = AuthOpenId.getLastAuth()
+                                                val newAuth = OpenIdService.getAuth.getLastAuth()
                                                 newAuth.onSuccess {
                                                     if (it != null) {
                                                         println("Login success ${it.accessToken}")
@@ -199,7 +183,7 @@ internal fun App() = AppTheme {
                             enabled = idToken.isNotEmpty(),
                             onClick = {
                                 scope.launch {
-                                    authLogout.launch()
+                                    authLogout.launch(OpenIdService.getAuth)
                                 }
                             }) {
                             Text("Logout")

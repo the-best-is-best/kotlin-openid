@@ -10,8 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.core.net.toUri
 import io.github.kmmcrypto.KMMCrypto
-import io.github.openid.AuthOpenId.group
-import io.github.openid.AuthOpenId.key
+import io.github.openid.AuthOpenId.Companion.group
+import io.github.openid.AuthOpenId.Companion.key
 import net.openid.appauth.AuthorizationService
 import net.openid.appauth.EndSessionRequest
 
@@ -38,8 +38,8 @@ actual class LogoutOpenIdState actual constructor(logoutLauncher: Any) {
     private val authService = AuthorizationService(applicationContext)
 
 
-    actual suspend fun launch() {
-        val result = AuthOpenId.getLastAuth()
+    actual suspend fun launch(auth: AuthOpenId) {
+        val result = auth.getLastAuth()
 
         result.onSuccess { authData ->
             val idToken = authData?.idToken ?: ""
@@ -48,7 +48,7 @@ actual class LogoutOpenIdState actual constructor(logoutLauncher: Any) {
             val serviceConfig = getAuthServicesConfig()
             val endSessionRequest = EndSessionRequest.Builder(serviceConfig)
                 .setIdTokenHint(idToken)
-                .setPostLogoutRedirectUri(OpenIdConfig.postLogoutRedirectURL.toUri())
+                .setPostLogoutRedirectUri(AndroidOpenIdConfig.postLogoutRedirectURL.toUri())
                 .build()
 
             val endSessionIntent = authService.getEndSessionRequestIntent(

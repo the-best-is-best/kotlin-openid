@@ -38,7 +38,7 @@ actual fun RememberAuthOpenId(onAuthResult: (Boolean?) -> Unit): AuthOpenIdState
 actual class AuthOpenIdState actual constructor(authLauncher: Any) {
     private val authLauncher = authLauncher as ActivityResultLauncher<Intent>
     private val authService = AuthorizationService(applicationContext)
-    actual suspend fun launch() {
+    actual suspend fun launch(auth: AuthOpenId) {
         // Configure OpenID service
         val serviceConfig = getAuthServicesConfig()
 
@@ -46,11 +46,11 @@ actual class AuthOpenIdState actual constructor(authLauncher: Any) {
         // Build authorization request
         val authRequest = AuthorizationRequest.Builder(
             serviceConfig,
-            OpenIdConfig.clientId,
+            AndroidOpenIdConfig.clientId,
             ResponseTypeValues.CODE,
-            OpenIdConfig.redirectUrl.toUri()
+            AndroidOpenIdConfig.redirectUrl.toUri()
         )
-            .setScopes(OpenIdConfig.scope)
+            .setScopes(AndroidOpenIdConfig.scope)
             .build()
 
         // Create intent with CustomTabs

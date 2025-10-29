@@ -10,17 +10,19 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 
-actual object AuthOpenId {
+actual class AuthOpenId {
     private val authService by lazy { AuthorizationService(applicationContext) }
 
-
-    lateinit var key: String
+    companion object {
+        lateinit var key: String
         lateinit var group: String
+    }
 
 
-    actual fun init(key: String, group: String) {
+    actual fun init(key: String, group: String, openIdConfig: OpenIdConfig) {
         AuthOpenId.key = key
         AuthOpenId.group = group
+        AndroidOpenIdConfig.init(openIdConfig)
     }
 
     actual suspend fun refreshToken(): Result<AuthResult> {
@@ -32,7 +34,7 @@ actual object AuthOpenId {
             val serviceConfig = getAuthServicesConfig()
             val tokenRequest = TokenRequest.Builder(
                 serviceConfig,
-                OpenIdConfig.clientId
+                AndroidOpenIdConfig.clientId
             ).setGrantType(GrantTypeValues.REFRESH_TOKEN)
                 .setRefreshToken(refreshToken)
                 .build()

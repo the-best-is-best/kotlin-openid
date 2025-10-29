@@ -6,10 +6,10 @@ import net.openid.appauth.AuthorizationServiceConfiguration
 
 fun getAuthServicesConfig(): AuthorizationServiceConfiguration {
     return AuthorizationServiceConfiguration(
-        "${OpenIdConfig.issuerUrl}/${OpenIdConfig.authEndPoint}".toUri(),
-        "${OpenIdConfig.issuerUrl}/${OpenIdConfig.tokenEndPoint}".toUri(),
-        if (OpenIdConfig.registerEndPoint == null) null else OpenIdConfig.registerEndPoint?.toUri(),
-        "${OpenIdConfig.issuerUrl}/${OpenIdConfig.endSessionEndPoint}".toUri(),
+        "${AndroidOpenIdConfig.issuerUrl}/${AndroidOpenIdConfig.authEndPoint}".toUri(),
+        "${AndroidOpenIdConfig.issuerUrl}/${AndroidOpenIdConfig.tokenEndPoint}".toUri(),
+        if (AndroidOpenIdConfig.registerEndPoint == null) null else AndroidOpenIdConfig.registerEndPoint?.toUri(),
+        "${AndroidOpenIdConfig.issuerUrl}/${AndroidOpenIdConfig.endSessionEndPoint}".toUri(),
 
         )
 }

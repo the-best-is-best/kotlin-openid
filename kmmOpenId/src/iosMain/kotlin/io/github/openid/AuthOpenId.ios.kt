@@ -12,19 +12,19 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 @OptIn(ExperimentalForeignApi::class)
-actual object AuthOpenId {
+actual class AuthOpenId {
 
     private val auth = KAuthManager.shared()
 
-    actual fun init(key: String, group: String) {
-        KOpenIdConfig.shared().configureWithDiscoveryUrl(
-            OpenIdConfig.issuerUrl,
-            OpenIdConfig.clientId,
-            OpenIdConfig.redirectUrl,
-            OpenIdConfig.scope,
-            OpenIdConfig.postLogoutRedirectURL
+    actual fun init(key: String, group: String, openIdConfig: OpenIdConfig) {
+        val client = KOpenIdConfig(
+            openIdConfig.issuerUrl,
+            openIdConfig.clientId,
+            openIdConfig.redirectUrl,
+            openIdConfig.scope,
+            openIdConfig.postLogoutRedirectURL
         )
-        auth.initCryptoWithService(key, group)
+        auth.initCryptoWithService(key, group, client)
 
     }
 
