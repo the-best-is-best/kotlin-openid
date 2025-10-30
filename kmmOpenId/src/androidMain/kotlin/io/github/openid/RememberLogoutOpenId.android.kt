@@ -38,8 +38,8 @@ actual class LogoutOpenIdState actual constructor(logoutLauncher: Any) {
     private val authService = AuthorizationService(applicationContext)
 
 
-    actual suspend fun launch() {
-        val result = AuthOpenId().getLastAuth()
+    actual suspend fun launch(auth: AuthOpenId) {
+        val result = auth.getLastAuth()
 
         result.onSuccess { authData ->
             val idToken = authData?.idToken ?: ""

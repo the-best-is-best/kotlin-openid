@@ -20,14 +20,17 @@
 KApp Auth is available on `mavenCentral()`.
 
 ```kotlin
-implementation("io.github.the-best-is-best:kapp-auth:2.2.0")
+implementation("io.github.the-best-is-best:kapp-auth:4.0.0")
 
 ```
 
 ### ✅ **Install via SPM**
 
+You can install **AppAuthInterop** directly using **Swift Package Manager (SPM)** from:  
+🔗 [AppAuthInterop on GitHub](https://github.com/the-best-is-best/AppAuthInterop)
+
 You can install **AppAuth** directly using **Swift Package Manager (SPM)** from:  
-🔗 [AppAuth-iOS on GitHub](https://github.com/openid/AppAuth-iOS)
+🔗 [AppAuth-iOS on GitHub](https://github.com/openid/AppAuth-iOS)_
 
 You need install **IOSCrypto** directly using **Swift Package Manager (SPM)** from:  
 🔗 [IOSCryptoManager-iOS on GitHub](https://github.com/the-best-is-best/IOSCrypto)
@@ -40,6 +43,36 @@ You need install **IOSCrypto** directly using **Swift Package Manager (SPM)** fr
 
 ```kotlin
 AndroidKMMCrypto.init("key0") // add alias key name
+```
+
+### Init Auth Service
+
+```kotlin
+package io.github.sample.api
+
+import io.github.openid.AuthOpenId
+import io.github.openid.authOpenIdConfig
+
+object AuthOpenedIdService {
+    val auth = AuthOpenId()
+
+    init {
+        val issuerUrl = "https://demo.duendesoftware.com"
+        authOpenIdConfig(
+            issuerUrl = issuerUrl,
+            discoveryUrl = ".well-known/openid-configuration",
+            tokenEndPoint = "connect/token",
+            authEndPoint = "connect/authorize",
+            endSessionEndPoint = "connect/endsession",
+            clientId = "interactive.public",
+            redirectUrl = "com.duendesoftware.demo:/oauthredirect'",
+            scope = "openid profile offline_access email api",
+            postLogoutRedirectURL = "com.duendesoftware.demo:/",
+
+            )
+        auth.init("auth", "kmmOpenId")
+    }
+}
 ```
 
 ### Note: this package login and saved data so auth or refresh token will return true or false or exception
@@ -71,7 +104,7 @@ AndroidKMMCrypto.init("key0") // add alias key name
 
    ...
    Button(onClick:(){
-     authRes.launch()
+       authRes.launch(AuthOpenedIdService.auth)
    }){
     Text("login")
    }
@@ -140,7 +173,7 @@ val auth = AuthOpenId()
         }
     }
     Button(onClick:(){
-        authLogout.launch()
+        authLogout.launch(AuthOpenedIdService.auth)
     }){
         Text("Logout")
     }
@@ -218,7 +251,7 @@ import io.ktor.client.statement.bodyAsText
 
 internal class KtorServices : KtorApi() {
     suspend fun testApi(): String = client.post {
-        pathUrl("/test")
+        pathUrl("test")
         interceptRequest(this)
     }.bodyAsText()
 }

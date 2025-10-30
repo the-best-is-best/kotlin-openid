@@ -15,7 +15,7 @@ fun authOpenIdConfig(
 
 ) {
 
-
+    OpenIdConfig.issuer = issuerUrl
     OpenIdConfig.authEndPoint = "$issuerUrl/$authEndPoint"
     OpenIdConfig.scope = scope
     OpenIdConfig.clientId = clientId

@@ -1,0 +1,5 @@
+language = Objective-C
+headers = /Users/michelleraouf/Desktop/kmm/kotlin-openid/kmmOpenId/interop/src/KAppAuthInterop-Swift.h
+
+compilerOpts = -framework AppAuthIntrop
+linkerOpts = -framework AppAuthIntrop

@@ -13,7 +13,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -25,10 +24,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import io.github.openid.AuthOpenId
 import io.github.openid.RememberAuthOpenId
 import io.github.openid.RememberLogoutOpenId
-import io.github.openid.authOpenIdConfig
+import io.github.sample.api.AuthOpenedIdService
 import io.github.sample.api.KtorServices
 import io.github.sample.theme.AppTheme
 import kotlinx.coroutines.launch
@@ -36,7 +34,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 internal fun App() = AppTheme {
-    val auth = AuthOpenId()
+    val auth = AuthOpenedIdService.auth
     var refreshToken by remember { mutableStateOf("") }
     var accessToken by remember { mutableStateOf("") }
     var idToken by remember { mutableStateOf("") }
@@ -79,24 +77,7 @@ internal fun App() = AppTheme {
 
         }
     }
-    LaunchedEffect(Unit) {
-        val issuerUrl = "https://demo.duendesoftware.com"
-        authOpenIdConfig(
-            issuerUrl = issuerUrl,
-            discoveryUrl = ".well-known/openid-configuration",
-            tokenEndPoint = "connect/token",
-            authEndPoint = "connect/authorize",
-            endSessionEndPoint = "connect/endsession",
-            clientId = "interactive.public",
-            redirectUrl = "com.duendesoftware.demo:/oauthredirect'",
-            scope = "openid profile offline_access email api",
-            postLogoutRedirectURL = "com.duendesoftware.demo:/",
 
-        )
-        auth.init("auth", "kmmOpenId")
-
-
-    }
     val ktorServices = KtorServices()
 
     Surface(
@@ -129,7 +110,7 @@ internal fun App() = AppTheme {
                     }
                     Button(onClick = {
                         scope.launch {
-                            authRes.launch()
+                            authRes.launch(auth)
                         }
 
                     }) {
@@ -187,17 +168,23 @@ internal fun App() = AppTheme {
                         enabled = idToken.isNotEmpty(),
                         onClick = {
                             scope.launch {
-                                authLogout.launch()
+                                authLogout.launch(auth)
                             }
                         }) {
                         Text("Logout")
                     }
                     Spacer(modifier = Modifier.height(30.dp))
                     Button(onClick = {
+
                         scope.launch {
-                            val result = ktorServices.testApi()
-                            println("data api is $result")
+                            try {
+                                val result = ktorServices.testApi()
+                                println("data api is $result")
+                            } catch (e: Exception) {
+                                println("error is $e")
+                            }
                         }
+
                     }) {
                         Text("Test Api")
                     }

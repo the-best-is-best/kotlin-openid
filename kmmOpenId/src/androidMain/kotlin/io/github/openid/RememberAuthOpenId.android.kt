@@ -39,7 +39,7 @@ actual class AuthOpenIdState actual constructor(authLauncher: Any) {
     private val authLauncher = authLauncher as ActivityResultLauncher<Intent>
     private val authService = AuthorizationService(applicationContext)
     private var continuation: kotlin.coroutines.Continuation<Boolean?>? = null
-    actual suspend fun launch() {
+    actual suspend fun launch(auth: AuthOpenId) {
         // Configure OpenID service
         val serviceConfig = getAuthServicesConfig()
 

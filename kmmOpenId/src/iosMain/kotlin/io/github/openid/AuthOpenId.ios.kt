@@ -1,24 +1,18 @@
 package io.github.openid
 
+import io.github.app_auth_interop.KAuthManager
+import io.github.app_auth_interop.KOpenIdConfig
 import io.github.appauth.OIDAuthState
-import io.github.appauth.OIDAuthorizationRequest
-import io.github.appauth.OIDAuthorizationService
-import io.github.appauth.OIDEndSessionRequest
-import io.github.appauth.OIDExternalUserAgentIOS
-import io.github.appauth.OIDResponseTypeCode
 import io.github.kmmcrypto.KMMCrypto
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.suspendCancellableCoroutine
-import platform.Foundation.NSKeyedArchiver
 import platform.Foundation.NSKeyedUnarchiver
-import platform.Foundation.NSURL
-import platform.UIKit.UIApplication
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 @OptIn(ExperimentalForeignApi::class)
 actual class AuthOpenId {
-
+    private val authInterop = KAuthManager.shared()
     companion object {
         internal lateinit var service: String
         internal lateinit var group: String
@@ -29,44 +23,43 @@ actual class AuthOpenId {
     actual fun init(key: String, group: String) {
         service = key
         AuthOpenId.group = group
+        val client = KOpenIdConfig(
+            OpenIdConfig.issuer,
+            OpenIdConfig.clientId,
+            OpenIdConfig.redirectUrl,
+            OpenIdConfig.scope,
+            OpenIdConfig.postLogoutRedirectURL
+
+        )
+        authInterop.initCryptoWithService(service, group, client)
     }
 
-    actual suspend fun refreshToken(): Result<AuthResult> {
-        return try {
-            val authState = loadState() ?: return Result.failure(Exception("Auth state missing"))
+    actual suspend fun refreshToken(): Result<AuthResult> = suspendCancellableCoroutine { cont ->
+        try {
 
-            val refreshRequest = authState.tokenRefreshRequest()
-                ?: return Result.failure(Exception("Refresh request is null"))
+            authInterop.refreshAccessToken { authTokens, error ->
+                if (error != null) {
+                    cont.resumeWithException(Exception(error))
+                    return@refreshAccessToken
+                }
+                val accessToken = authTokens?.accessToken() ?: ""
+                val refreshToken = authTokens?.refreshToken() ?: ""
+                val idToken = authTokens?.idToken() ?: ""
 
-            val tokenResponse = suspendCancellableCoroutine { cont ->
-                OIDAuthorizationService.performTokenRequest(
-                    request = refreshRequest,
-                    callback = { response, error ->
-                        if (response != null) cont.resume(response)
-                        else cont.resumeWithException(
-                            error?.let { Exception("Token refresh failed: ${it.localizedDescription}") }
-                                ?: Exception("Unknown error")
-                        )
-                    }
+                val authResult = AuthResult(
+                    accessToken = accessToken,
+                    refreshToken = refreshToken,
+                    idToken = idToken
                 )
+
+                cont.resume(Result.success(authResult))
+
+
             }
-
-            authState.updateWithTokenResponse(tokenResponse, null)
-            saveState(authState)
-
-            val newAuthResult = AuthResult(
-                accessToken = tokenResponse.accessToken ?: "",
-                refreshToken = tokenResponse.refreshToken ?: "",
-                idToken = tokenResponse.idToken ?: ""
-            )
-
-            Result.success(newAuthResult)
-
         } catch (e: Exception) {
-            Result.failure(e)
+            cont.resume(Result.failure(e))
         }
     }
-
 
     actual suspend fun getLastAuth(): Result<AuthResult?> {
         return try {
@@ -89,17 +82,16 @@ actual class AuthOpenId {
         }
     }
 
-
-    private fun saveState(authState: OIDAuthState?) {
-        try {
-            val data = authState?.let {
-                NSKeyedArchiver.archivedDataWithRootObject(it)
-            } ?: throw IllegalStateException("Data is null")
-            crypto.saveDataType(service, group, data)
-        } catch (e: Exception) {
-            throw Exception(e.message)
-        }
-    }
+//    private fun saveState(authState: OIDAuthState?) {
+//        try {
+//            val data = authState?.let {
+//                NSKeyedArchiver.archivedDataWithRootObject(it)
+//            } ?: throw IllegalStateException("Data is null")
+//            crypto.saveDataType(service, group, data)
+//        } catch (e: Exception) {
+//            throw Exception(e.message)
+//        }
+//    }
 
     private suspend fun loadState(): OIDAuthState? {
         return try {
@@ -112,97 +104,60 @@ actual class AuthOpenId {
         }
     }
 
-    fun login(onAuthResult: (Boolean?) -> Unit) {
-        val authRequest = createAuthRequest()
-        val viewController = UIApplication.sharedApplication.keyWindow?.rootViewController
+    suspend fun login(): Result<Boolean> = suspendCancellableCoroutine { cont ->
+        authInterop.login { res, error ->
+            if (error != null) {
+                cont.resume(Result.failure(Exception(error)))
+                return@login
+            } else {
+                val accessToken = res?.accessToken() ?: ""
+                val refreshToken = res?.refreshToken() ?: ""
+                val idToken = res?.idToken() ?: ""
 
-        if (viewController == null) {
-            onAuthResult(false)
-            return
-        }
+                println("Authentication successful: Access Token: $accessToken, Refresh Token: $refreshToken, ID Token: $idToken")
 
-        val externalUserAgent = OIDExternalUserAgentIOS(
-            presentingViewController = viewController
-        )
-
-        OIDAuthState.authStateByPresentingAuthorizationRequest(
-            authorizationRequest = authRequest,
-            externalUserAgent = externalUserAgent,
-            callback = { authState, _ ->
-                if (authState != null) {
-
-                    val accessToken = authState.lastTokenResponse?.accessToken ?: ""
-                    val refreshToken = authState.lastTokenResponse?.refreshToken ?: ""
-                    val idToken =
-                        authState.lastTokenResponse?.idToken ?: ""  // Extract ID token
-                    println("Authentication successful: Access Token: $accessToken, Refresh Token: $refreshToken, ID Token: $idToken")
-                    AuthOpenId().saveState(authState)
-                    onAuthResult(true)
-                } else {
-                    onAuthResult(false)
+                try {
+                    cont.resume(Result.success(true))
+                } catch (e: Exception) {
+                    cont.resume(Result.failure(Exception("Failed to save auth state: ${e.message}")))
                 }
             }
-
-        )
+        }
     }
 
-    suspend fun logout(callback: (Boolean?) -> Unit) {
-        val authConfig = getAuthConfig()
+    suspend fun logout(): Result<Boolean> = suspendCancellableCoroutine { cont ->
+        authInterop.logout { res, error ->
+            if (error != null) {
+                println("Logout failed: $error")
+                cont.resume(Result.failure(Exception(error)))
+                return@logout
 
-        val idToken = AuthOpenId().loadState()?.lastTokenResponse?.idToken
-        if (idToken == null) {
-            callback(false)
-            return
-        }
-
-        val endSessionRequest = OIDEndSessionRequest(
-            configuration = authConfig,
-            idTokenHint = idToken,
-            postLogoutRedirectURL = NSURL(string = OpenIdConfig.postLogoutRedirectURL),
-            additionalParameters = null
-        )
-
-        // Present the logout request in a web view (or default browser)
-        val viewController = UIApplication.sharedApplication.keyWindow?.rootViewController
-        if (viewController == null) {
-            callback(false)
-            return
-        }
-
-        val externalUserAgent = OIDExternalUserAgentIOS(
-            presentingViewController = viewController
-        )
-
-        OIDAuthorizationService.presentEndSessionRequest(
-            endSessionRequest,
-            externalUserAgent,
-            callback = { endSessionResponse, error ->
-                if (endSessionResponse != null) {
-                    // Handle successful logout
-                    KMMCrypto().deleteData(service, group)
-                    callback(true) // Return null or any specific result if needed
-                } else {
-                    callback(false)
-                }
             }
-        )
-    }
+            try {
+                cont.resume(Result.success(true))
+            } catch (e: Exception) {
+                println("Failed to save auth state: ${e.message}")
+                cont.resume(Result.failure(Exception("Failed to save auth state: ${e.message}")))
+            }
+        }
 
-    @OptIn(ExperimentalForeignApi::class)
-    private fun createAuthRequest(): OIDAuthorizationRequest {
-        val authConfig = getAuthConfig()
-        val clientId = OpenIdConfig.clientId
-        val scopesList: List<String> = OpenIdConfig.scope.split(" ")
-        val redirectUrl = NSURL(string = OpenIdConfig.redirectUrl)
-
-        return OIDAuthorizationRequest(
-            configuration = authConfig,
-            clientId = clientId,
-            clientSecret = null,
-            scopes = scopesList,
-            redirectURL = redirectUrl,
-            responseType = OIDResponseTypeCode!!,
-            additionalParameters = null
-        )
     }
+//
+//    @OptIn(ExperimentalForeignApi::class)
+//    private fun createAuthRequest(): OIDAuthorizationRequest {
+//        val authConfig = getAuthConfig()
+//        val clientId = OpenIdConfig.clientId
+//        val scopesList: List<String> = OpenIdConfig.scope.split(" ")
+//        val redirectUrl = NSURL(string = OpenIdConfig.redirectUrl)
+//
+//        return OIDAuthorizationRequest(
+//            configuration = authConfig,
+//            clientId = clientId,
+//            clientSecret = null,
+//            scopes = scopesList,
+//            redirectURL = redirectUrl,
+//            responseType = OIDResponseTypeCode!!,
+//            additionalParameters = null
+//        )
+//    }
 }
