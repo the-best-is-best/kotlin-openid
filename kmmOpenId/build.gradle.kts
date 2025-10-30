@@ -109,6 +109,10 @@ kotlin {
                 defFile(project.file("interop/appauth.def"))
                 packageName("io.github.appauth")
             }
+            val appAuthInterop by creating {
+                defFile(project.file("interop/kapp_auth_interop.def"))
+                packageName("io.github.app_auth_interop")
+            }
         }
     }
 

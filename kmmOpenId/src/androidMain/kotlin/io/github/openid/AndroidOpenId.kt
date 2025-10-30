@@ -3,7 +3,6 @@ package io.github.openid
 import android.app.Activity
 import com.google.gson.Gson
 import io.github.kmmcrypto.KMMCrypto
-import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
@@ -14,40 +13,9 @@ import kotlin.coroutines.resumeWithException
 
 class AndroidOpenId {
 
-    //    internal lateinit var authLauncher: ActivityResultLauncher<Intent>
-    internal lateinit var continuation: CancellableContinuation<Boolean?>
-
-//    internal lateinit var logoutLauncher: ActivityResultLauncher<Intent>
-
-
     private val kmmCrypto = KMMCrypto()
 
     private val gson = Gson()
-//
-//    @Composable
-//    fun Init() {
-//        // Get the context and make sure it's an Activity
-//
-//        // Initialize authLauncher using rememberLauncherForActivityResult
-//        authLauncher =
-//            rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-//                if (::continuation.isInitialized && !continuation.isCompleted) {
-//                        val isSuccess = handleAuthResult(result) // Check if login was successful
-//                        continuation.resume(isSuccess != null) // Resume with correct result
-//
-//                }
-//            }
-//
-//        // Initialize logoutLauncher using rememberLauncherForActivityResult
-//        logoutLauncher =
-//            rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-//                if (::continuation.isInitialized && !continuation.isCompleted) {
-//                        val isSuccess = handleLogoutResult(result) // Handle logout result
-//                        continuation.resume(isSuccess)
-//                    }
-//                }
-//            }
-//    }
 
 
     internal fun handleLogoutResult(result: androidx.activity.result.ActivityResult): Boolean {

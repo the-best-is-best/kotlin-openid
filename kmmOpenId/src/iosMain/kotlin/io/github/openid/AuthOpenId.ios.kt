@@ -82,17 +82,6 @@ actual class AuthOpenId {
         }
     }
 
-//    private fun saveState(authState: OIDAuthState?) {
-//        try {
-//            val data = authState?.let {
-//                NSKeyedArchiver.archivedDataWithRootObject(it)
-//            } ?: throw IllegalStateException("Data is null")
-//            crypto.saveDataType(service, group, data)
-//        } catch (e: Exception) {
-//            throw Exception(e.message)
-//        }
-//    }
-
     private suspend fun loadState(): OIDAuthState? {
         return try {
             val data = crypto.loadDataType(service, group)
@@ -128,7 +117,6 @@ actual class AuthOpenId {
     suspend fun logout(): Result<Boolean> = suspendCancellableCoroutine { cont ->
         authInterop.logout { res, error ->
             if (error != null) {
-                println("Logout failed: $error")
                 cont.resume(Result.failure(Exception(error)))
                 return@logout
 
@@ -136,28 +124,10 @@ actual class AuthOpenId {
             try {
                 cont.resume(Result.success(true))
             } catch (e: Exception) {
-                println("Failed to save auth state: ${e.message}")
                 cont.resume(Result.failure(Exception("Failed to save auth state: ${e.message}")))
             }
         }
 
     }
-//
-//    @OptIn(ExperimentalForeignApi::class)
-//    private fun createAuthRequest(): OIDAuthorizationRequest {
-//        val authConfig = getAuthConfig()
-//        val clientId = OpenIdConfig.clientId
-//        val scopesList: List<String> = OpenIdConfig.scope.split(" ")
-//        val redirectUrl = NSURL(string = OpenIdConfig.redirectUrl)
-//
-//        return OIDAuthorizationRequest(
-//            configuration = authConfig,
-//            clientId = clientId,
-//            clientSecret = null,
-//            scopes = scopesList,
-//            redirectURL = redirectUrl,
-//            responseType = OIDResponseTypeCode!!,
-//            additionalParameters = null
-//        )
-//    }
+
 }
