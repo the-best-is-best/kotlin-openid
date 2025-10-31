@@ -35,7 +35,7 @@ tasks.withType<PublishToMavenRepository> {
 
 
 mavenPublishing {
-    coordinates("io.github.the-best-is-best", "kapp-auth", "3.2.0-2-snapshot")
+    coordinates("io.github.the-best-is-best", "kapp-auth", "4.0.1")
 
     publishToMavenCentral(true)
 
@@ -70,10 +70,10 @@ mavenPublishing {
 
 }
 
-signing {
-    useGpgCmd()
-    sign(publishing.publications)
-}
+//signing {
+//    useGpgCmd()
+//    sign(publishing.publications)
+//}
 
 
 kotlin {
@@ -108,6 +108,11 @@ kotlin {
             val appauth by creating {
                 defFile(project.file("interop/appauth.def"))
                 packageName("io.native.appauth")
+            }
+
+            val appAuthInterop by creating {
+                defFile(project.file("interop/kapp_auth_interop.def"))
+                packageName("io.github.app_auth_interop")
             }
         }
     }

@@ -14,18 +14,7 @@ object OpenIdService {
 
     init {
         val issuerUrl = "https://demo.duendesoftware.com"
-        val client = OpenIdConfig(
-            issuerUrl = issuerUrl,
-            discoveryUrl = ".well-known/openid-configuration",
-            tokenEndPoint = "connect/token",
-            authEndPoint = "connect/authorize",
-            endSessionEndPoint = "connect/endsession",
-            clientId = "interactive.public",
-            redirectUrl = "com.duendesoftware.demo:/oauthredirect",
-            scope = "openid profile offline_access email api",
-            postLogoutRedirectURL = "com.duendesoftware.demo:/",
 
-            )
-        auth.init(key, service, client)
+        auth.init(key, service)
     }
 }

@@ -3,27 +3,22 @@ package io.github.openid
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 
-
 @Composable
 actual fun RememberAuthOpenId(onAuthResult: (Boolean?) -> Unit): AuthOpenIdState {
-    return AuthOpenIdState(
-        authLauncher = remember {
-            onAuthResult
-        }
-    )
+
+    return remember {
+        AuthOpenIdState(onAuthResult)
+    }
 }
 
-actual class AuthOpenIdState actual constructor(authLauncher: Any) {
-    private val onAuthResult = (authLauncher as (Boolean?) -> Unit)
+@Suppress("UNCHECKED_CAST")
+actual class AuthOpenIdState actual constructor(private val authLauncher: Any) {
     actual suspend fun launch(auth: AuthOpenId) {
-        auth.login().onSuccess {
-            onAuthResult(true)
+        val res = auth.login()
+        res.onSuccess {
+            (authLauncher as (Boolean?) -> Unit)(true)
         }.onFailure {
-            onAuthResult(false)
+            (authLauncher as (Boolean?) -> Unit)(false)
         }
-
     }
-
-
-
 }

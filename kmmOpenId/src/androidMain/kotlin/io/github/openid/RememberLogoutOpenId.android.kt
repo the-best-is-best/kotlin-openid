@@ -48,7 +48,7 @@ actual class LogoutOpenIdState actual constructor(logoutLauncher: Any) {
             val serviceConfig = getAuthServicesConfig()
             val endSessionRequest = EndSessionRequest.Builder(serviceConfig)
                 .setIdTokenHint(idToken)
-                .setPostLogoutRedirectUri(AndroidOpenIdConfig.postLogoutRedirectURL.toUri())
+                .setPostLogoutRedirectUri(OpenIdConfig.postLogoutRedirectURL.toUri())
                 .build()
 
             val endSessionIntent = authService.getEndSessionRequestIntent(

@@ -1,14 +1,14 @@
 package io.github.openid
 
-class OpenIdConfig(
-    val issuerUrl: String,
-    val discoveryUrl: String,
-    val tokenEndPoint: String,
-    val authEndPoint: String,
-    val endSessionEndPoint: String,
-    val registerEndPoint: String? = null,
-    val clientId: String,
-    val redirectUrl: String,
-    val scope: String,
-    val postLogoutRedirectURL: String
-)
+internal object OpenIdConfig {
+    lateinit var issuer: String
+    lateinit var discoveryUrl: String
+    lateinit var tokenEndPoint: String
+    lateinit var authEndPoint: String
+    lateinit var endSessionEndPoint: String
+    var registerEndPoint: String? = null
+    lateinit var clientId: String
+    lateinit var redirectUrl: String
+    lateinit var scope: String
+    lateinit var postLogoutRedirectURL: String
+}

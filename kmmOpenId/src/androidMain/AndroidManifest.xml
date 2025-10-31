@@ -9,8 +9,8 @@
             tools:node="merge">
 
             <meta-data
-            android:name="io.github.openid.ApplicationContextInitializer"
-            android:value="androidx.startup" />
+                android:name="io.github.openid.ApplicationContextInitializer"
+                android:value="androidx.startup" />
         </provider>
 
 
