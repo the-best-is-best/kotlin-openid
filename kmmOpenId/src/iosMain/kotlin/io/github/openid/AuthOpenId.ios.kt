@@ -2,9 +2,9 @@ package io.github.openid
 
 import io.github.app_auth_interop.KAuthManager
 import io.github.app_auth_interop.KOpenIdConfig
-import io.github.appauth.OIDAuthState
-import io.github.appauth.OIDAuthorizationService
 import io.github.kmmcrypto.KMMCrypto
+import io.native.appauth.OIDAuthState
+import io.native.appauth.OIDAuthorizationService
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.suspendCancellableCoroutine
 import platform.Foundation.NSKeyedArchiver
