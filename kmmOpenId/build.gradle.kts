@@ -35,7 +35,7 @@ tasks.withType<PublishToMavenRepository> {
 
 
 mavenPublishing {
-    coordinates("io.github.the-best-is-best", "kapp-auth", "4.0.1")
+    coordinates("io.github.the-best-is-best", "kapp-auth", "5.0.0")
 
     publishToMavenCentral(true)
 
@@ -70,10 +70,10 @@ mavenPublishing {
 
 }
 
-//signing {
-//    useGpgCmd()
-//    sign(publishing.publications)
-//}
+signing {
+    useGpgCmd()
+    sign(publishing.publications)
+}
 
 
 kotlin {

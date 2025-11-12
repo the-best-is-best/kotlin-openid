@@ -20,7 +20,7 @@
 KApp Auth is available on `mavenCentral()`.
 
 ```kotlin
-implementation("io.github.the-best-is-best:kapp-auth:4.0.1")
+implementation("io.github.the-best-is-best:kapp-auth:5.0.0")
 
 ```
 
@@ -29,11 +29,13 @@ implementation("io.github.the-best-is-best:kapp-auth:4.0.1")
 You need install **IOSCrypto** directly using **Swift Package Manager (SPM)** from:  
 🔗 [AppAuthInterop-iOS on GitHub](https://github.com/the-best-is-best/AppAuthInterop)
 
+### Note: v5 dep on v2.0.0
+
 You can install **AppAuth** directly using **Swift Package Manager (SPM)** from:  
 🔗 [AppAuth-iOS on GitHub](https://github.com/openid/AppAuth-iOS)
 
 You need install **IOSCrypto** directly using **Swift Package Manager (SPM)** from:  
-🔗 [IOSCryptoManager-iOS on GitHub](https://github.com/the-best-is-best/IOSCrypto)
+🔗 [IOSCryptoManager-iOS on GitHub](https://github.com/the-best-is-best/IOSCryptoInterop)
 
 ## How to use it
 
