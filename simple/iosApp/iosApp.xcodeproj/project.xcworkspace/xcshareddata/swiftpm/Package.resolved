@@ -1,5 +1,5 @@
 {
-  "originHash" : "36f993eecd46dbe27d4d2f3a6ebf213d95269ccc51fd77aea5ac59ba5b244136",
+  "originHash" : "8cba3f926f716daf9952aebbd68511418981a729409fd2d89a27fde9a43750c6",
   "pins" : [
     {
       "identity" : "appauth-ios",
@@ -11,21 +11,21 @@
       }
     },
     {
-      "identity" : "appauthintrop",
+      "identity" : "appauthinterop",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/the-best-is-best/AppAuthIntrop",
+      "location" : "https://github.com/the-best-is-best/AppAuthInterop",
       "state" : {
-        "branch" : "fix2",
-        "revision" : "c65519eaca06c1893fc8ee6a60783ecc953488ff"
+        "branch" : "main",
+        "revision" : "46e15ce2107b3661c6eb5bc6d40e4dacadac057a"
       }
     },
     {
-      "identity" : "ioscrypto",
+      "identity" : "ioscryptointerop",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/the-best-is-best/IOSCrypto",
+      "location" : "https://github.com/the-best-is-best/IOSCryptoInterop.git",
       "state" : {
-        "revision" : "6c57d1fb60d2a95d44e1a3fd0a2caeb0a5193e34",
-        "version" : "1.0.1"
+        "revision" : "4fc8aa4a1af0794d08eebd275d2fff3ea79704a8",
+        "version" : "1.0.0"
       }
     }
   ],

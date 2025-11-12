@@ -8,10 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		410020752EA7B50C0027BA6E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 410020742EA7B50A0027BA6E /* ContentView.swift */; };
-		4171BFB22EAFD6BA00F6BE08 /* AppAuthIntrop in Frameworks */ = {isa = PBXBuildFile; productRef = 4171BFB12EAFD6BA00F6BE08 /* AppAuthIntrop */; };
 		4171BFB52EAFD6F100F6BE08 /* AppAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 4171BFB42EAFD6F100F6BE08 /* AppAuth */; };
 		4171BFB72EAFD6F100F6BE08 /* AppAuthCore in Frameworks */ = {isa = PBXBuildFile; productRef = 4171BFB62EAFD6F100F6BE08 /* AppAuthCore */; };
-		4171BFBA2EAFD6FC00F6BE08 /* kmmcrypto in Frameworks */ = {isa = PBXBuildFile; productRef = 4171BFB92EAFD6FC00F6BE08 /* kmmcrypto */; };
+		41EB02472EC4FD61007D24F9 /* IOSCryptoInterop in Frameworks */ = {isa = PBXBuildFile; productRef = 41EB02462EC4FD61007D24F9 /* IOSCryptoInterop */; };
+		41EB024A2EC4FE0C007D24F9 /* AppAuthInterop in Frameworks */ = {isa = PBXBuildFile; productRef = 41EB02492EC4FE0C007D24F9 /* AppAuthInterop */; };
 		A93A953B29CC810C00F8E227 /* iosApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A93A953A29CC810C00F8E227 /* iosApp.swift */; };
 		A93A953F29CC810D00F8E227 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A93A953E29CC810D00F8E227 /* Assets.xcassets */; };
 		A93A954229CC810D00F8E227 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A93A954129CC810D00F8E227 /* Preview Assets.xcassets */; };
@@ -32,9 +32,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				4171BFB52EAFD6F100F6BE08 /* AppAuth in Frameworks */,
-				4171BFB22EAFD6BA00F6BE08 /* AppAuthIntrop in Frameworks */,
+				41EB02472EC4FD61007D24F9 /* IOSCryptoInterop in Frameworks */,
+				41EB024A2EC4FE0C007D24F9 /* AppAuthInterop in Frameworks */,
 				4171BFB72EAFD6F100F6BE08 /* AppAuthCore in Frameworks */,
-				4171BFBA2EAFD6FC00F6BE08 /* kmmcrypto in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -130,9 +130,9 @@
 			);
 			mainGroup = A93A952E29CC810C00F8E227;
 			packageReferences = (
-				4171BFB02EAFD6BA00F6BE08 /* XCRemoteSwiftPackageReference "AppAuthIntrop" */,
 				4171BFB32EAFD6F100F6BE08 /* XCRemoteSwiftPackageReference "AppAuth-iOS" */,
-				4171BFB82EAFD6FC00F6BE08 /* XCRemoteSwiftPackageReference "IOSCrypto" */,
+				41EB02452EC4FD61007D24F9 /* XCRemoteSwiftPackageReference "IOSCryptoInterop" */,
+				41EB02482EC4FE0C007D24F9 /* XCRemoteSwiftPackageReference "AppAuthInterop" */,
 			);
 			productRefGroup = A93A953829CC810C00F8E227 /* Products */;
 			projectDirPath = "";
@@ -386,14 +386,6 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		4171BFB02EAFD6BA00F6BE08 /* XCRemoteSwiftPackageReference "AppAuthIntrop" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/the-best-is-best/AppAuthIntrop";
-			requirement = {
-				branch = fix2;
-				kind = branch;
-			};
-		};
 		4171BFB32EAFD6F100F6BE08 /* XCRemoteSwiftPackageReference "AppAuth-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/openid/AppAuth-iOS.git";
@@ -402,22 +394,25 @@
 				minimumVersion = 2.0.0;
 			};
 		};
-		4171BFB82EAFD6FC00F6BE08 /* XCRemoteSwiftPackageReference "IOSCrypto" */ = {
+		41EB02452EC4FD61007D24F9 /* XCRemoteSwiftPackageReference "IOSCryptoInterop" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/the-best-is-best/IOSCrypto";
+			repositoryURL = "https://github.com/the-best-is-best/IOSCryptoInterop";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.1;
+				minimumVersion = 1.0.0;
+			};
+		};
+		41EB02482EC4FE0C007D24F9 /* XCRemoteSwiftPackageReference "AppAuthInterop" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/the-best-is-best/AppAuthInterop";
+			requirement = {
+				branch = main;
+				kind = branch;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		4171BFB12EAFD6BA00F6BE08 /* AppAuthIntrop */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 4171BFB02EAFD6BA00F6BE08 /* XCRemoteSwiftPackageReference "AppAuthIntrop" */;
-			productName = AppAuthIntrop;
-		};
 		4171BFB42EAFD6F100F6BE08 /* AppAuth */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 4171BFB32EAFD6F100F6BE08 /* XCRemoteSwiftPackageReference "AppAuth-iOS" */;
@@ -428,10 +423,15 @@
 			package = 4171BFB32EAFD6F100F6BE08 /* XCRemoteSwiftPackageReference "AppAuth-iOS" */;
 			productName = AppAuthCore;
 		};
-		4171BFB92EAFD6FC00F6BE08 /* kmmcrypto */ = {
+		41EB02462EC4FD61007D24F9 /* IOSCryptoInterop */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 4171BFB82EAFD6FC00F6BE08 /* XCRemoteSwiftPackageReference "IOSCrypto" */;
-			productName = kmmcrypto;
+			package = 41EB02452EC4FD61007D24F9 /* XCRemoteSwiftPackageReference "IOSCryptoInterop" */;
+			productName = IOSCryptoInterop;
+		};
+		41EB02492EC4FE0C007D24F9 /* AppAuthInterop */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 41EB02482EC4FE0C007D24F9 /* XCRemoteSwiftPackageReference "AppAuthInterop" */;
+			productName = AppAuthInterop;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

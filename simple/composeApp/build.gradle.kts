@@ -69,11 +69,11 @@ kotlin {
 
         }
 
-        commonTest.dependencies {
-            implementation(kotlin("test"))
-            @OptIn(ExperimentalComposeLibrary::class)
-            implementation(compose.uiTest)
-        }
+//        commonTest.dependencies {
+//            implementation(kotlin("test"))
+//            @OptIn(ExperimentalComposeLibrary::class)
+//            implementation(compose.uiTest)
+//        }
 
         androidMain.dependencies {
             implementation(compose.uiTooling)
