@@ -15,14 +15,14 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/the-best-is-best/AppAuthInterop",
       "state" : {
-        "branch" : "main",
-        "revision" : "5851a6d90d71c5ef78b1e4904c1060f191d6835e"
+        "revision" : "5851a6d90d71c5ef78b1e4904c1060f191d6835e",
+        "version" : "2.0.0"
       }
     },
     {
       "identity" : "ioscryptointerop",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/the-best-is-best/IOSCryptoInterop",
+      "location" : "https://github.com/the-best-is-best/IOSCryptoInterop.git",
       "state" : {
         "revision" : "4fc8aa4a1af0794d08eebd275d2fff3ea79704a8",
         "version" : "1.0.0"
