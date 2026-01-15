@@ -29,7 +29,7 @@ implementation("io.github.the-best-is-best:kapp-auth:5.0.0")
 You need install **IOSCrypto** directly using **Swift Package Manager (SPM)** from:  
 🔗 [AppAuthInterop-iOS on GitHub](https://github.com/the-best-is-best/AppAuthInterop)
 
-### Note: v5 dep on v2.0.0
+### Note: v5 dep on v1.0.0
 
 You can install **AppAuth** directly using **Swift Package Manager (SPM)** from:  
 🔗 [AppAuth-iOS on GitHub](https://github.com/openid/AppAuth-iOS)
