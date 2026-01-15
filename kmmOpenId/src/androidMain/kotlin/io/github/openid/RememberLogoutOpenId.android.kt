@@ -18,7 +18,7 @@ import net.openid.appauth.EndSessionRequest
 @SuppressLint("ComposableNaming")
 @Composable
 actual fun RememberLogoutOpenId(
-    endSessionRequest: AuthorizationRequest,
+    authorizationRequest: AuthorizationRequest,
     onLogoutResult: (Boolean?) -> Unit
 ): LogoutOpenIdState {
     val kmmCrypto = KMMCrypto()
@@ -32,7 +32,7 @@ actual fun RememberLogoutOpenId(
             }
             onLogoutResult(isSuccess)
         }
-    return remember { LogoutOpenIdState(endSessionRequest, logoutLauncher) }
+    return remember { LogoutOpenIdState(authorizationRequest, logoutLauncher) }
 }
 
 actual class LogoutOpenIdState actual constructor(

@@ -1,7 +1,6 @@
 package io.github.openid
 
 import io.github.app_auth_interop.KAuthManager
-import io.github.app_auth_interop.KOpenIdConfig
 import io.github.kmmcrypto.KMMCrypto
 import io.native.appauth.OIDAuthState
 import io.native.appauth.OIDAuthorizationService
@@ -27,18 +26,11 @@ actual class AuthOpenId {
     actual fun init(key: String, group: String) {
         service = key
         AuthOpenId.group = group
-        val client = KOpenIdConfig(
-            OpenIdConfig.issuer,
-            OpenIdConfig.clientId,
-            OpenIdConfig.redirectUrl,
-            OpenIdConfig.scope,
-            OpenIdConfig.postLogoutRedirectURL
 
-        )
-        authInterop.initCryptoWithService(service, group, client)
+        authInterop.initCryptoWithService(service, group)
     }
 
-    actual suspend fun refreshToken(): Result<AuthResult> {
+    actual suspend fun refreshToken(tokenRequest: TokenRequest): Result<AuthResult> {
         return try {
             val authState = loadState() ?: return Result.failure(Exception("Auth state missing"))
             val refreshRequest = authState.tokenRefreshRequest()
@@ -119,11 +111,12 @@ actual class AuthOpenId {
         }
     }
 
-    suspend fun login(): Result<Boolean> = suspendCancellableCoroutine { cont ->
-        authInterop.login { res, error ->
+    suspend fun login(authorizationRequest: AuthorizationRequest): Result<Boolean> =
+        suspendCancellableCoroutine { cont ->
+            authInterop.loginWithOpenId(authorizationRequest.toIOSOpenIdConfig()) { res, error ->
             if (error != null) {
                 cont.resume(Result.failure(Exception(error)))
-                return@login
+                return@loginWithOpenId
             } else {
                 val accessToken = res?.accessToken() ?: ""
                 val refreshToken = res?.refreshToken() ?: ""
@@ -140,12 +133,13 @@ actual class AuthOpenId {
         }
     }
 
-    suspend fun logout(): Result<Boolean> = suspendCancellableCoroutine { cont ->
-        authInterop.logout { res, error ->
+    suspend fun logout(authorizationRequest: AuthorizationRequest): Result<Boolean> =
+        suspendCancellableCoroutine { cont ->
+            authInterop.logoutWithOpenId(authorizationRequest.toIOSOpenIdConfig()) { res, error ->
             if (error != null) {
                 println("Logout failed: $error")
                 cont.resume(Result.failure(Exception(error)))
-                return@logout
+                return@logoutWithOpenId
 
             }
             try {

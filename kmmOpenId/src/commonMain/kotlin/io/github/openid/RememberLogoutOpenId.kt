@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 
 @Composable
 expect fun RememberLogoutOpenId(
-    endSessionRequest: AuthorizationRequest,
+    authorizationRequest: AuthorizationRequest,
     onLogoutResult: (Boolean?) -> Unit
 ): LogoutOpenIdState
 
