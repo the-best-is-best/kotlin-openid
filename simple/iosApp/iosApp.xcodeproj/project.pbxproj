@@ -406,8 +406,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/the-best-is-best/AppAuthInterop";
 			requirement = {
-				branch = for_v6;
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.1;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

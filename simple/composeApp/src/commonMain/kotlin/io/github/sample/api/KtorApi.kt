@@ -23,8 +23,8 @@ import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
 
 internal abstract class KtorApi {
-    val auth = AuthOpenId()
-    val openIdService = OpenIdService()
+    private val auth = AuthOpenId()
+    private val openIdService = OpenIdService()
     val client = HttpClient {
         expectSuccess = true
         defaultRequest {

@@ -16,8 +16,8 @@ actual fun RememberAuthOpenId(
 
 @Suppress("UNCHECKED_CAST")
 actual class AuthOpenIdState actual constructor(
-    val authorizationRequest: AuthorizationRequest,
-    val authLauncher: Any
+    private val authorizationRequest: AuthorizationRequest,
+    private val authLauncher: Any
 ) {
     actual suspend fun launch() {
         val res = AuthOpenId().login(authorizationRequest)

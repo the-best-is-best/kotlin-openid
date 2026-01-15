@@ -15,8 +15,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/the-best-is-best/AppAuthInterop",
       "state" : {
-        "branch" : "for_v6",
-        "revision" : "a495937b57ee3884201c0fd32724df62a56842c9"
+        "revision" : "ce2613bd1fec666f8cfbf05fb3fc7b37d017b92f",
+        "version" : "3.0.1"
       }
     },
     {

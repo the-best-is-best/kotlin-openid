@@ -37,9 +37,8 @@ actual fun RememberLogoutOpenId(
 
 actual class LogoutOpenIdState actual constructor(
     private val authorizationRequest: AuthorizationRequest,
-    logoutLauncher: Any
+  private val  logoutLauncher: Any
 ) {
-    private val logoutLauncher = logoutLauncher as ActivityResultLauncher<Intent>
 
     private val authService = AuthorizationService(applicationContext)
 
@@ -72,7 +71,7 @@ actual class LogoutOpenIdState actual constructor(
                     }
             )
 
-            logoutLauncher.launch(endSessionIntent)
+            (logoutLauncher as ActivityResultLauncher<Intent>).launch(endSessionIntent)
         }.onFailure {
             // handle failure if needed
         }

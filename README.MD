@@ -20,7 +20,7 @@
 KApp Auth is available on `mavenCentral()`.
 
 ```kotlin
-implementation("io.github.the-best-is-best:kapp-auth:5.0.0")
+implementation("io.github.the-best-is-best:kapp-auth:6.0.0")
 
 ```
 
@@ -29,7 +29,7 @@ implementation("io.github.the-best-is-best:kapp-auth:5.0.0")
 You need install **IOSCrypto** directly using **Swift Package Manager (SPM)** from:  
 🔗 [AppAuthInterop-iOS on GitHub](https://github.com/the-best-is-best/AppAuthInterop)
 
-### Note: v5 dep on v2.0.0
+### Note: v5 dep on v3.0.0
 
 You can install **AppAuth** directly using **Swift Package Manager (SPM)** from:  
 🔗 [AppAuth-iOS on GitHub](https://github.com/openid/AppAuth-iOS)
@@ -47,12 +47,65 @@ You need install **IOSCrypto** directly using **Swift Package Manager (SPM)** fr
 AndroidKMMCrypto.init("key0") // add alias key name
 ```
 
+### Second in commonMain
+
+#### 1 -
+
+```kotlin
+ val auth = AuthOpenId()
+ LaunchedEffect(Unit) {
+        auth.init("key", "service")
+    }
+```
+
+#### 2 -
+
+```kotlin
+
+import io.github.openid.AuthorizationRequest
+import io.github.openid.AuthorizationServiceConfig
+import io.github.openid.TokenRequest
+
+class OpenIdService {
+
+
+    fun getAuthorizationRequest(): AuthorizationRequest {
+        return AuthorizationRequest(
+            issuer = "https://demo.duendesoftware.com",
+            discoveryUrl = ".well-known/openid-configuration",
+            scope = listOf("openid", "profile", "offline_access", "email"),
+            clientId = "interactive.public",
+            redirectUrl = "com.duendesoftware.demo:/oauthredirect",
+            authorizationServiceConfiguration = AuthorizationServiceConfig(
+                authorizationEndpoint = "connect/authorize",
+                tokenEndpoint = "connect/token",
+                endSessionEndpoint = "connect/endsession",
+                postLogoutRedirectURL = "com.duendesoftware.demo:/postlogout",
+                registerEndPoint = null
+            ),
+        )
+    }
+
+
+    fun getTokenRequest(): TokenRequest {
+        return TokenRequest(
+            issuer = "https://demo.duendesoftware.com",
+            tokenEndpoint = "connect/token",
+            clientId = "interactive.public",
+        )
+    }
+
+}
+```
+
 ### Note: this package login and saved data so auth or refresh token will return true or false or exception
 
 ### Auth
 
 ```kotlin
-       val authRes = RememberAuthOpenId {
+       val authRes = RememberAuthOpenId(
+            authorizationRequest = openIdServices.getAuthorizationRequest()
+        ) {
         println("Auth result $it")
         it?.let { isAuthenticated ->
             if (isAuthenticated) {
@@ -87,45 +140,42 @@ AndroidKMMCrypto.init("key0") // add alias key name
 ```kotlin
  try {
     println("Attempting to refresh token")
-    AuthOpenId.refreshToken { result ->
+     val result =
+        auth.refreshToken(openIdServices.getTokenRequest())
         result.onSuccess { isAuthenticated ->
             if (isAuthenticated) {
                 println("Authentication successful!")
                 
-
-
             } else {
                 println("Authentication failed!")
             }
         }.onFailure { error ->
             println("Authentication error: ${error.message}")
         }
+    
+    } catch (e: Exception) {
+        println("Refresh token failed: ${e.message}")
     }
-
-} catch (e: Exception) {
-    println("Refresh token failed: ${e.message}")
-}
 ```
 
 ### Get data
 
 ```kotlin
-   AuthOpenId.getLastAuth(callback = {
-    it.onSuccess {
-        println("last auth token ${it?.accessToken}")
-        if (it != null) {
-            accessToken = it.accessToken
-            refreshToken = it.refreshToken
-            idToken = it.idToken
+     val res = auth.getLastAuth()
+        res.onSuccess { result ->
+            accessToken = result!!.accessToken
+            refreshToken = result.refreshToken
+            idToken = result.idToken
         }
-    }
-})
+
 ```
 
 ### logout
 
 ```kotlin
-   val authLogout = RememberLogoutOpenId {
+   val authLogout = RememberLogoutOpenId(
+            openIdServices.getAuthorizationRequest()
+        ) {
         println("Logout result $it")
         it?.let { isLogout ->
             if (isLogout) {
@@ -153,26 +203,32 @@ AndroidKMMCrypto.init("key0") // add alias key name
 ### Finally we add interceptor for get token and refresh token auto in 401 or 403 and re call api ` But there is no test yet. `
 
 ```kotlin
-package io.github.sample.api
 
 import io.github.openid.AuthOpenId
-import io.github.openid.ktor_feature.AppAutInterceptor
+import io.github.sample.services.OpenIdService
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.HttpRequestRetry
+import io.ktor.client.plugins.auth.Auth
+import io.ktor.client.plugins.auth.providers.BearerTokens
+import io.ktor.client.plugins.auth.providers.bearer
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.DEFAULT
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.HttpRequestBuilder
 import io.ktor.client.request.header
 import io.ktor.http.path
 import io.ktor.http.takeFrom
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
 
 internal abstract class KtorApi {
-
+    private val auth = AuthOpenId()
+    private val openIdService = OpenIdService()
     val client = HttpClient {
         expectSuccess = true
         defaultRequest {
@@ -191,6 +247,58 @@ internal abstract class KtorApi {
                 }
             )
         }
+        install(HttpRequestRetry) {
+            maxRetries = 3
+            retryIf { _, response ->
+                response.status.value == 401 || response.status.value in 500..599
+            }
+            retryOnExceptionIf { _, cause -> cause is IOException }
+            delayMillis { retry -> retry * 1000L }
+            modifyRequest { request ->
+                request.timeout {
+                    requestTimeoutMillis = 10000
+                }
+            }
+        }
+
+        install(Auth) {
+            bearer {
+                loadTokens {
+                    try {
+                        val res = auth.getLastAuth()
+                        var token: BearerTokens? = null
+                        res.onSuccess {
+                            println("res token ${it?.accessToken}")
+                            if (it != null && it.accessToken.isNotBlank()) {
+                                token = BearerTokens(it.accessToken, it.refreshToken)
+                            }
+                        }
+                        res.onFailure {
+                            println("res token fail $it")
+                        }
+                        token
+                    } catch (e: Exception) {
+                        null
+                    }
+                }
+                refreshTokens {
+                    var token: BearerTokens? = null
+                    val res = auth.refreshToken(openIdService.getTokenRequest())
+                    res.onSuccess {
+                        if (it.accessToken.isNotBlank()) {
+                            println("res token after refresh ${it.accessToken}")
+                            token = BearerTokens(it.accessToken, it.refreshToken)
+                        }
+                    }
+                    res.onFailure {
+                        println("res token fail $it")
+                    }
+                    println("refresh token is $token")
+                    token
+                }
+            }
+        }
+
 
     }
 
@@ -202,11 +310,7 @@ internal abstract class KtorApi {
         }
     }
 
-    private val tokenInterceptor = AppAutInterceptor(AuthOpenId, client)
 
-    suspend fun interceptRequest(request: HttpRequestBuilder) {
-        tokenInterceptor.intercept(request)
-    }
 }
 
 ```
@@ -214,8 +318,6 @@ internal abstract class KtorApi {
 ### And
 
 ```kotlin
-package io.github.sample.api
-
 import io.ktor.client.request.post
 import io.ktor.client.statement.bodyAsText
 
