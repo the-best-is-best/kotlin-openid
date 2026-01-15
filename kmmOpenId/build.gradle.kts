@@ -5,7 +5,7 @@ plugins {
     alias(libs.plugins.multiplatform)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.compose)
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.androidKotlinMultiplatformLibrary)
     id("maven-publish")
     id("signing")
     alias(libs.plugins.maven.publish)
@@ -35,7 +35,7 @@ tasks.withType<PublishToMavenRepository> {
 
 
 mavenPublishing {
-    coordinates("io.github.the-best-is-best", "kapp-auth", "5.0.0")
+    coordinates("io.github.the-best-is-best", "kapp-auth", "5.0.1")
 
     publishToMavenCentral(true)
 
@@ -78,10 +78,6 @@ signing {
 
 kotlin {
     jvmToolchain(17)
-    androidTarget {
-        //https://www.jetbrains.com/help/kotlin-multiplatform-dev/compose-test.html
-        instrumentedTestVariant.sourceSetTree.set(KotlinSourceSetTree.test)
-    }
 
     //    jvm()
     //
@@ -165,21 +161,13 @@ kotlin {
         }
 
     }
-}
 
-android {
-    namespace = "io.github.kmmopenid"
-    compileSdk = 36
-
-    defaultConfig {
-        minSdk = 23
-
-        buildFeatures {
-            //enables a Compose tooling support in the AndroidStudio
-            compose = true
-        }
+    android {
+        namespace = "io.github.kmmopenid"
+        compileSdk = 36
     }
 }
+
 //compose.desktop {
 //    application {
 //        mainClass = "MainKt"

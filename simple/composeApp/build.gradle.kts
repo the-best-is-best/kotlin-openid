@@ -48,11 +48,11 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.runtime)
-            implementation(compose.foundation)
-            implementation(compose.material3)
-            implementation(compose.components.resources)
-            implementation(compose.components.uiToolingPreview)
+            implementation(libs.runtime)
+            implementation(libs.foundation)
+            implementation(libs.jetbrains.material3)
+            implementation(libs.components.resources)
+            implementation(libs.ui.tooling.preview)
 
             implementation(project(":kmmOpenId"))
 //            implementation(libs.kmm.crypto)
@@ -63,7 +63,7 @@ kotlin {
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.serialization.kotlinx.json)
 
-            implementation("io.insert-koin:koin-androidx-compose:4.1.1")
+            implementation(libs.koin.androidx.compose)
 
 
 
