@@ -1,30 +1,36 @@
 package io.github.sample.services
 
-import io.github.openid.AuthOpenId
-import io.github.openid.authOpenIdConfig
+import io.github.openid.AuthorizationRequest
+import io.github.openid.AuthorizationServiceConfig
+import io.github.openid.TokenRequest
 
-object OpenIdService {
-    private val auth = AuthOpenId()
+class OpenIdService {
 
-    val getAuth: AuthOpenId
-        get() = auth
 
-    private const val key = "key"
-    private const val service = "service"
-
-    init {
-        val issuerUrl = "https://demo.duendesoftware.com"
-        authOpenIdConfig(
-            issuerUrl = issuerUrl,
+    fun getAuthorizationRequest(): AuthorizationRequest {
+        return AuthorizationRequest(
+            issuer = "https://demo.duendesoftware.com",
             discoveryUrl = ".well-known/openid-configuration",
-            tokenEndPoint = "connect/token",
-            authEndPoint = "connect/authorize",
-            endSessionEndPoint = "connect/endsession",
+            scope = listOf("openid", "profile", "offline_access", "email"),
             clientId = "interactive.public",
             redirectUrl = "com.duendesoftware.demo:/oauthredirect",
-            scope = "openid profile offline_access email api",
-            postLogoutRedirectURL = "com.duendesoftware.demo:/",
+            authorizationServiceConfiguration = AuthorizationServiceConfig(
+                authorizationEndpoint = "connect/authorize",
+                tokenEndpoint = "connect/token",
+                endSessionEndpoint = "connect/endsession",
+                postLogoutRedirectURL = "com.duendesoftware.demo:/postlogout",
+                registerEndPoint = null
+            ),
         )
-        auth.init(key, service)
     }
+
+
+    fun getTokenRequest(): TokenRequest {
+        return TokenRequest(
+            issuer = "https://demo.duendesoftware.com",
+            tokenEndpoint = "connect/token",
+            clientId = "interactive.public",
+        )
+    }
+
 }

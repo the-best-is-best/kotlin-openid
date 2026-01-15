@@ -1,5 +1,6 @@
 package io.github.sample.api
 
+import io.github.openid.AuthOpenId
 import io.github.sample.services.OpenIdService
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpRequestRetry
@@ -22,6 +23,8 @@ import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
 
 internal abstract class KtorApi {
+    val auth = AuthOpenId()
+    val openIdService = OpenIdService()
     val client = HttpClient {
         expectSuccess = true
         defaultRequest {
@@ -58,7 +61,7 @@ internal abstract class KtorApi {
             bearer {
                 loadTokens {
                     try {
-                        val res = OpenIdService.getAuth.getLastAuth()
+                        val res = auth.getLastAuth()
                         var token: BearerTokens? = null
                         res.onSuccess {
                             println("res token ${it?.accessToken}")
@@ -76,7 +79,7 @@ internal abstract class KtorApi {
                 }
                 refreshTokens {
                     var token: BearerTokens? = null
-                    val res = OpenIdService.getAuth.refreshToken()
+                    val res = auth.refreshToken(openIdService.getTokenRequest())
                     res.onSuccess {
                         if (it.accessToken.isNotBlank()) {
                             println("res token after refresh ${it.accessToken}")

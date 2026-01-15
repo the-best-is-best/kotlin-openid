@@ -17,7 +17,10 @@ import net.openid.appauth.ResponseTypeValues
 
 @SuppressLint("ComposableNaming")
 @Composable
-actual fun RememberAuthOpenId(onAuthResult: (Boolean?) -> Unit): AuthOpenIdState {
+actual fun RememberAuthOpenId(
+    authorizationRequest: io.github.openid.AuthorizationRequest,
+    onAuthResult: (Boolean?) -> Unit
+): AuthOpenIdState {
     val scope = rememberCoroutineScope()
     val authLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
@@ -31,27 +34,31 @@ actual fun RememberAuthOpenId(onAuthResult: (Boolean?) -> Unit): AuthOpenIdState
         }
 
     // Return the state object with the launcher
-    return remember { AuthOpenIdState(authLauncher) }
+    return remember { AuthOpenIdState(authorizationRequest, authLauncher) }
 }
 
 
-actual class AuthOpenIdState actual constructor(authLauncher: Any) {
-    private val authLauncher = authLauncher as ActivityResultLauncher<Intent>
+actual class AuthOpenIdState actual constructor(
+    private val authorizationRequest: io.github.openid.AuthorizationRequest,
+    private val authLauncher: Any
+) {
     private val authService = AuthorizationService(applicationContext)
-    private var continuation: kotlin.coroutines.Continuation<Boolean?>? = null
-    actual suspend fun launch(auth: AuthOpenId) {
-        // Configure OpenID service
-        val serviceConfig = getAuthServicesConfig()
+    actual suspend fun launch() {
 
+        // Configure OpenID service
+        val serviceConfig = getAuthServicesConfig(
+            authorizationRequest.issuer,
+            authorizationRequest.authorizationServiceConfiguration
+        )
 
         // Build authorization request
         val authRequest = AuthorizationRequest.Builder(
             serviceConfig,
-            OpenIdConfig.clientId,
+            authorizationRequest.clientId,
             ResponseTypeValues.CODE,
-            OpenIdConfig.redirectUrl.toUri()
+            authorizationRequest.redirectUrl.toUri()
         )
-            .setScopes(OpenIdConfig.scope)
+            .setScopes(authorizationRequest.scope)
             .build()
 
         // Create intent with CustomTabs
@@ -68,7 +75,7 @@ actual class AuthOpenIdState actual constructor(authLauncher: Any) {
         )
 
         // Launch the authentication flow
-        authLauncher.launch(authRequestIntent)
+        (authLauncher as ActivityResultLauncher<Intent>).launch(authRequestIntent)
 
     }
 }

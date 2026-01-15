@@ -1,6 +1,6 @@
 [versions]
 appauth = "0.11.1"
-gson = "2.13.2"
+#gson = "2.13.2"
 kmmCrypto = "2.0.1"
 koinAndroidxCompose = "4.1.1"
 kotlin = "2.3.0"
@@ -21,7 +21,7 @@ androidx-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref =
 appauth = { module = "net.openid:appauth", version.ref = "appauth" }
 components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
 foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose" }
-gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+#gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 jetbrains-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3Version" }
 kmm-crypto = { module = "io.github.the-best-is-best:kmm-crypto", version.ref = "kmmCrypto" }
 
@@ -49,4 +49,5 @@ compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 androidKotlinMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 maven-publish = {id = "com.vanniktech.maven.publish" , version.ref = "maven-publish"}

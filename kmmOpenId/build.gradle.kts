@@ -1,11 +1,11 @@
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
 plugins {
     alias(libs.plugins.multiplatform)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.compose)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
+    alias(libs.plugins.kotlin.serialization)
     id("maven-publish")
     id("signing")
     alias(libs.plugins.maven.publish)
@@ -117,13 +117,15 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.runtime)
+            implementation("org.jetbrains.compose.runtime:runtime:1.10.0")
 //            implementation(compose.foundation)
 //            implementation(compose.material3)
 //            implementation(compose.components.resources)
 //            implementation(compose.components.uiToolingPreview)
 
             implementation(libs.kotlinx.coroutines.core)
+            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0-RC")
+
 
 
             api(libs.kmm.crypto)
@@ -144,7 +146,7 @@ kotlin {
 //            implementation(compose.uiTooling)
 //            implementation(libs.androidx.activityCompose)
             implementation(libs.appauth)
-            implementation(libs.gson)
+//            implementation(libs.gson)
             implementation(libs.androidx.activityCompose)
             implementation(libs.androidx.startup.runtime)
         }

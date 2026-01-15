@@ -17,7 +17,10 @@ import net.openid.appauth.EndSessionRequest
 
 @SuppressLint("ComposableNaming")
 @Composable
-actual fun RememberLogoutOpenId(onLogoutResult: (Boolean?) -> Unit): LogoutOpenIdState {
+actual fun RememberLogoutOpenId(
+    endSessionRequest: AuthorizationRequest,
+    onLogoutResult: (Boolean?) -> Unit
+): LogoutOpenIdState {
     val kmmCrypto = KMMCrypto()
 
     val logoutLauncher =
@@ -29,26 +32,32 @@ actual fun RememberLogoutOpenId(onLogoutResult: (Boolean?) -> Unit): LogoutOpenI
             }
             onLogoutResult(isSuccess)
         }
-    return remember { LogoutOpenIdState(logoutLauncher) }
+    return remember { LogoutOpenIdState(endSessionRequest, logoutLauncher) }
 }
 
-actual class LogoutOpenIdState actual constructor(logoutLauncher: Any) {
+actual class LogoutOpenIdState actual constructor(
+    private val authorizationRequest: AuthorizationRequest,
+    logoutLauncher: Any
+) {
     private val logoutLauncher = logoutLauncher as ActivityResultLauncher<Intent>
 
     private val authService = AuthorizationService(applicationContext)
 
 
-    actual suspend fun launch(auth: AuthOpenId) {
-        val result = auth.getLastAuth()
-
+    actual suspend fun launch() {
+        val result = AuthOpenId().getLastAuth()
+        println("launching logout ${authorizationRequest.authorizationServiceConfiguration.postLogoutRedirectURL!!.toUri()}")
         result.onSuccess { authData ->
             val idToken = authData?.idToken ?: ""
             if (idToken.isEmpty()) return@onSuccess
 
-            val serviceConfig = getAuthServicesConfig()
+            val serviceConfig = getAuthServicesConfig(
+                authorizationRequest.issuer,
+                authorizationRequest.authorizationServiceConfiguration
+            )
             val endSessionRequest = EndSessionRequest.Builder(serviceConfig)
                 .setIdTokenHint(idToken)
-                .setPostLogoutRedirectUri(OpenIdConfig.postLogoutRedirectURL.toUri())
+                .setPostLogoutRedirectUri(authorizationRequest.authorizationServiceConfiguration.postLogoutRedirectURL.toUri())
                 .build()
 
             val endSessionIntent = authService.getEndSessionRequestIntent(

@@ -13,6 +13,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,6 +25,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.openid.AuthOpenId
 import io.github.openid.RememberAuthOpenId
 import io.github.openid.RememberLogoutOpenId
 import io.github.sample.api.KtorServices
@@ -49,6 +51,13 @@ internal fun App() = AppTheme {
 //    LaunchedEffect(Unit){
 //        OpenIdService.init()
 //    }
+    val auth = AuthOpenId()
+
+    val openIdServices = OpenIdService()
+
+    LaunchedEffect(Unit) {
+        auth.init("key", "service")
+    }
 
     KoinApplication(
         application = {
@@ -57,13 +66,15 @@ internal fun App() = AppTheme {
     ) {
         val apiService = getKoin().get<KtorServices>()
 
-        val authRes = RememberAuthOpenId {
+        val authRes = RememberAuthOpenId(
+            authorizationRequest = openIdServices.getAuthorizationRequest()
+        ) {
             println("Auth result $it")
             it?.let { isAuthenticated ->
                 if (isAuthenticated) {
                     scope.launch {
 
-                        val res = OpenIdService.getAuth.getLastAuth()
+                        val res = auth.getLastAuth()
                         res.onSuccess { result ->
                             accessToken = result!!.accessToken
                             refreshToken = result.refreshToken
@@ -77,7 +88,9 @@ internal fun App() = AppTheme {
                 }
             }
         }
-        val authLogout = RememberLogoutOpenId {
+        val authLogout = RememberLogoutOpenId(
+            openIdServices.getAuthorizationRequest()
+        ) {
             println("Logout result $it")
             it?.let { isLogout ->
                 if (isLogout) {
@@ -110,7 +123,7 @@ internal fun App() = AppTheme {
                         Spacer(Modifier.height(20.dp))
                         Button(onClick = {
                             scope.launch {
-                                val res = OpenIdService.getAuth.getLastAuth()
+                                val res = auth.getLastAuth()
                                 res.onSuccess {
                                     println("last auth token ${it?.accessToken}")
                                     if (it != null) {
@@ -125,7 +138,7 @@ internal fun App() = AppTheme {
                         }
                         Button(onClick = {
                             scope.launch {
-                                authRes.launch(OpenIdService.getAuth)
+                                authRes.launch()
                             }
 
                         }) {
@@ -138,12 +151,13 @@ internal fun App() = AppTheme {
                                     println("Attempting to refresh token")
                                     scope.launch {
 
-                                        val result = OpenIdService.getAuth.refreshToken()
+                                        val result =
+                                            auth.refreshToken(openIdServices.getTokenRequest())
                                         result.onSuccess { isAuthenticated ->
                                             println("Authentication successful!")
                                             scope.launch {
 
-                                                val newAuth = OpenIdService.getAuth.getLastAuth()
+                                                val newAuth = auth.getLastAuth()
                                                 newAuth.onSuccess {
                                                     if (it != null) {
                                                         println("Login success ${it.accessToken}")
@@ -183,7 +197,7 @@ internal fun App() = AppTheme {
                             enabled = idToken.isNotEmpty(),
                             onClick = {
                                 scope.launch {
-                                    authLogout.launch(OpenIdService.getAuth)
+                                    authLogout.launch()
                                 }
                             }) {
                             Text("Logout")
