@@ -9,6 +9,7 @@ agp = "8.13.2"
 androidx-activityCompose = "1.12.2"
 androidx-uiTest = "1.10.0"
 kotlinxCoroutinesCore = "1.10.2"
+kotlinxSerializationJson = "1.10.0-RC"
 material3Version = "1.10.0-alpha05"
 maven-publish = "0.35.0"
 ktor = "3.3.3"
@@ -27,6 +28,7 @@ kmm-crypto = { module = "io.github.the-best-is-best:kmm-crypto", version.ref = "
 
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinAndroidxCompose" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }

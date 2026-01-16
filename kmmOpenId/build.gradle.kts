@@ -35,7 +35,7 @@ tasks.withType<PublishToMavenRepository> {
 
 
 mavenPublishing {
-    coordinates("io.github.the-best-is-best", "kapp-auth", "5.0.1")
+    coordinates("io.github.the-best-is-best", "kapp-auth", "6.0.0")
 
     publishToMavenCentral(true)
 
@@ -117,14 +117,14 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation("org.jetbrains.compose.runtime:runtime:1.10.0")
+            implementation(libs.runtime)
 //            implementation(compose.foundation)
 //            implementation(compose.material3)
 //            implementation(compose.components.resources)
 //            implementation(compose.components.uiToolingPreview)
 
             implementation(libs.kotlinx.coroutines.core)
-            implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0-RC")
+            implementation(libs.kotlinx.serialization.json)
 
 
 
