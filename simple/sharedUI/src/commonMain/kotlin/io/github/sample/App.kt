@@ -38,7 +38,7 @@ import org.koin.dsl.module
 
 
 @Composable
-internal fun App() = AppTheme {
+fun App() = AppTheme {
     var refreshToken by remember { mutableStateOf("") }
     var accessToken by remember { mutableStateOf("") }
     var idToken by remember { mutableStateOf("") }

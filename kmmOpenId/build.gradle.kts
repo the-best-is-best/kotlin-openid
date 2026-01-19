@@ -35,7 +35,7 @@ tasks.withType<PublishToMavenRepository> {
 
 
 mavenPublishing {
-    coordinates("io.github.the-best-is-best", "kapp-auth", "6.0.0")
+    coordinates("io.github.the-best-is-best", "kapp-auth", "6.0.1")
 
     publishToMavenCentral(true)
 
@@ -167,6 +167,7 @@ kotlin {
     android {
         namespace = "io.github.kmmopenid"
         compileSdk = 36
+        minSdk = 24
     }
 }
 
