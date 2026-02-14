@@ -1,28 +1,36 @@
 package io.github.openid
 
+import android.app.Activity
+import android.content.Intent
+import androidx.core.net.toUri
 import io.github.kmmcrypto.KMMCrypto
 import kotlinx.coroutines.suspendCancellableCoroutine
 import net.openid.appauth.AuthorizationService
 import net.openid.appauth.GrantTypeValues
+import net.openid.appauth.ResponseTypeValues
 import net.openid.appauth.TokenRequest
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 
 actual class AuthOpenId {
-    private val authService = AuthorizationService(applicationContext)
 
     companion object {
         lateinit var key: String
         lateinit var group: String
     }
 
+
     actual fun init(key: String, group: String) {
         AuthOpenId.key = key
         AuthOpenId.group = group
     }
 
+    // فنكشن مساعدة عشان تجيب الـ Activity بأمان
+    private fun getActivity(): Activity? = applicationContext as? Activity
+
     actual suspend fun refreshToken(tokenRequest: io.github.openid.TokenRequest): Result<AuthResult> {
+        val authService = AuthorizationService(applicationContext)
         return try {
             val authResult = getLastAuth().getOrThrow()
             val refreshToken = authResult?.refreshToken
@@ -68,6 +76,48 @@ actual class AuthOpenId {
         }
     }
 
+    suspend fun login(authorizationRequest: AuthorizationRequest): Intent {
+        val authService = AuthorizationService(applicationContext)
+
+        val serviceConfig = getAuthServicesConfig(
+            authorizationRequest.issuer,
+            authorizationRequest.authorizationServiceConfiguration
+        )
+
+        val request = net.openid.appauth.AuthorizationRequest.Builder(
+            serviceConfig,
+            authorizationRequest.clientId,
+            ResponseTypeValues.CODE,
+            authorizationRequest.redirectUrl.toUri()
+        ).setScope(authorizationRequest.scope.joinToString(" ")).build()
+
+        // Return the intent to be started by the Activity/Fragment
+        return authService.getAuthorizationRequestIntent(request)
+    }
+
+
+    suspend fun logout(authorizationRequest: AuthorizationRequest): Intent {
+        val authService = AuthorizationService(applicationContext)
+
+        val serviceConfig = getAuthServicesConfig(
+            authorizationRequest.issuer,
+            authorizationRequest.authorizationServiceConfiguration
+        )
+
+        val endSessionRequest = net.openid.appauth.EndSessionRequest.Builder(serviceConfig)
+            .setPostLogoutRedirectUri(authorizationRequest.authorizationServiceConfiguration.postLogoutRedirectURL!!.toUri())
+            // Important: AppAuth often requires the ID Token hint for logout
+            .apply {
+                getLastAuth().getOrNull()?.idToken?.let { setIdTokenHint(it) }
+            }
+            .build()
+
+        // Clear local data
+        KMMCrypto().deleteData(key, group)
+
+        return authService.getEndSessionRequestIntent(endSessionRequest)
+    }
+
 
     actual suspend fun getLastAuth(): Result<AuthResult?> {
         return try {
@@ -96,4 +146,8 @@ actual class AuthOpenId {
         }
     }
 
+    fun deleteLastAuth() {
+        val kmmCrypto = KMMCrypto()
+        kmmCrypto.deleteData(key, group)
+    }
 }

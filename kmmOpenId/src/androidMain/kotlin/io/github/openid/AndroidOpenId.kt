@@ -2,7 +2,6 @@ package io.github.openid
 
 import android.app.Activity
 import io.github.kmmcrypto.KMMCrypto
-import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.suspendCancellableCoroutine
 import net.openid.appauth.AuthorizationException
 import net.openid.appauth.AuthorizationResponse
@@ -13,10 +12,6 @@ import kotlin.coroutines.resumeWithException
 
 class AndroidOpenId {
 
-    //    internal lateinit var authLauncher: ActivityResultLauncher<Intent>
-    internal lateinit var continuation: CancellableContinuation<Boolean?>
-
-//    internal lateinit var logoutLauncher: ActivityResultLauncher<Intent>
 
 
     private val kmmCrypto = KMMCrypto()
@@ -95,6 +90,8 @@ class AndroidOpenId {
             println("data removed")
         }
     }
+
+
 }
 
 

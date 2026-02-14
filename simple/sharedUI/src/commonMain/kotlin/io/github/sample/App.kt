@@ -46,6 +46,7 @@ fun App() = AppTheme {
     val scope = rememberCoroutineScope()
 
     val appModule = module {
+        factory { KtorServices() }
         single { AppModule().module }
     }
 

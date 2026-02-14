@@ -111,21 +111,31 @@ actual class AuthOpenId {
         }
     }
 
-    suspend fun login(authorizationRequest: AuthorizationRequest): Result<Boolean> =
+    suspend fun login(authorizationRequest: AuthorizationRequest): Result<AuthResult> =
         suspendCancellableCoroutine { cont ->
             authInterop.loginWithOpenId(authorizationRequest.toIOSOpenIdConfig()) { res, error ->
                 if (error != null) {
                     cont.resume(Result.failure(Exception(error)))
                     return@loginWithOpenId
                 } else {
+                    // 1. Extract tokens
                     val accessToken = res?.accessToken() ?: ""
                     val refreshToken = res?.refreshToken() ?: ""
                     val idToken = res?.idToken() ?: ""
 
-                    println("Authentication successful: Access Token: $accessToken, Refresh Token: $refreshToken, ID Token: $idToken")
+                    // 2. Create the AuthResult object
+                    val authResult = AuthResult(
+                        accessToken = accessToken,
+                        refreshToken = refreshToken,
+                        idToken = idToken
+                        // Add other fields if your AuthResult class requires them
+                    )
+
+                    println("Authentication successful: Access Token: $accessToken")
 
                     try {
-                        cont.resume(Result.success(true))
+                        // 3. Resume with the AuthResult object, NOT just 'true'
+                        cont.resume(Result.success(authResult))
                     } catch (e: Exception) {
                         cont.resume(Result.failure(Exception("Failed to save auth state: ${e.message}")))
                     }
@@ -136,22 +146,29 @@ actual class AuthOpenId {
     suspend fun logout(authorizationRequest: AuthorizationRequest): Result<Boolean> =
         suspendCancellableCoroutine { cont ->
             authInterop.logoutWithOpenId(authorizationRequest.toIOSOpenIdConfig()) { res, error ->
-                // Even if there is an error (like no internet), we clear local data
-                // so the user isn't stuck logged into the app.
-                try {
-                    crypto.deleteData(service, group)
-                } catch (e: Exception) {
-                    println("Local wipe failed: ${e.message}")
-                }
-
+                // 1. Handle Native Errors (e.g., Network/Browser issues)
                 if (error != null) {
                     println("Native Logout Error: $error")
-                    // We resume with success(false) so the ViewModel knows
-                    // the server call failed, but the app can still reset.
-                    cont.resume(Result.success(false))
+                    cont.resume(Result.failure(Exception(error)))
+                    return@logoutWithOpenId
+                }
+
+                // 2. Check if 'res' is actually true (The user confirmed logout in the browser)
+                if (res) {
+                    try {
+                        // Only delete local data if the server/browser logout was successful
+                        crypto.deleteData(service, group)
+                        println("Local data wiped successfully.")
+                        cont.resume(Result.success(true))
+                    } catch (e: Exception) {
+                        cont.resume(Result.failure(Exception("Wipe failed: ${e.message}")))
+                    }
                 } else {
-                    cont.resume(Result.success(true))
+                    // If res is false, the user likely cancelled the logout dialog
+                    println("Logout cancelled by user or failed.")
+                    cont.resume(Result.success(false))
                 }
             }
         }
+
 }

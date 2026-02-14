@@ -35,7 +35,6 @@ kotlin {
     // https://developer.android.com/kotlin/multiplatform/migrate
     val xcfName = "SimpleKMPProject"
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach { target ->
@@ -84,6 +83,8 @@ kotlin {
                 implementation(libs.koin.android)
                 implementation(libs.koin.compose)
                 implementation(libs.ktor.client.okhttp)
+
+                implementation(libs.androidx.startup.runtime)
             }
         }
 
@@ -107,8 +108,11 @@ kotlin {
 }
 
 dependencies {
-    add("kspCommonMainMetadata", libs.koingenerator.processor)
+    add("kspAndroid", libs.koingenerator.processor)
 
+    // Target iOS (Assuming you use kspIosX64, kspIosArm64, etc.)
+    add("kspIosArm64", libs.koingenerator.processor)
+    add("kspIosSimulatorArm64", libs.koingenerator.processor)
 }
 project.tasks.configureEach {
     if (name.startsWith("ksp") && name != "kspCommonMainKotlinMetadata") {

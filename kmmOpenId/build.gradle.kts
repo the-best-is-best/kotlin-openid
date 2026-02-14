@@ -29,7 +29,7 @@ tasks.withType<PublishToMavenRepository> {
 
 
 mavenPublishing {
-    coordinates("io.github.the-best-is-best", "kapp-auth", "6.0.2")
+    coordinates("io.github.the-best-is-best", "kapp-auth", "7.0.0")
 
     publishToMavenCentral(true)
 
@@ -87,7 +87,6 @@ kotlin {
     //    }
 
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach {
