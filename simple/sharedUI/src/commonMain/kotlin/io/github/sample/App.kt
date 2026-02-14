@@ -25,11 +25,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.kmmopenid.api.KtorServices
+import io.github.kmmopenid.di.AppModule
 import io.github.kmmopenid.kappauthcmp.RememberAuthOpenId
 import io.github.kmmopenid.kappauthcmp.RememberLogoutOpenId
+import io.github.kmmopenid.services.OpenIdService
 import io.github.openid.AuthOpenId
-import io.github.sample.api.KtorServices
-import io.github.sample.services.OpenIdService
 import io.github.sample.theme.AppTheme
 import kotlinx.coroutines.launch
 import org.koin.compose.KoinApplication
@@ -45,7 +46,7 @@ fun App() = AppTheme {
     val scope = rememberCoroutineScope()
 
     val appModule = module {
-        single { KtorServices() }
+        single { AppModule().module }
     }
 
 //    LaunchedEffect(Unit){

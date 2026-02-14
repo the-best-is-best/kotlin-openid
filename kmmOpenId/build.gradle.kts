@@ -12,10 +12,6 @@ plugins {
 
 
 
-apply(plugin = "maven-publish")
-apply(plugin = "signing")
-
-
 tasks.withType<PublishToMavenRepository> {
     val isMac = getCurrentOperatingSystem().isMacOsX
     onlyIf {
@@ -33,7 +29,7 @@ tasks.withType<PublishToMavenRepository> {
 
 
 mavenPublishing {
-    coordinates("io.github.the-best-is-best", "kapp-auth", "6.0.1")
+    coordinates("io.github.the-best-is-best", "kapp-auth", "6.0.2")
 
     publishToMavenCentral(true)
 

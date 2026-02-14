@@ -1,12 +1,11 @@
-package io.github.sample.services
+package io.github.kmmopenid.services
 
 import io.github.openid.AuthorizationRequest
 import io.github.openid.AuthorizationServiceConfig
 import io.github.openid.TokenRequest
 
+
 class OpenIdService {
-
-
     fun getAuthorizationRequest(): AuthorizationRequest {
         return AuthorizationRequest(
             issuer = "https://demo.duendesoftware.com",

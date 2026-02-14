@@ -1,330 +1,182 @@
-<h1 align="center">KAppAuth</h1><br>
+# KAppAuth
 
-<div align="center">
-<a href="https://opensource.org/licenses/Apache-2.0"><img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg"/></a>
-<a href="https://android-arsenal.com/api?level=23" rel="nofollow">
-    <img alt="API" src="https://img.shields.io/badge/API-23%2B-brightgreen.svg?style=flat" style="max-width: 100%;">
-</a>
-  <img src="https://img.shields.io/badge/Platform-Android-brightgreen.svg?logo=android" alt="Badge Android" />
-  <img src="https://img.shields.io/badge/Platform-iOS%20%2F%20macOS-lightgrey.svg?logo=apple" alt="Badge iOS" />
+This package provides a Kotlin Multiplatform abstraction around the Android and iOS AppAuth SDKs, making it easy to communicate with OAuth 2.0 and OpenID Connect providers.
 
-<a href="https://github.com/the-best-is-best/"><img alt="Profile" src="https://img.shields.io/badge/github-%23181717.svg?&style=for-the-badge&logo=github&logoColor=white" height="20"/></a>
-</div>
+## Project Structure & Philosophy
 
-### This package provides an abstraction around the Android and iOS AppAuth SDKs so it can be used to communicate with OAuth 2.0 and OpenID Connect providers
+This project demonstrates two different UI strategies for a Kotlin Multiplatform project, each with a specific library dependency chain.
 
-<hr>
+### Library Modules
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.the-best-is-best/kapp-auth)](https://central.sonatype.com/artifact/io.github.the-best-is-best/kapp-auth)
+1.  **:kmmOpenId** (`io.github.the-best-is-best:kapp-auth`)
+    *   The **core KMP library** containing the platform-specific authentication logic. It has no UI dependencies. **It is the required library for native iOS (SwiftUI) development.**
+2.  **:kappAuthCMP** (`io.github.the-best-is-best:kapp-auth-cmp`)
+    *   An **optional helper library for Compose**. It provides the `RememberAuthOpenId` composable. **It is the required library for Android (Jetpack Compose) or shared Compose Multiplatform UI development.**
 
-KApp Auth is available on `mavenCentral()`.
+### Business Logic Module
 
-```kotlin
-implementation("io.github.the-best-is-best:kapp-auth:6.0.0")
+*   **:simpleKMPPorject**: This is the shared KMP module that contains all the business logic, like the `LoginViewModel`. It depends on the core `:kmmOpenId` library.
 
-```
+### Demo Apps
 
-### ✅ **Install via SPM**
+*   **Native UI Approach**: An Android app using Jetpack Compose (`:simple:androidKMMSimple`) and an iOS app using SwiftUI (`:simple:iosAppKMP`).
+*   **Shared UI Approach**: A shared Compose Multiplatform UI module (`:simple:sharedUI`) hosted inside a native iOS app (`:simple:iosApp`).
 
-You need install **IOSCrypto** directly using **Swift Package Manager (SPM)** from:  
-🔗 [AppAuthInterop-iOS on GitHub](https://github.com/the-best-is-best/AppAuthInterop)
+---
 
-### Note: v5 dep on v3.0.0
+## Core Setup (Required for All Approaches)
 
-You can install **AppAuth** directly using **Swift Package Manager (SPM)** from:  
-🔗 [AppAuth-iOS on GitHub](https://github.com/openid/AppAuth-iOS)
+This setup is done in your shared KMP business logic module (e.g., `:simpleKMPPorject`).
 
-You need install **IOSCrypto** directly using **Swift Package Manager (SPM)** from:  
-🔗 [IOSCryptoManager-iOS on GitHub](https://github.com/the-best-is-best/IOSCryptoInterop)
+#### 1. Configure Gradle Dependencies
 
-## How to use it
-
-### First in androidMain
-
-<br>
+Your shared logic module must depend on the core `:kmmOpenId` library.
 
 ```kotlin
-AndroidKMMCrypto.init("key0") // add alias key name
-```
-
-### Second in commonMain
-
-#### 1 -
-
-```kotlin
- val auth = AuthOpenId()
- LaunchedEffect(Unit) {
-        auth.init("key", "service")
+// in simple/simpleKMPPorject/build.gradle.kts
+kotlin {
+    sourceSets {
+        commonMain {
+            dependencies {
+                api(project(":kmmOpenId"))
+                api(libs.androidx.lifecycle.viewmodel)
+                api(libs.koin.core)
+            }
+        }
     }
-```
-
-#### 2 -
-
-```kotlin
-
-import io.github.openid.AuthorizationRequest
-import io.github.openid.AuthorizationServiceConfig
-import io.github.openid.TokenRequest
-
-class OpenIdService {
-
-
-    fun getAuthorizationRequest(): AuthorizationRequest {
-        return AuthorizationRequest(
-            issuer = "https://demo.duendesoftware.com",
-            discoveryUrl = ".well-known/openid-configuration",
-            scope = listOf("openid", "profile", "offline_access", "email"),
-            clientId = "interactive.public",
-            redirectUrl = "com.duendesoftware.demo:/oauthredirect",
-            authorizationServiceConfiguration = AuthorizationServiceConfig(
-                authorizationEndpoint = "connect/authorize",
-                tokenEndpoint = "connect/token",
-                endSessionEndpoint = "connect/endsession",
-                postLogoutRedirectURL = "com.duendesoftware.demo:/postlogout",
-                registerEndPoint = null
-            ),
-        )
-    }
-
-
-    fun getTokenRequest(): TokenRequest {
-        return TokenRequest(
-            issuer = "https://demo.duendesoftware.com",
-            tokenEndpoint = "connect/token",
-            clientId = "interactive.public",
-        )
-    }
-
 }
 ```
 
-### Note: this package login and saved data so auth or refresh token will return true or false or exception
+#### 2. Create a Shared `LoginViewModel`
 
-### Auth
+This ViewModel in `commonMain` orchestrates the authentication logic.
 
 ```kotlin
-       val authRes = RememberAuthOpenId(
-            authorizationRequest = openIdServices.getAuthorizationRequest()
-        ) {
-        println("Auth result $it")
-        it?.let { isAuthenticated ->
-            if (isAuthenticated) {
-                scope.launch {
-
-                    auth.getLastAuth { res ->
-                        res.onSuccess { it ->
-                            accessToken = it!!.accessToken
-                            refreshToken = it.refreshToken
-                            idToken = it.idToken
-                        }
-                    }
-                    println("Authentication successful!")
-                }
-            } else {
-                println("Authentication failed!")
-
-            }
-        }
-    }
-
-   ...
-   Button(onClick:(){
-     authRes.launch()
-   }){
-    Text("login")
-   }
+// in simpleKMPPorject/src/commonMain/kotlin/io/github/kmmopenid/LoginViewModel.kt
+@KoinViewModel
+class LoginViewModel(...) : ViewModel() { /* ... */ }
 ```
 
-### Refresh token
+#### 3. Initialize the Library on App Startup
 
+You must initialize the library to configure encrypted data storage.
+
+**Android (`App.kt`)**
 ```kotlin
- try {
-    println("Attempting to refresh token")
-     val result =
-        auth.refreshToken(openIdServices.getTokenRequest())
-        result.onSuccess { isAuthenticated ->
-            if (isAuthenticated) {
-                println("Authentication successful!")
-                
-            } else {
-                println("Authentication failed!")
-            }
-        }.onFailure { error ->
-            println("Authentication error: ${error.message}")
-        }
-    
-    } catch (e: Exception) {
-        println("Refresh token failed: ${e.message}")
+// in simple/androidKMMSimple/src/main/kotlin/org/company/app/androidApp/App.kt
+class App : Application() {
+    override fun onCreate() {
+        super.onCreate()
+        initKoin { androidContext(this@App) }
+        AuthOpenId().init("key", "group")
     }
+}
 ```
 
-### Get data
-
-```kotlin
-     val res = auth.getLastAuth()
-        res.onSuccess { result ->
-            accessToken = result!!.accessToken
-            refreshToken = result.refreshToken
-            idToken = result.idToken
+**iOS (`iosApp.swift`)**
+```swift
+// in simple/iosAppKMP/iosApp/iosApp.swift (Native UI example)
+@main
+struct iOSApp: App {
+    init() { KoinModuleIOS().doInitKoinIOS() }
+    var body: some Scene {
+        WindowGroup {
+            ContentView().onAppear { AuthOpenId().doInit(key: "key", group: "group") }
         }
-
+    }
+}
 ```
 
-### logout
+---
+
+## UI Integration Guides
+
+### Approach 1: Native UIs (Jetpack Compose & SwiftUI)
+
+This is the classic KMP approach where UI is native to each platform.
+
+#### Android (Jetpack Compose)
+
+The Android app (`:simple:androidKMMSimple`) **must** use the `:kappAuthCMP` module for its Composable helpers.
 
 ```kotlin
-   val authLogout = RememberLogoutOpenId(
-            openIdServices.getAuthorizationRequest()
-        ) {
-        println("Logout result $it")
-        it?.let { isLogout ->
-            if (isLogout) {
-                accessToken = ""
-                refreshToken = ""
-                idToken = ""
+// in simple/androidKMMSimple/build.gradle.kts
+implementation(project(":simple:simpleKMPPorject"))
+implementation(project(":kappAuthCMP")) // <<< Required for RememberAuthOpenId
 
-                println("Logout successful!")
-            } else {
-                println("Logout failed!")
-
-            }
-
-
-        }
-    }
-    Button(onClick:(){
-        authLogout.launch()
-    }){
-        Text("Logout")
-    }
-
+// in simple/androidKMMSimple/src/main/kotlin/org/company/app/androidApp/AppActivity.kt
+val authLauncher = RememberAuthOpenId(
+    authorizationRequest = openIdServices.getAuthorizationRequest(),
+    onAuthResult = loginViewModel::onLoginResult
+)
 ```
 
-### Finally we add interceptor for get token and refresh token auto in 401 or 403 and re call api ` But there is no test yet. `
+#### iOS (SwiftUI)
 
-```kotlin
+The native iOS app (`:simple:iosAppKMP`) uses **only** the core `:kmmOpenId` library and requires a `UIViewControllerRepresentable` bridge.
 
-import io.github.openid.AuthOpenId
-import io.github.sample.services.OpenIdService
-import io.ktor.client.HttpClient
-import io.ktor.client.plugins.HttpRequestRetry
-import io.ktor.client.plugins.auth.Auth
-import io.ktor.client.plugins.auth.providers.BearerTokens
-import io.ktor.client.plugins.auth.providers.bearer
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.plugins.logging.DEFAULT
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logger
-import io.ktor.client.plugins.logging.Logging
-import io.ktor.client.plugins.timeout
-import io.ktor.client.request.HttpRequestBuilder
-import io.ktor.client.request.header
-import io.ktor.http.path
-import io.ktor.http.takeFrom
-import io.ktor.serialization.kotlinx.json.json
-import kotlinx.io.IOException
-import kotlinx.serialization.json.Json
+```swift
+// in simple/iosAppKMP/iosApp/iosApp.swift
 
-internal abstract class KtorApi {
-    private val auth = AuthOpenId()
-    private val openIdService = OpenIdService()
-    val client = HttpClient {
-        expectSuccess = true
-        defaultRequest {
-            header("Content-Type", "application/json")
-        }
-        install(Logging) {
-            logger = Logger.DEFAULT
-            level = LogLevel.ALL
-        }
-
-        install(ContentNegotiation) {
-            json(
-                Json {
-                    ignoreUnknownKeys = true
-                    useAlternativeNames = false
-                }
-            )
-        }
-        install(HttpRequestRetry) {
-            maxRetries = 3
-            retryIf { _, response ->
-                response.status.value == 401 || response.status.value in 500..599
+// 1. Create a UIViewControllerRepresentable to bridge the auth call.
+struct AuthView: UIViewControllerRepresentable {
+    func updateUIViewController(_ vc: UIViewController, context: Context) {
+        if startAuth {
+            // 2. Call the login function from the core KMP library directly
+            AuthOpenId().login(...) { result, error in
+                // ...
             }
-            retryOnExceptionIf { _, cause -> cause is IOException }
-            delayMillis { retry -> retry * 1000L }
-            modifyRequest { request ->
-                request.timeout {
-                    requestTimeoutMillis = 10000
-                }
-            }
-        }
-
-        install(Auth) {
-            bearer {
-                loadTokens {
-                    try {
-                        val res = auth.getLastAuth()
-                        var token: BearerTokens? = null
-                        res.onSuccess {
-                            println("res token ${it?.accessToken}")
-                            if (it != null && it.accessToken.isNotBlank()) {
-                                token = BearerTokens(it.accessToken, it.refreshToken)
-                            }
-                        }
-                        res.onFailure {
-                            println("res token fail $it")
-                        }
-                        token
-                    } catch (e: Exception) {
-                        null
-                    }
-                }
-                refreshTokens {
-                    var token: BearerTokens? = null
-                    val res = auth.refreshToken(openIdService.getTokenRequest())
-                    res.onSuccess {
-                        if (it.accessToken.isNotBlank()) {
-                            println("res token after refresh ${it.accessToken}")
-                            token = BearerTokens(it.accessToken, it.refreshToken)
-                        }
-                    }
-                    res.onFailure {
-                        println("res token fail $it")
-                    }
-                    println("refresh token is $token")
-                    token
-                }
-            }
-        }
-
-
-    }
-
-
-    fun HttpRequestBuilder.pathUrl(path: String) {
-        url {
-            takeFrom("https://demo.duendesoftware.com")
-                .path("api", path)
         }
     }
-
-
 }
 
+// 3. In your main ContentView, use a ZStack to host the bridge.
+struct ContentView: View {
+    var body: some View {
+        ZStack {
+            VStack { Button("Login") { ... } }
+            // The hidden bridge view is triggered by state changes
+            AuthView(...).frame(width: 0, height: 0)
+        }
+    }
+}
 ```
 
-### And
+### Approach 2: Shared UI (Compose Multiplatform)
+
+This approach shares UI code between Android and iOS. This requires the **:kappAuthCMP** module in the `commonMain` of your shared UI module.
+
+**Shared UI Module (e.g., `:simple:sharedUI`)**
+
+Your shared UI module must depend on `:kappAuthCMP` to use `RememberAuthOpenId` in `commonMain`.
 
 ```kotlin
-import io.ktor.client.request.post
-import io.ktor.client.statement.bodyAsText
+// In a shared Composable screen in commonMain
+@Composable
+fun LoginScreen() {
+    // Use RememberAuthOpenId here, same as the native Android example
+    val authLauncher = RememberAuthOpenId(...)
+}
+```
 
-internal class KtorServices : KtorApi() {
-    suspend fun testApi(): String = client.post {
-        pathUrl("/test")
-        interceptRequest(this)
-    }.bodyAsText()
+**iOS Host App (`:simple:iosApp`)**
+
+The iOS host app's only job is to display the shared Composable screen. It does not need to know about the auth libraries directly.
+
+```swift
+// in simple/iosApp/iosApp/iosApp.swift
+
+// 1. Bridge to the Compose UIViewController created in your shared module's iosMain
+struct ComposeView: UIViewControllerRepresentable {
+    func makeUIViewController(context: Context) -> UIViewController {
+        return MainKt.MainViewController() // This function returns your Compose UI
+    }
+}
+
+// 2. Display the view
+struct ContentView: View {
+    var body: some View {
+        ComposeView().ignoresSafeArea(.all)
+    }
 }
 ```

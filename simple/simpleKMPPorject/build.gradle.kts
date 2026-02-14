@@ -1,80 +1,16 @@
-import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem
-
 plugins {
     alias(libs.plugins.multiplatform)
-    alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.compose)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
-    alias(libs.plugins.kotlin.serialization)
-    id("maven-publish")
-    id("signing")
-    alias(libs.plugins.maven.publish)
+    alias(libs.plugins.ksp)
 }
 
-
-tasks.withType<PublishToMavenRepository> {
-    val isMac = getCurrentOperatingSystem().isMacOsX
-    onlyIf {
-        isMac.also {
-            if (!isMac) logger.error(
-                """
-                        Publishing the library requires macOS to be able to generate iOS artifacts.
-                        Run the task on a mac or use the project GitHub workflows for publication and release.
-                    """
-            )
-        }
-    }
-}
-
-
-
-mavenPublishing {
-    coordinates("io.github.the-best-is-best", "kapp-auth-cmp", "6.0.2")
-
-    publishToMavenCentral(true)
-
-    signAllPublications()
-
-    pom {
-        name.set("KApp Auth")
-        description.set("This package provides an abstraction around the Android and iOS AppAuth SDKs so it can be used to communicate with OAuth 2.0 and OpenID Connect providers")
-        url.set("https://github.com/the-best-is-best/kotlin-openid")
-        licenses {
-            license {
-                name.set("Apache-2.0")
-                url.set("https://opensource.org/licenses/Apache-2.0")
-            }
-        }
-        issueManagement {
-            system.set("Github")
-            url.set("https://github.com/the-best-is-best/kotlin-openid")
-        }
-        scm {
-            connection.set("https://github.com/the-best-is-best/kotlin-openid.git")
-            url.set("https://github.com/the-best-is-best/kotlin-openid")
-        }
-        developers {
-            developer {
-                id.set("MichelleRaouf")
-                name.set("Michelle Raouf")
-                email.set("eng.michelle.raouf@gmail.com")
-            }
-        }
-    }
-
-}
-
-signing {
-    useGpgCmd()
-    sign(publishing.publications)
-}
 kotlin {
 
     // Target declarations - add or remove as needed below. These define
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     androidLibrary {
-        namespace = "io.github.kmmopenid.kappauthcmp"
+        namespace = "io.github.kmmopenid.kmpproject"
         compileSdk {
             version = release(36) { minorApiLevel = 1 }
         }
@@ -97,21 +33,21 @@ kotlin {
     // A step-by-step guide on how to include this library in an XCode
     // project can be found here:
     // https://developer.android.com/kotlin/multiplatform/migrate
-    val xcfName = "kappAuthCMPKit"
-
-
+    val xcfName = "SimpleKMPProject"
     listOf(
         iosX64(),
         iosArm64(),
         iosSimulatorArm64()
-    ).forEach {
-        it.binaries.framework {
+    ).forEach { target ->
+        target.binaries.framework {
             baseName = xcfName
+            isStatic = true
+            export(libs.androidx.lifecycle.viewmodel)
+            export(project(":kmmOpenId"))
+            export(libs.koin.core)
         }
 
     }
-
-
     // Source set declarations.
     // Declaring a target automatically creates a source set with the same name. By default, the
     // Kotlin Gradle Plugin creates additional source sets that depend on each other, since it is
@@ -122,25 +58,35 @@ kotlin {
             dependencies {
                 implementation(libs.kotlin.stdlib)
                 // Add KMP dependencies here
-                implementation(libs.runtime)
                 api(project(":kmmOpenId"))
+                api(libs.androidx.lifecycle.viewmodel)
 
-//                implementation(libs.kotlinx.coroutines.core)
-//                implementation(libs.kotlinx.serialization.json)
+                api(libs.koin.core)
+                implementation(libs.koin.viewmodel)
+                implementation(libs.koingenerator.annotations)
+
+                implementation(libs.ktor.client.core)
+                implementation(libs.ktor.client.auth)
+
+                implementation(libs.ktor.client.logging)
+                implementation(libs.ktor.client.content.negotiation)
+                implementation(libs.ktor.serialization.kotlinx.json)
             }
         }
+
+
 
         androidMain {
             dependencies {
                 // Add Android-specific dependencies here. Note that this source set depends on
                 // commonMain by default and will correctly pull the Android artifacts of any KMP
                 // dependencies declared in commonMain.
-                implementation(libs.androidx.activityCompose)
-                implementation(libs.androidx.core.ktx)
-                implementation(libs.androidx.startup.runtime)
-                implementation(libs.androidx.browser)
+                implementation(libs.koin.android)
+                implementation(libs.koin.compose)
+                implementation(libs.ktor.client.okhttp)
             }
         }
+
 
 
         iosMain {
@@ -150,8 +96,22 @@ kotlin {
                 // part of KMP’s default source set hierarchy. Note that this source set depends
                 // on common by default and will correctly pull the iOS artifacts of any
                 // KMP dependencies declared in commonMain.
+                implementation(libs.ktor.client.darwin)
             }
+        }
+        sourceSets.named("commonMain").configure {
+            kotlin.srcDir("build/generated/ksp/metadata/commonMain/kotlin")
         }
     }
 
+}
+
+dependencies {
+    add("kspCommonMainMetadata", libs.koingenerator.processor)
+
+}
+project.tasks.configureEach {
+    if (name.startsWith("ksp") && name != "kspCommonMainKotlinMetadata") {
+        dependsOn("kspCommonMainKotlinMetadata")
+    }
 }

@@ -1,9 +1,11 @@
-package io.github.sample.api
+package io.github.kmmopenid.api
 
+import io.github.tbib.koingeneratorannotations.Factory
 import io.ktor.client.request.post
 import io.ktor.client.statement.bodyAsText
 
-internal class KtorServices : KtorApi() {
+@Factory
+class KtorServices : KtorApi() {
     suspend fun testApi(): String = client.post {
         pathUrl("test")
     }.bodyAsText()

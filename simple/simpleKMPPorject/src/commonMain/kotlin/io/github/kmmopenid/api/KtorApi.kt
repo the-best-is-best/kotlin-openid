@@ -1,7 +1,7 @@
-package io.github.sample.api
+package io.github.kmmopenid.api
 
 import io.github.openid.AuthOpenId
-import io.github.sample.services.OpenIdService
+import io.github.kmmopenid.services.OpenIdService
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.HttpRequestRetry
 import io.ktor.client.plugins.auth.Auth
@@ -22,7 +22,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.io.IOException
 import kotlinx.serialization.json.Json
 
-internal abstract class KtorApi {
+ abstract class KtorApi {
     private val auth = AuthOpenId()
     private val openIdService = OpenIdService()
     val client = HttpClient {

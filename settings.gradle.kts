@@ -38,4 +38,7 @@ dependencyResolutionManagement {
 include(":kmmOpenId")
 include(":simple:sharedUI")
 include(":simple:androidSimple")
+include(":simple:androidKMMSimple")
 include(":kappAuthCMP")
+include(":simple:simpleKMPPorject")
+

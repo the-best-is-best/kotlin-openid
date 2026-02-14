@@ -114,59 +114,44 @@ actual class AuthOpenId {
     suspend fun login(authorizationRequest: AuthorizationRequest): Result<Boolean> =
         suspendCancellableCoroutine { cont ->
             authInterop.loginWithOpenId(authorizationRequest.toIOSOpenIdConfig()) { res, error ->
-            if (error != null) {
-                cont.resume(Result.failure(Exception(error)))
-                return@loginWithOpenId
-            } else {
-                val accessToken = res?.accessToken() ?: ""
-                val refreshToken = res?.refreshToken() ?: ""
-                val idToken = res?.idToken() ?: ""
+                if (error != null) {
+                    cont.resume(Result.failure(Exception(error)))
+                    return@loginWithOpenId
+                } else {
+                    val accessToken = res?.accessToken() ?: ""
+                    val refreshToken = res?.refreshToken() ?: ""
+                    val idToken = res?.idToken() ?: ""
 
-                println("Authentication successful: Access Token: $accessToken, Refresh Token: $refreshToken, ID Token: $idToken")
+                    println("Authentication successful: Access Token: $accessToken, Refresh Token: $refreshToken, ID Token: $idToken")
 
-                try {
-                    cont.resume(Result.success(true))
-                } catch (e: Exception) {
-                    cont.resume(Result.failure(Exception("Failed to save auth state: ${e.message}")))
+                    try {
+                        cont.resume(Result.success(true))
+                    } catch (e: Exception) {
+                        cont.resume(Result.failure(Exception("Failed to save auth state: ${e.message}")))
+                    }
                 }
             }
         }
-    }
 
     suspend fun logout(authorizationRequest: AuthorizationRequest): Result<Boolean> =
         suspendCancellableCoroutine { cont ->
             authInterop.logoutWithOpenId(authorizationRequest.toIOSOpenIdConfig()) { res, error ->
-            if (error != null) {
-                println("Logout failed: $error")
-                cont.resume(Result.failure(Exception(error)))
-                return@logoutWithOpenId
+                // Even if there is an error (like no internet), we clear local data
+                // so the user isn't stuck logged into the app.
+                try {
+                    crypto.deleteData(service, group)
+                } catch (e: Exception) {
+                    println("Local wipe failed: ${e.message}")
+                }
 
-            }
-            try {
-                cont.resume(Result.success(true))
-            } catch (e: Exception) {
-                println("Failed to save auth state: ${e.message}")
-                cont.resume(Result.failure(Exception("Failed to save auth state: ${e.message}")))
+                if (error != null) {
+                    println("Native Logout Error: $error")
+                    // We resume with success(false) so the ViewModel knows
+                    // the server call failed, but the app can still reset.
+                    cont.resume(Result.success(false))
+                } else {
+                    cont.resume(Result.success(true))
+                }
             }
         }
-
-    }
-//
-//    @OptIn(ExperimentalForeignApi::class)
-//    private fun createAuthRequest(): OIDAuthorizationRequest {
-//        val authConfig = getAuthConfig()
-//        val clientId = OpenIdConfig.clientId
-//        val scopesList: List<String> = OpenIdConfig.scope.split(" ")
-//        val redirectUrl = NSURL(string = OpenIdConfig.redirectUrl)
-//
-//        return OIDAuthorizationRequest(
-//            configuration = authConfig,
-//            clientId = clientId,
-//            clientSecret = null,
-//            scopes = scopesList,
-//            redirectURL = redirectUrl,
-//            responseType = OIDResponseTypeCode!!,
-//            additionalParameters = null
-//        )
-//    }
 }

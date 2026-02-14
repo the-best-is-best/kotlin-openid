@@ -1,0 +1,33 @@
+{
+  "originHash" : "369a3c2c0ac8ac048a5644d93cf76c8bf0247f94f0d463eb8189235c5bdc0283",
+  "pins" : [
+    {
+      "identity" : "appauth-ios",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/openid/AppAuth-iOS.git",
+      "state" : {
+        "revision" : "145104f5ea9d58ae21b60add007c33c1cc0c948e",
+        "version" : "2.0.0"
+      }
+    },
+    {
+      "identity" : "appauthinterop",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/the-best-is-best/AppAuthInterop",
+      "state" : {
+        "revision" : "ce2613bd1fec666f8cfbf05fb3fc7b37d017b92f",
+        "version" : "3.0.1"
+      }
+    },
+    {
+      "identity" : "ioscryptointerop",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/the-best-is-best/IOSCryptoInterop.git",
+      "state" : {
+        "revision" : "4fc8aa4a1af0794d08eebd275d2fff3ea79704a8",
+        "version" : "1.0.0"
+      }
+    }
+  ],
+  "version" : 3
+}

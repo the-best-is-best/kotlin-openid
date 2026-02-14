@@ -42,14 +42,11 @@ kotlin {
             implementation(libs.ui.tooling.preview)
 
             implementation(project(":kappAuthCMP"))
-            implementation(libs.ktor.client.core)
-            implementation(libs.ktor.client.auth)
 
-            implementation(libs.ktor.client.logging)
-            implementation(libs.ktor.client.content.negotiation)
-            implementation(libs.ktor.serialization.kotlinx.json)
 
             implementation(libs.koin.androidx.compose)
+
+            implementation(project(":simple:simpleKMPPorject"))
 
 
 
@@ -73,7 +70,6 @@ kotlin {
 //        }
 
         iosMain.dependencies {
-            implementation(libs.ktor.client.darwin)
 
         }
 

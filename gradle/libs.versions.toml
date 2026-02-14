@@ -5,6 +5,7 @@ browser = "1.10.0-alpha03"
 coreKtx = "1.17.0"
 kmmCrypto = "2.0.2"
 koinAndroidxCompose = "4.1.1"
+koingeneratorAnnotations = "1.0.2"
 kotlin = "2.3.0"
 compose = "1.10.0"
 agp = "9.0.0"
@@ -17,7 +18,11 @@ material3Version = "1.10.0-alpha05"
 maven-publish = "0.36.0"
 ktor = "3.4.0"
 startupRuntime = "1.2.0"
-junit = "1.3.0"
+androidx-viewmodel = "2.10.0"
+koin = "4.1.1"
+ksp = "2.3.5"
+
+
 [libraries]
 
 androidx-activityCompose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
@@ -33,6 +38,8 @@ jetbrains-material3 = { module = "org.jetbrains.compose.material3:material3", ve
 kmm-crypto = { module = "io.github.the-best-is-best:kmm-crypto", version.ref = "kmmCrypto" }
 
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinAndroidxCompose" }
+koingenerator-annotations = { module = "io.github.the-best-is-best:koingenerator-annotations", version.ref = "koingeneratorAnnotations" }
+koingenerator-processor = { module = "io.github.the-best-is-best:koingenerator-processor", version.ref = "koingeneratorAnnotations" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
@@ -48,8 +55,11 @@ runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "com
 ui-tooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "compose" }
 ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose" }
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
-
-
+androidx-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "androidx-viewmodel" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
+koin-viewmodel = { module = "io.insert-koin:koin-core-viewmodel", version.ref = "koin" }
 [plugins]
 
 multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
@@ -61,3 +71,4 @@ androidKotlinMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.lib
 android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 maven-publish = {id = "com.vanniktech.maven.publish" , version.ref = "maven-publish"}
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
