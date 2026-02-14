@@ -1,7 +1,9 @@
-package io.github.openid
+package io.github.kmmopenid.kappauthcmp
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import io.github.openid.AuthOpenId
+import io.github.openid.AuthorizationRequest
 
 @Composable
 actual fun RememberLogoutOpenId(

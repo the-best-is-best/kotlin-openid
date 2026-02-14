@@ -23,11 +23,11 @@ class AndroidOpenId {
 
 
 
-    internal fun handleLogoutResult(result: androidx.activity.result.ActivityResult): Boolean {
+    fun handleLogoutResult(result: androidx.activity.result.ActivityResult): Boolean {
         return result.resultCode == Activity.RESULT_OK
     }
 
-    internal suspend fun handleAuthResult(result: androidx.activity.result.ActivityResult): AuthResult? {
+    suspend fun handleAuthResult(result: androidx.activity.result.ActivityResult): AuthResult? {
         val data = result.data
         if (data != null) {
             val response = AuthorizationResponse.fromIntent(data)

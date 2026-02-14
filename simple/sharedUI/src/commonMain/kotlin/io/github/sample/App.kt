@@ -25,9 +25,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import io.github.kmmopenid.kappauthcmp.RememberAuthOpenId
+import io.github.kmmopenid.kappauthcmp.RememberLogoutOpenId
 import io.github.openid.AuthOpenId
-import io.github.openid.RememberAuthOpenId
-import io.github.openid.RememberLogoutOpenId
 import io.github.sample.api.KtorServices
 import io.github.sample.services.OpenIdService
 import io.github.sample.theme.AppTheme

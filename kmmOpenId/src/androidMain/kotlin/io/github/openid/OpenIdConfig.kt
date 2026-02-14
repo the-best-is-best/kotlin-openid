@@ -3,7 +3,7 @@ package io.github.openid
 import androidx.core.net.toUri
 import net.openid.appauth.AuthorizationServiceConfiguration
 
-internal fun getAuthServicesConfig(
+fun getAuthServicesConfig(
     issurUrl: String,
     authorizationServiceConfiguration: AuthorizationServiceConfig
 ): AuthorizationServiceConfiguration {

@@ -41,7 +41,7 @@ kotlin {
 //            implementation(libs.components.resources)
             implementation(libs.ui.tooling.preview)
 
-            implementation(project(":kmmOpenId"))
+            implementation(project(":kappAuthCMP"))
             implementation(libs.ktor.client.core)
             implementation(libs.ktor.client.auth)
 

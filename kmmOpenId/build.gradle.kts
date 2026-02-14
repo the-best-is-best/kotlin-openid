@@ -2,8 +2,6 @@ import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurr
 
 plugins {
     alias(libs.plugins.multiplatform)
-    alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.compose)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.kotlin.serialization)
     id("maven-publish")
@@ -117,14 +115,14 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(libs.runtime)
+//            implementation(libs.runtime)
 //            implementation(compose.foundation)
 //            implementation(compose.material3)
 //            implementation(compose.components.resources)
 //            implementation(compose.components.uiToolingPreview)
 
-            implementation(libs.kotlinx.coroutines.core)
-            implementation(libs.kotlinx.serialization.json)
+            api(libs.kotlinx.coroutines.core)
+            api(libs.kotlinx.serialization.json)
 
 
 
@@ -145,10 +143,11 @@ kotlin {
         androidMain.dependencies {
 //            implementation(compose.uiTooling)
 //            implementation(libs.androidx.activityCompose)
-            implementation(libs.appauth)
+             api(libs.appauth)
 //            implementation(libs.gson)
-            implementation(libs.androidx.activityCompose)
+//            implementation(libs.androidx.activityCompose)
             implementation(libs.androidx.startup.runtime)
+            implementation(libs.androidx.core.ktx)
         }
 
         //        jvmMain.dependencies {

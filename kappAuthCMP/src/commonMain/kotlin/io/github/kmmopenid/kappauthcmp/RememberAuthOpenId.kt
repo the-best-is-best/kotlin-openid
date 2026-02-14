@@ -1,6 +1,7 @@
-package io.github.openid
+package io.github.kmmopenid.kappauthcmp
 
 import androidx.compose.runtime.Composable
+import io.github.openid.AuthorizationRequest
 
 @Composable
 expect fun RememberAuthOpenId(

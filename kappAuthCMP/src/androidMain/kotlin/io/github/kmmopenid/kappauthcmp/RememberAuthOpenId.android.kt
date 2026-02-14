@@ -1,4 +1,4 @@
-package io.github.openid
+package io.github.kmmopenid.kappauthcmp
 
 import android.annotation.SuppressLint
 import android.content.Intent
@@ -10,6 +10,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.core.net.toUri
+import io.github.openid.AndroidOpenId
+import io.github.openid.getAuthServicesConfig
 import kotlinx.coroutines.launch
 import net.openid.appauth.AuthorizationRequest
 import net.openid.appauth.AuthorizationService
