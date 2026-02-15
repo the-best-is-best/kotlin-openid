@@ -1,6 +1,5 @@
 package io.github.kmmopenid
 
-import android.content.Intent
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.kmmopenid.api.KtorServices
@@ -16,8 +15,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
 sealed interface Event {
-    data class LaunchLogin(val intent: Intent) : Event
-    data class LaunchLogout(val intent: Intent) : Event
+    object Login : Event
+    object Logout : Event
 }
 
 @Single
@@ -37,10 +36,7 @@ actual class LoginViewModel(
 
     actual fun login() {
         viewModelScope.launch {
-
-            val getAuthRequest = OpenIdService().getAuthorizationRequest()
-            val intent = auth.getLoginIntent(getAuthRequest)
-            _event.emit(Event.LaunchLogin(intent))
+            _event.emit(Event.Login)
         }
 
     }
@@ -48,11 +44,7 @@ actual class LoginViewModel(
 
     actual fun logout() {
         viewModelScope.launch {
-            // 1. Prepare the request
-            val getAuthRequest = OpenIdService().getAuthorizationRequest()
-            val intent = auth.getLoginIntent(getAuthRequest)
-            // 3. Emit a new Event type that carries the Intent
-            _event.emit(Event.LaunchLogout(intent))
+            _event.emit(Event.Logout)
         }
     }
 

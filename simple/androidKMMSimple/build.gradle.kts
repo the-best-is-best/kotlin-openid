@@ -50,6 +50,6 @@ dependencies {
     implementation(libs.foundation)
     implementation(libs.jetbrains.material3)
     implementation(libs.kmm.crypto)
-//    implementation(project(":kappAuthCMP"))
+    implementation(project(":kappAuthCMP"))
 
 }

@@ -2,10 +2,8 @@ package org.company.app.androidApp
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -36,7 +34,9 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import io.github.kmmcrypto.AndroidKMMCrypto
 import io.github.kmmopenid.Event
 import io.github.kmmopenid.LoginViewModel
-import io.github.openid.AndroidOpenId
+import io.github.kmmopenid.kappauthcmp.RememberAuthOpenId
+import io.github.kmmopenid.kappauthcmp.RememberLogoutOpenId
+import io.github.kmmopenid.services.OpenIdService
 import io.github.openid.AuthOpenId
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -107,36 +107,47 @@ fun AuthScreen() {
 
     // Collect State from ViewModel
     val userInfo by loginViewModel.userInfo.collectAsState()
+
+//    val scope = rememberCoroutineScope()
+//    val loginLauncher = rememberLauncherForActivityResult(
+//        ActivityResultContracts.StartActivityForResult()
+//    ) { result ->
+//        scope.launch {
+//            AndroidOpenId().handleAuthResult(result)
+//            // Trigger UI refresh after login completes
+//            loginViewModel.getUserData()
+//        }
+//    }
+//
+//    val logoutLauncher = rememberLauncherForActivityResult(
+//        ActivityResultContracts.StartActivityForResult()
+//    ) { result ->
+//        scope.launch {
+//            // Refresh state after logout
+//            val isSuccessful = AndroidOpenId().handleLogoutResult(result)
+//            if (isSuccessful) {
+//                loginViewModel.completeLogout()
+//            }
+//
+//        }
+//    }
+
+    val loginLauncher = RememberAuthOpenId(OpenIdService().getAuthorizationRequest()) {
+        loginViewModel.getUserData()
+    }
+
+    val logoutLauncher = RememberLogoutOpenId(OpenIdService().getAuthorizationRequest()) {
+        //  loginViewModel.completeLogout()
+    }
+
     val scope = rememberCoroutineScope()
-    val loginLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        scope.launch {
-            AndroidOpenId().handleAuthResult(result)
-            // Trigger UI refresh after login completes
-            loginViewModel.getUserData()
-        }
-    }
-
-    val logoutLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        scope.launch {
-            // Refresh state after logout
-            val isSuccessful = AndroidOpenId().handleLogoutResult(result)
-            if (isSuccessful) {
-                loginViewModel.completeLogout()
-            }
-
-        }
-    }
 
     // ✅ Collect Events to trigger the class-level launchers
     LaunchedEffect(Unit) {
         loginViewModel.event.collectLatest { event ->
             when (event) {
-                is Event.LaunchLogin -> loginLauncher.launch(event.intent)
-                is Event.LaunchLogout -> logoutLauncher.launch(event.intent)
+                is Event.Login -> loginLauncher.launch()
+                is Event.Logout -> logoutLauncher.launch()
             }
         }
     }
