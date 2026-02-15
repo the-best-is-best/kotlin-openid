@@ -76,7 +76,7 @@ actual class AuthOpenId {
         }
     }
 
-    suspend fun login(authorizationRequest: AuthorizationRequest): Intent {
+    fun getLoginIntent(authorizationRequest: AuthorizationRequest): Intent {
         val authService = AuthorizationService(applicationContext)
 
         val serviceConfig = getAuthServicesConfig(
@@ -96,7 +96,7 @@ actual class AuthOpenId {
     }
 
 
-    suspend fun logout(authorizationRequest: AuthorizationRequest): Intent {
+    suspend fun getLogoutIntent(authorizationRequest: AuthorizationRequest): Intent {
         val authService = AuthorizationService(applicationContext)
 
         val serviceConfig = getAuthServicesConfig(

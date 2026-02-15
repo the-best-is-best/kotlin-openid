@@ -39,7 +39,7 @@ actual class LoginViewModel(
         viewModelScope.launch {
 
             val getAuthRequest = OpenIdService().getAuthorizationRequest()
-            val intent = auth.login(getAuthRequest)
+            val intent = auth.getLoginIntent(getAuthRequest)
             _event.emit(Event.LaunchLogin(intent))
         }
 
@@ -50,7 +50,7 @@ actual class LoginViewModel(
         viewModelScope.launch {
             // 1. Prepare the request
             val getAuthRequest = OpenIdService().getAuthorizationRequest()
-            val intent = auth.logout(getAuthRequest)
+            val intent = auth.getLoginIntent(getAuthRequest)
             // 3. Emit a new Event type that carries the Intent
             _event.emit(Event.LaunchLogout(intent))
         }
