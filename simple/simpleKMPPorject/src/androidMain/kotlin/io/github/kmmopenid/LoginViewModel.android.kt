@@ -81,7 +81,8 @@ actual class LoginViewModel(
     actual fun getApiCall() {
         viewModelScope.launch {
             try {
-                ktorServices.testApi()
+                val res = ktorServices.testApi()
+                println("api call $res")
             } catch (e: Exception) {
                 println("$e")
             }

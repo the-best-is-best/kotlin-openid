@@ -63,20 +63,25 @@ AuthOpenId().doInit(key = "your_storage_key", group = "your_keychain_group")
 
 ## Platform-specific flows
 
+Login and logout are **not** in the common API: Android returns intents for the UI to launch; iOS
+exposes suspend functions that run the flow and return a result.
+
 ### Android
 
-- **Login:** `AuthOpenId().login(authorizationRequest)` returns an `Intent`. Start it with
-  `startActivityForResult` / `ActivityResultLauncher` and pass the result to
+- **Login:** `AuthOpenId().getLoginIntent(authorizationRequest)` returns an `Intent`. Start it with
+  `startActivityForResult` / `ActivityResultLauncher`, then pass the activity result to
   `AndroidOpenId().handleAuthResult(result)` to complete the flow and persist tokens.
-- **Logout:** `AuthOpenId().logout(authorizationRequest)` returns an `Intent`. Launch it the same
-  way and use `AndroidOpenId().handleLogoutResult(result)` for the outcome.
+- **Logout:** `AuthOpenId().getLogoutIntent(authorizationRequest)` is a **suspend** function that
+  returns an `Intent`. Launch it the same way and use `AndroidOpenId().handleLogoutResult(result)`
+  for the outcome.
 
 ### iOS
 
-- **Login:** `AuthOpenId().login(authorizationRequest) { result, error -> ... }` — callback receives
-  `Result<AuthResult>` (or error). Tokens are persisted inside the library.
-- **Logout:** `AuthOpenId().logout(authorizationRequest) { result, error -> ... }` — callback
-  receives success/failure; local data is cleared on success.
+- **Login:** `AuthOpenId().login(authorizationRequest)` is a **suspend** function that returns
+  `Result<AuthResult>`. Tokens are persisted inside the library. Call it from a coroutine (e.g.
+  `scope.launch { authOpenId.login(request).getOrThrow() }`).
+- **Logout:** `AuthOpenId().logout(authorizationRequest)` is a **suspend** function that returns
+  `Result<Boolean>`. Local data is cleared on success. Call it from a coroutine.
 
 ---
 
