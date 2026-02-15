@@ -1,21 +1,15 @@
 import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform.getCurrentOperatingSystem
-import org.jetbrains.kotlin.gradle.plugin.KotlinSourceSetTree
 
 plugins {
     alias(libs.plugins.multiplatform)
-    alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.compose)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
+    alias(libs.plugins.kotlin.serialization)
     id("maven-publish")
     id("signing")
     alias(libs.plugins.maven.publish)
 }
 
 
-
-
-apply(plugin = "maven-publish")
-apply(plugin = "signing")
 
 
 tasks.withType<PublishToMavenRepository> {
@@ -35,7 +29,7 @@ tasks.withType<PublishToMavenRepository> {
 
 
 mavenPublishing {
-    coordinates("io.github.the-best-is-best", "kapp-auth", "5.0.1")
+    coordinates("io.github.the-best-is-best", "kapp-auth", "7.0.0")
 
     publishToMavenCentral(true)
 
@@ -93,7 +87,6 @@ kotlin {
     //    }
 
     listOf(
-        iosX64(),
         iosArm64(),
         iosSimulatorArm64()
     ).forEach {
@@ -117,13 +110,15 @@ kotlin {
 
     sourceSets {
         commonMain.dependencies {
-            implementation(compose.runtime)
+//            implementation(libs.runtime)
 //            implementation(compose.foundation)
 //            implementation(compose.material3)
 //            implementation(compose.components.resources)
 //            implementation(compose.components.uiToolingPreview)
 
-            implementation(libs.kotlinx.coroutines.core)
+            api(libs.kotlinx.coroutines.core)
+            api(libs.kotlinx.serialization.json)
+
 
 
             api(libs.kmm.crypto)
@@ -143,10 +138,11 @@ kotlin {
         androidMain.dependencies {
 //            implementation(compose.uiTooling)
 //            implementation(libs.androidx.activityCompose)
-            implementation(libs.appauth)
-            implementation(libs.gson)
-            implementation(libs.androidx.activityCompose)
+             api(libs.appauth)
+//            implementation(libs.gson)
+//            implementation(libs.androidx.activityCompose)
             implementation(libs.androidx.startup.runtime)
+            implementation(libs.androidx.core.ktx)
         }
 
         //        jvmMain.dependencies {
@@ -165,6 +161,7 @@ kotlin {
     android {
         namespace = "io.github.kmmopenid"
         compileSdk = 36
+        minSdk = 24
     }
 }
 

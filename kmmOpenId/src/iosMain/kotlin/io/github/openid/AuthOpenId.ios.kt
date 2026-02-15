@@ -1,7 +1,6 @@
 package io.github.openid
 
 import io.github.app_auth_interop.KAuthManager
-import io.github.app_auth_interop.KOpenIdConfig
 import io.github.kmmcrypto.KMMCrypto
 import io.native.appauth.OIDAuthState
 import io.native.appauth.OIDAuthorizationService
@@ -27,18 +26,11 @@ actual class AuthOpenId {
     actual fun init(key: String, group: String) {
         service = key
         AuthOpenId.group = group
-        val client = KOpenIdConfig(
-            OpenIdConfig.issuer,
-            OpenIdConfig.clientId,
-            OpenIdConfig.redirectUrl,
-            OpenIdConfig.scope,
-            OpenIdConfig.postLogoutRedirectURL
 
-        )
-        authInterop.initCryptoWithService(service, group, client)
+        authInterop.initCryptoWithService(service, group)
     }
 
-    actual suspend fun refreshToken(): Result<AuthResult> {
+    actual suspend fun refreshToken(tokenRequest: TokenRequest): Result<AuthResult> {
         return try {
             val authState = loadState() ?: return Result.failure(Exception("Auth state missing"))
             val refreshRequest = authState.tokenRefreshRequest()
@@ -119,60 +111,64 @@ actual class AuthOpenId {
         }
     }
 
-    suspend fun login(): Result<Boolean> = suspendCancellableCoroutine { cont ->
-        authInterop.login { res, error ->
-            if (error != null) {
-                cont.resume(Result.failure(Exception(error)))
-                return@login
-            } else {
-                val accessToken = res?.accessToken() ?: ""
-                val refreshToken = res?.refreshToken() ?: ""
-                val idToken = res?.idToken() ?: ""
+    suspend fun login(authorizationRequest: AuthorizationRequest): Result<AuthResult> =
+        suspendCancellableCoroutine { cont ->
+            authInterop.loginWithOpenId(authorizationRequest.toIOSOpenIdConfig()) { res, error ->
+                if (error != null) {
+                    cont.resume(Result.failure(Exception(error)))
+                    return@loginWithOpenId
+                } else {
+                    // 1. Extract tokens
+                    val accessToken = res?.accessToken() ?: ""
+                    val refreshToken = res?.refreshToken() ?: ""
+                    val idToken = res?.idToken() ?: ""
 
-                println("Authentication successful: Access Token: $accessToken, Refresh Token: $refreshToken, ID Token: $idToken")
+                    // 2. Create the AuthResult object
+                    val authResult = AuthResult(
+                        accessToken = accessToken,
+                        refreshToken = refreshToken,
+                        idToken = idToken
+                        // Add other fields if your AuthResult class requires them
+                    )
 
-                try {
-                    cont.resume(Result.success(true))
-                } catch (e: Exception) {
-                    cont.resume(Result.failure(Exception("Failed to save auth state: ${e.message}")))
+                    println("Authentication successful: Access Token: $accessToken")
+
+                    try {
+                        // 3. Resume with the AuthResult object, NOT just 'true'
+                        cont.resume(Result.success(authResult))
+                    } catch (e: Exception) {
+                        cont.resume(Result.failure(Exception("Failed to save auth state: ${e.message}")))
+                    }
                 }
             }
         }
-    }
 
-    suspend fun logout(): Result<Boolean> = suspendCancellableCoroutine { cont ->
-        authInterop.logout { res, error ->
-            if (error != null) {
-                println("Logout failed: $error")
-                cont.resume(Result.failure(Exception(error)))
-                return@logout
+    suspend fun logout(authorizationRequest: AuthorizationRequest): Result<Boolean> =
+        suspendCancellableCoroutine { cont ->
+            authInterop.logoutWithOpenId(authorizationRequest.toIOSOpenIdConfig()) { res, error ->
+                // 1. Handle Native Errors (e.g., Network/Browser issues)
+                if (error != null) {
+                    println("Native Logout Error: $error")
+                    cont.resume(Result.failure(Exception(error)))
+                    return@logoutWithOpenId
+                }
 
-            }
-            try {
-                cont.resume(Result.success(true))
-            } catch (e: Exception) {
-                println("Failed to save auth state: ${e.message}")
-                cont.resume(Result.failure(Exception("Failed to save auth state: ${e.message}")))
+                // 2. Check if 'res' is actually true (The user confirmed logout in the browser)
+                if (res) {
+                    try {
+                        // Only delete local data if the server/browser logout was successful
+                        crypto.deleteData(service, group)
+                        println("Local data wiped successfully.")
+                        cont.resume(Result.success(true))
+                    } catch (e: Exception) {
+                        cont.resume(Result.failure(Exception("Wipe failed: ${e.message}")))
+                    }
+                } else {
+                    // If res is false, the user likely cancelled the logout dialog
+                    println("Logout cancelled by user or failed.")
+                    cont.resume(Result.success(false))
+                }
             }
         }
 
-    }
-//
-//    @OptIn(ExperimentalForeignApi::class)
-//    private fun createAuthRequest(): OIDAuthorizationRequest {
-//        val authConfig = getAuthConfig()
-//        val clientId = OpenIdConfig.clientId
-//        val scopesList: List<String> = OpenIdConfig.scope.split(" ")
-//        val redirectUrl = NSURL(string = OpenIdConfig.redirectUrl)
-//
-//        return OIDAuthorizationRequest(
-//            configuration = authConfig,
-//            clientId = clientId,
-//            clientSecret = null,
-//            scopes = scopesList,
-//            redirectURL = redirectUrl,
-//            responseType = OIDResponseTypeCode!!,
-//            additionalParameters = null
-//        )
-//    }
 }

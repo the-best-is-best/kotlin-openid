@@ -14,6 +14,9 @@ pluginManagement {
         mavenCentral()
     }
 }
+plugins {
+    id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
+}
 
 dependencyResolutionManagement {
     repositories {
@@ -33,5 +36,9 @@ dependencyResolutionManagement {
     }
 }
 include(":kmmOpenId")
-include(":simple:composeApp")
+include(":simple:sharedUI")
+include(":simple:androidSimple")
+include(":simple:androidKMMSimple")
+include(":kappAuthCMP")
+include(":simple:simpleKMPPorject")
 

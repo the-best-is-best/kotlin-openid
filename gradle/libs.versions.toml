@@ -1,32 +1,47 @@
 [versions]
 appauth = "0.11.1"
-gson = "2.13.2"
-kmmCrypto = "2.0.1"
+#gson = "2.13.2"
+browser = "1.10.0-alpha03"
+coreKtx = "1.17.0"
+kmmCrypto = "2.0.2"
 koinAndroidxCompose = "4.1.1"
+koingeneratorAnnotations = "1.0.2"
 kotlin = "2.3.0"
 compose = "1.10.0"
-agp = "8.13.2"
+agp = "9.0.0"
 androidx-activityCompose = "1.12.2"
+#noinspection GradleDependency
 androidx-uiTest = "1.10.0"
 kotlinxCoroutinesCore = "1.10.2"
+kotlinxSerializationJson = "1.10.0"
 material3Version = "1.10.0-alpha05"
-maven-publish = "0.35.0"
-ktor = "3.3.3"
+maven-publish = "0.36.0"
+ktor = "3.4.0"
 startupRuntime = "1.2.0"
+androidx-viewmodel = "2.10.0"
+koin = "4.1.1"
+ksp = "2.3.5"
+
+
 [libraries]
 
 androidx-activityCompose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
+androidx-browser = { module = "androidx.browser:browser", version.ref = "browser" }
+androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "coreKtx" }
 androidx-testManifest = { module = "androidx.compose.ui:ui-test-manifest", version.ref = "androidx-uiTest" }
 androidx-junit4 = { module = "androidx.compose.ui:ui-test-junit4", version.ref = "androidx-uiTest" }
 appauth = { module = "net.openid:appauth", version.ref = "appauth" }
 components-resources = { module = "org.jetbrains.compose.components:components-resources", version.ref = "compose" }
 foundation = { module = "org.jetbrains.compose.foundation:foundation", version.ref = "compose" }
-gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+#gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 jetbrains-material3 = { module = "org.jetbrains.compose.material3:material3", version.ref = "material3Version" }
 kmm-crypto = { module = "io.github.the-best-is-best:kmm-crypto", version.ref = "kmmCrypto" }
 
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koinAndroidxCompose" }
+koingenerator-annotations = { module = "io.github.the-best-is-best:koingenerator-annotations", version.ref = "koingeneratorAnnotations" }
+koingenerator-processor = { module = "io.github.the-best-is-best:koingenerator-processor", version.ref = "koingeneratorAnnotations" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesCore" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerializationJson" }
 ktor-client-auth = { module = "io.ktor:ktor-client-auth", version.ref = "ktor" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-okhttp = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
@@ -37,16 +52,23 @@ ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx
 
 androidx-startup-runtime = { module = "androidx.startup:startup-runtime", version.ref = "startupRuntime" }
 runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
+ui-tooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "compose" }
 ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose" }
-
-
+kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
+androidx-lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "androidx-viewmodel" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koin" }
+koin-viewmodel = { module = "io.insert-koin:koin-core-viewmodel", version.ref = "koin" }
 [plugins]
 
-native-cocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
 multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+
 compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 android-application = { id = "com.android.application", version.ref = "agp" }
 androidKotlinMultiplatformLibrary = { id = "com.android.kotlin.multiplatform.library", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 maven-publish = {id = "com.vanniktech.maven.publish" , version.ref = "maven-publish"}
+ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

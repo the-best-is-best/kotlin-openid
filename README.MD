@@ -1,228 +1,66 @@
-<h1 align="center">KAppAuth</h1><br>
+# KApp Auth (Kotlin OpenID)
 
-<div align="center">
-<a href="https://opensource.org/licenses/Apache-2.0"><img alt="License" src="https://img.shields.io/badge/License-Apache%202.0-blue.svg"/></a>
-<a href="https://android-arsenal.com/api?level=23" rel="nofollow">
-    <img alt="API" src="https://img.shields.io/badge/API-23%2B-brightgreen.svg?style=flat" style="max-width: 100%;">
-</a>
-  <img src="https://img.shields.io/badge/Platform-Android-brightgreen.svg?logo=android" alt="Badge Android" />
-  <img src="https://img.shields.io/badge/Platform-iOS%20%2F%20macOS-lightgrey.svg?logo=apple" alt="Badge iOS" />
+Kotlin Multiplatform authentication for **OAuth 2.0** and **OpenID Connect**. This repo provides a
+shared API over the [Android AppAuth](https://github.com/openid/AppAuth-Android) and iOS AppAuth
+SDKs so you can use one codebase on both platforms.
 
-<a href="https://github.com/the-best-is-best/"><img alt="Profile" src="https://img.shields.io/badge/github-%23181717.svg?&style=for-the-badge&logo=github&logoColor=white" height="20"/></a>
-</div>
+---
 
-### This package provides an abstraction around the Android and iOS AppAuth SDKs so it can be used to communicate with OAuth 2.0 and OpenID Connect providers
+## Libraries
 
-<hr>
+| Module                                   | Maven artifact                                   | Description                                                                                                                |
+|------------------------------------------|--------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------|
+| **[kmmOpenId](kmmOpenId/README.md)**     | `io.github.the-best-is-best:kapp-auth:7.0.0`     | Core KMP auth library. No UI — use from shared logic (ViewModels, etc.) and wire to native or Compose UI.                  |
+| **[kappAuthCMP](kappAuthCMP/README.md)** | `io.github.the-best-is-best:kapp-auth-cmp:7.0.0` | Optional Compose Multiplatform helpers (`RememberAuthOpenId`, `RememberLogoutOpenId`) for shared UI. Depends on kmmOpenId. |
 
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.the-best-is-best/kapp-auth)](https://central.sonatype.com/artifact/io.github.the-best-is-best/kapp-auth)
+- **Native UI** (Jetpack Compose on Android + SwiftUI on iOS): use **kmmOpenId** only; handle
+  intents/callbacks in platform code.
+- **Shared UI** (Compose Multiplatform): add **kappAuthCMP** and use the composables in
+  `commonMain`.
 
-KApp Auth is available on `mavenCentral()`.
+---
 
-```kotlin
-implementation("io.github.the-best-is-best:kapp-auth:5.0.0")
+## Sample structure (this repo)
 
-```
+- **`:simple:simpleKMPPorject`** — Shared KMP logic (e.g. ViewModels, OpenID config). Depends on
+  `:kmmOpenId`.
+- **`:simple:sharedUI`** — Shared Compose UI; can depend on `:kappAuthCMP` and
+  `:simple:simpleKMPPorject`.
+- **`:simple:androidKMMSimple`** — Android app (native Compose).
+- **`:simple:androidSimple`** — Android app variant.
 
-### ✅ **Install via SPM**
+iOS apps (e.g. SwiftUI or Compose host) can depend on the same shared modules; see the library
+READMEs for platform setup.
 
-You need install **IOSCrypto** directly using **Swift Package Manager (SPM)** from:  
-🔗 [AppAuthInterop-iOS on GitHub](https://github.com/the-best-is-best/AppAuthInterop)
+---
 
-### Note: v5 dep on v2.0.0
+## Quick start
 
-You can install **AppAuth** directly using **Swift Package Manager (SPM)** from:  
-🔗 [AppAuth-iOS on GitHub](https://github.com/openid/AppAuth-iOS)
+1. **Add the core library** (and optionally the CMP helper) in your shared module:
 
-You need install **IOSCrypto** directly using **Swift Package Manager (SPM)** from:  
-🔗 [IOSCryptoManager-iOS on GitHub](https://github.com/the-best-is-best/IOSCryptoInterop)
-
-## How to use it
-
-### First in androidMain
-
-<br>
-
-```kotlin
-AndroidKMMCrypto.init("key0") // add alias key name
-```
-
-### Note: this package login and saved data so auth or refresh token will return true or false or exception
-
-### Auth
-
-```kotlin
-       val authRes = RememberAuthOpenId {
-        println("Auth result $it")
-        it?.let { isAuthenticated ->
-            if (isAuthenticated) {
-                scope.launch {
-
-                    auth.getLastAuth { res ->
-                        res.onSuccess { it ->
-                            accessToken = it!!.accessToken
-                            refreshToken = it.refreshToken
-                            idToken = it.idToken
-                        }
-                    }
-                    println("Authentication successful!")
-                }
-            } else {
-                println("Authentication failed!")
-
-            }
-        }
-    }
-
-   ...
-   Button(onClick:(){
-     authRes.launch()
-   }){
-    Text("login")
+   ```kotlin
+   kotlin {
+       sourceSets {
+           commonMain.dependencies {
+               api("io.github.the-best-is-best:kapp-auth:7.0.0")
+               // api("io.github.the-best-is-best:kapp-auth-cmp:7.0.0")  // only for Compose Multiplatform
+           }
+       }
    }
-```
+   ```
 
-### Refresh token
+2. **Initialize at app startup** (before any auth calls):
+   - **Android:** `AuthOpenId().init("your_storage_key", "your_keychain_group")`
+   - **iOS:** `AuthOpenId().doInit(key: "your_storage_key", group: "your_keychain_group")`
 
-```kotlin
- try {
-    println("Attempting to refresh token")
-    AuthOpenId.refreshToken { result ->
-        result.onSuccess { isAuthenticated ->
-            if (isAuthenticated) {
-                println("Authentication successful!")
-                
+3. **Use the API** for login, logout, refresh, and `getLastAuth()` — see *
+   *[kmmOpenId/README.md](kmmOpenId/README.md)** for the full API and platform-specific flows, and *
+   *[kappAuthCMP/README.md](kappAuthCMP/README.md)** for Compose usage.
 
+---
 
-            } else {
-                println("Authentication failed!")
-            }
-        }.onFailure { error ->
-            println("Authentication error: ${error.message}")
-        }
-    }
+## License
 
-} catch (e: Exception) {
-    println("Refresh token failed: ${e.message}")
-}
-```
+Apache-2.0. See [LICENSE](LICENSE) if present.
 
-### Get data
-
-```kotlin
-   AuthOpenId.getLastAuth(callback = {
-    it.onSuccess {
-        println("last auth token ${it?.accessToken}")
-        if (it != null) {
-            accessToken = it.accessToken
-            refreshToken = it.refreshToken
-            idToken = it.idToken
-        }
-    }
-})
-```
-
-### logout
-
-```kotlin
-   val authLogout = RememberLogoutOpenId {
-        println("Logout result $it")
-        it?.let { isLogout ->
-            if (isLogout) {
-                accessToken = ""
-                refreshToken = ""
-                idToken = ""
-
-                println("Logout successful!")
-            } else {
-                println("Logout failed!")
-
-            }
-
-
-        }
-    }
-    Button(onClick:(){
-        authLogout.launch()
-    }){
-        Text("Logout")
-    }
-
-```
-
-### Finally we add interceptor for get token and refresh token auto in 401 or 403 and re call api ` But there is no test yet. `
-
-```kotlin
-package io.github.sample.api
-
-import io.github.openid.AuthOpenId
-import io.github.openid.ktor_feature.AppAutInterceptor
-import io.ktor.client.HttpClient
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.client.plugins.defaultRequest
-import io.ktor.client.plugins.logging.DEFAULT
-import io.ktor.client.plugins.logging.LogLevel
-import io.ktor.client.plugins.logging.Logger
-import io.ktor.client.plugins.logging.Logging
-import io.ktor.client.request.HttpRequestBuilder
-import io.ktor.client.request.header
-import io.ktor.http.path
-import io.ktor.http.takeFrom
-import io.ktor.serialization.kotlinx.json.json
-import kotlinx.serialization.json.Json
-
-internal abstract class KtorApi {
-
-    val client = HttpClient {
-        expectSuccess = true
-        defaultRequest {
-            header("Content-Type", "application/json")
-        }
-        install(Logging) {
-            logger = Logger.DEFAULT
-            level = LogLevel.ALL
-        }
-
-        install(ContentNegotiation) {
-            json(
-                Json {
-                    ignoreUnknownKeys = true
-                    useAlternativeNames = false
-                }
-            )
-        }
-
-    }
-
-
-    fun HttpRequestBuilder.pathUrl(path: String) {
-        url {
-            takeFrom("https://demo.duendesoftware.com")
-                .path("api", path)
-        }
-    }
-
-    private val tokenInterceptor = AppAutInterceptor(AuthOpenId, client)
-
-    suspend fun interceptRequest(request: HttpRequestBuilder) {
-        tokenInterceptor.intercept(request)
-    }
-}
-
-```
-
-### And
-
-```kotlin
-package io.github.sample.api
-
-import io.ktor.client.request.post
-import io.ktor.client.statement.bodyAsText
-
-internal class KtorServices : KtorApi() {
-    suspend fun testApi(): String = client.post {
-        pathUrl("/test")
-        interceptRequest(this)
-    }.bodyAsText()
-}
-```
+**Repository:** [the-best-is-best/kotlin-openid](https://github.com/the-best-is-best/kotlin-openid)
