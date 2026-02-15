@@ -2,6 +2,8 @@ plugins {
     alias(libs.plugins.multiplatform)
     alias(libs.plugins.androidKotlinMultiplatformLibrary)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.skie)
+
 }
 
 kotlin {
@@ -41,12 +43,14 @@ kotlin {
         target.binaries.framework {
             baseName = xcfName
             isStatic = true
-            export(libs.androidx.lifecycle.viewmodel)
+//            export(libs.androidx.lifecycle.viewmodel)
             export(project(":kmmOpenId"))
-            export(libs.koin.core)
+//            export(libs.kotlinx.coroutines.core)
         }
 
     }
+
+
     // Source set declarations.
     // Declaring a target automatically creates a source set with the same name. By default, the
     // Kotlin Gradle Plugin creates additional source sets that depend on each other, since it is
@@ -56,11 +60,12 @@ kotlin {
         commonMain {
             dependencies {
                 implementation(libs.kotlin.stdlib)
+                implementation(libs.kotlinx.coroutines.core)
                 // Add KMP dependencies here
                 api(project(":kmmOpenId"))
-                api(libs.androidx.lifecycle.viewmodel)
+                implementation(libs.androidx.lifecycle.viewmodel)
 
-                api(libs.koin.core)
+                implementation(libs.koin.core)
                 implementation(libs.koin.viewmodel)
                 implementation(libs.koingenerator.annotations)
 
@@ -98,6 +103,7 @@ kotlin {
                 // on common by default and will correctly pull the iOS artifacts of any
                 // KMP dependencies declared in commonMain.
                 implementation(libs.ktor.client.darwin)
+//                implementation(libs.runtime.skie)
             }
         }
         sourceSets.named("commonMain").configure {

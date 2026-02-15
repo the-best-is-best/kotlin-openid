@@ -2,8 +2,9 @@ import SwiftUI
 import Combine
 import SimpleKMPProject
 
+@MainActor
 class LoginObservable: ObservableObject {
-    let vm: LoginViewModel = KoinHelper.shared.getLoginViewModel()
+    private let vm = Koin.shared.get(objCClass: LoginViewModel.self) as! LoginViewModel
     
     @Published var userInfo: AuthResult? = nil
 //    @Published var isLoggedIn: Bool = false
@@ -15,18 +16,12 @@ class LoginObservable: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     
     init() {
-        // Observe the ONLY flow available in your Kotlin: userInfo
-        vm.userInfo.asPublisher(type: AnyObject.self)
-        .receive(on: DispatchQueue.main)
-        .sink { [weak self] info in
-            // Cast it here to check for nil safely
-            let authData = info as? AuthResult
-
-            self?.userInfo = authData
-
-            print("UserInfo Updated. Logged In: \(authData != nil)")
+        Task { @MainActor in
+            for await data in vm.userInfo {
+                self.userInfo = data
+            }
         }
-        .store(in: &cancellables)
+
     }
 
     // Instead of waiting for a Kotlin event, we trigger the bridge directly

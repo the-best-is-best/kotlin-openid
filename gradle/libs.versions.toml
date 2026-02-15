@@ -6,10 +6,10 @@ coreKtx = "1.17.0"
 kmmCrypto = "2.0.2"
 koinAndroidxCompose = "4.1.1"
 koingeneratorAnnotations = "1.0.2"
-kotlin = "2.3.0"
-compose = "1.10.0"
-agp = "9.0.0"
-androidx-activityCompose = "1.12.2"
+kotlin = "2.3.10"
+compose = "1.10.1"
+agp = "9.0.1"
+androidx-activityCompose = "1.12.4"
 #noinspection GradleDependency
 androidx-uiTest = "1.10.0"
 kotlinxCoroutinesCore = "1.10.2"
@@ -21,7 +21,7 @@ startupRuntime = "1.2.0"
 androidx-viewmodel = "2.10.0"
 koin = "4.1.1"
 ksp = "2.3.5"
-
+skie = "0.10.10"
 
 [libraries]
 
@@ -52,6 +52,7 @@ ktor-serialization-kotlinx-json = { module = "io.ktor:ktor-serialization-kotlinx
 
 androidx-startup-runtime = { module = "androidx.startup:startup-runtime", version.ref = "startupRuntime" }
 runtime = { module = "org.jetbrains.compose.runtime:runtime", version.ref = "compose" }
+runtime-skie = { module = "co.touchlab.skie:runtime-kotlin", version.ref = "skie" }
 ui-tooling = { module = "org.jetbrains.compose.ui:ui-tooling", version.ref = "compose" }
 ui-tooling-preview = { module = "org.jetbrains.compose.ui:ui-tooling-preview", version.ref = "compose" }
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "kotlin" }
@@ -72,3 +73,4 @@ android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 maven-publish = {id = "com.vanniktech.maven.publish" , version.ref = "maven-publish"}
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+skie = { id = "co.touchlab.skie", version.ref = "skie" }

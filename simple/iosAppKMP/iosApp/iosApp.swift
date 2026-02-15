@@ -2,26 +2,26 @@ import SwiftUI
 import Combine
 import SimpleKMPProject
 
-// MARK: - 1. Flow Interop Helpers
-class FlowCollector<T>: Kotlinx_coroutines_coreFlowCollector {
-    let callback: (T) -> Void
-    init(callback: @escaping (T) -> Void) { self.callback = callback }
-
-    func emit(value: Any?, completionHandler: @escaping (Error?) -> Void) {
-        if let value = value as? T { callback(value) }
-        completionHandler(nil)
-    }
-}
-
-extension Kotlinx_coroutines_coreFlow {
-    func asPublisher<T>(type: T.Type) -> AnyPublisher<T, Never> {
-        let subject = PassthroughSubject<T, Never>()
-        self.collect(collector: FlowCollector<T> { value in
-            subject.send(value)
-        }) { _ in }
-        return subject.eraseToAnyPublisher()
-    }
-}
+//// MARK: - 1. Flow Interop Helpers
+//class FlowCollector<T>: Kotlinx_coroutines_coreFlowCollector {
+//    let callback: (T) -> Void
+//    init(callback: @escaping (T) -> Void) { self.callback = callback }
+//
+//    func emit(value: Any?, completionHandler: @escaping (Error?) -> Void) {
+//        if let value = value as? T { callback(value) }
+//        completionHandler(nil)
+//    }
+//}
+//
+//extension Kotlinx_coroutines_coreFlow {
+//    func asPublisher<T>(type: T.Type) -> AnyPublisher<T, Never> {
+//        let subject = PassthroughSubject<T, Never>()
+//        self.collect(collector: FlowCollector<T> { value in
+//            subject.send(value)
+//        }) { _ in }
+//        return subject.eraseToAnyPublisher()
+//    }
+//}
 
 
 // MARK: - 3. The Main App Entry

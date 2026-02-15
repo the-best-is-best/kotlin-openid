@@ -8,7 +8,7 @@ import io.github.openid.AuthOpenId
 import io.github.openid.AuthResult
 import io.github.tbib.koingeneratorannotations.KoinViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
 
@@ -20,7 +20,7 @@ actual class LoginViewModel(
     private val auth = AuthOpenId()
 
     private val _userInfo = MutableStateFlow<AuthResult?>(null)
-    actual val userInfo = _userInfo.asStateFlow()
+    actual val userInfo: StateFlow<AuthResult?> = _userInfo
 
     actual fun login() {
         viewModelScope.launch {
