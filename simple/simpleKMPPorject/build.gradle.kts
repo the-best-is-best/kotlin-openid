@@ -44,7 +44,7 @@ kotlin {
             baseName = xcfName
             isStatic = true
 //            export(libs.androidx.lifecycle.viewmodel)
-            export(project(":kmmOpenId"))
+//            export(project(":kmmOpenId"))
 //            export(libs.kotlinx.coroutines.core)
         }
 
@@ -62,7 +62,7 @@ kotlin {
                 implementation(libs.kotlin.stdlib)
                 implementation(libs.kotlinx.coroutines.core)
                 // Add KMP dependencies here
-                api(project(":kmmOpenId"))
+                implementation(project(":kmmOpenId"))
                 implementation(libs.androidx.lifecycle.viewmodel)
 
                 implementation(libs.koin.core)

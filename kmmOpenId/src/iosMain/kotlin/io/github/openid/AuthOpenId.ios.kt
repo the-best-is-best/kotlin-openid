@@ -5,7 +5,9 @@ import io.github.kmmcrypto.KMMCrypto
 import io.native.appauth.OIDAuthState
 import io.native.appauth.OIDAuthorizationService
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import platform.Foundation.NSKeyedArchiver
 import platform.Foundation.NSKeyedUnarchiver
 import kotlin.coroutines.resume
@@ -30,40 +32,41 @@ actual class AuthOpenId {
         authInterop.initCryptoWithService(service, group)
     }
 
-    actual suspend fun refreshToken(tokenRequest: TokenRequest): Result<AuthResult> {
-        return try {
-            val authState = loadState() ?: return Result.failure(Exception("Auth state missing"))
-            val refreshRequest = authState.tokenRefreshRequest()
-                ?: return Result.failure(Exception("Refresh request is null"))
+    actual suspend fun refreshToken(tokenRequest: TokenRequest): Result<AuthResult> =
+        withContext(Dispatchers.Main) { // Move to Main Thread to avoid ObjHeader traps
+            try {
+                val authState = loadState()
+                    ?: return@withContext Result.failure(Exception("Auth state missing"))
 
-            val tokenResponse = suspendCancellableCoroutine { cont ->
-                OIDAuthorizationService.performTokenRequest(
-                    request = refreshRequest,
-                    callback = { response, error ->
-                        if (response != null) cont.resume(response)
-                        else cont.resumeWithException(
-                            error?.let { Exception("Token refresh failed: ${it.localizedDescription}") }
-                                ?: Exception("Unknown error")
-                        )
+                // The trap often happens here if the native authState
+                // is accessed from the wrong thread.
+                val refreshRequest = authState.tokenRefreshRequest()
+                    ?: return@withContext Result.failure(Exception("Refresh request is null"))
+
+                val tokenResponse = suspendCancellableCoroutine { cont ->
+                    OIDAuthorizationService.performTokenRequest(refreshRequest) { response, error ->
+                        // Guard the continuation
+                        if (cont.isActive) {
+                            if (response != null) cont.resume(response)
+                            else cont.resumeWithException(Exception(error?.localizedDescription))
+                        }
                     }
+                }
+
+                authState.updateWithTokenResponse(tokenResponse, null)
+                saveState(authState)
+
+                Result.success(
+                    AuthResult(
+                        accessToken = tokenResponse.accessToken ?: "",
+                        refreshToken = tokenResponse.refreshToken ?: "",
+                        idToken = tokenResponse.idToken ?: ""
+                    )
                 )
+            } catch (e: Exception) {
+                Result.failure(e)
             }
-
-            authState.updateWithTokenResponse(tokenResponse, null)
-            saveState(authState)
-
-            val newAuthResult = AuthResult(
-                accessToken = tokenResponse.accessToken ?: "",
-                refreshToken = tokenResponse.refreshToken ?: "",
-                idToken = tokenResponse.idToken ?: ""
-            )
-
-            Result.success(newAuthResult)
-
-        } catch (e: Exception) {
-            Result.failure(e)
         }
-    }
 
     actual suspend fun getLastAuth(): Result<AuthResult?> {
         return try {
