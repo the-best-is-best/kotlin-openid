@@ -16,8 +16,7 @@ import kotlin.coroutines.resumeWithException
 
 @OptIn(ExperimentalForeignApi::class)
 actual class AuthOpenId {
-    private val authInterop = KAuthManager.shared()
-
+    private val authInterop by lazy { KAuthManager.shared() }
     companion object {
         internal lateinit var service: String
         internal lateinit var group: String
@@ -68,9 +67,9 @@ actual class AuthOpenId {
             }
         }
 
-    actual suspend fun getLastAuth(): Result<AuthResult?> {
-        return try {
-            val state = loadState()
+    actual suspend fun getLastAuth(): Result<AuthResult?> = withContext(Dispatchers.Main) {
+        try {
+            val state = loadState() // This now runs on Main
             val token = state?.lastTokenResponse
 
             if (token != null) {
@@ -89,6 +88,9 @@ actual class AuthOpenId {
         }
     }
 
+    // Ensure loadState is also called within a Main context or called from one
+
+
     private fun saveState(authState: OIDAuthState?) {
         try {
             val data = authState?.let {
@@ -100,13 +102,12 @@ actual class AuthOpenId {
         }
     }
 
-    private suspend fun loadState(): OIDAuthState? {
-        return try {
+    private suspend fun loadState(): OIDAuthState? = withContext(Dispatchers.Main) {
+        try {
             val data = crypto.loadDataType(service, group)
-
             data?.let {
+                // Unarchiving native objects MUST happen on a consistent thread
                 val auth = NSKeyedUnarchiver.unarchiveObjectWithData(it) as? OIDAuthState
-                println("refresh token : ${auth?.lastTokenResponse?.refreshToken}")
                 auth
             }
         } catch (e: Exception) {
